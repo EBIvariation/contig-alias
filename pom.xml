@@ -8,7 +8,7 @@
 		<version>2.2.7.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.ebivariation</groupId>
+	<groupId>uk.ac.ebi.eva</groupId>
 	<artifactId>contig-alias</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>contig-alias</name>
