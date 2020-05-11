@@ -10,4 +10,9 @@ class ContigAliasApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void actionsTest(){
+		System.out.println("Github actions is running tests.");
+	}
+
 }
