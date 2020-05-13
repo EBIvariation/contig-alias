@@ -30,7 +30,7 @@ public class FTPBrowser {
             }
 
             // Login as anonymous user
-            boolean login = ftp.login("anonymous", "jmmut@ebi.ac.uk");
+            boolean login = ftp.login("anonymous", "anonymous");
             logger.debug("Login {}.", (login ? "successful" : "unsuccessful"));
             if (!login) {
                 throw new RuntimeException("FTP refused login");
@@ -54,9 +54,14 @@ public class FTPBrowser {
         }
     }
 
-    public FTPFile[] listDir() throws IOException {
+    public FTPFile[] listDirectories() throws IOException {
         FTPFile[] ftpFiles = ftp.listFiles();
         return ftpFiles;
     }
 
+    public void changeToDirectory(String directory) throws IOException {
+        if (!ftp.changeWorkingDirectory(directory)) {
+            throw new RuntimeException("Unable to change to directory '" + directory + "'");
+        }
+    }
 }
