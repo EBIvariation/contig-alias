@@ -3,66 +3,60 @@ package com.ebivariation.contigalias.dus;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class FTPBrowser {
 
+    public static final int FTP_PORT = 21;
+
+    public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
+
+    private final Logger logger = LoggerFactory.getLogger(FTPBrowser.class);
+
     private FTPClient ftp = new FTPClient();
 
     public void connect() throws IOException {
+        try {
+            ftp.connect(NCBI_FTP_SERVER, FTP_PORT);
+            // After connection attempt, you should check the reply code to verify
+            // success.
+            int reply = ftp.getReplyCode();
+            logger.debug("Connected to {} with reply code {}.", NCBI_FTP_SERVER, reply);
+            if(!FTPReply.isPositiveCompletion(reply)) {
+                throw new RuntimeException("FTP refused connection");
+            }
 
-        int reply;
-        String server = "ftp.ncbi.nlm.nih.gov";
+            // Login as anonymous user
+            boolean login = ftp.login("anonymous", "jmmut@ebi.ac.uk");
+            logger.debug("Login {}.", (login ? "successful" : "unsuccessful"));
+            if (!login) {
+                throw new RuntimeException("FTP refused login");
+            }
 
-        ftp.connect(server, 21);
-
-        System.out.println("Connected to " + server + ".");
-
-        // Login as anonymous user
-        boolean login = ftp.login("anonymous", "jmmut@ebi.ac.uk");
-        System.out.println("Login " + (login ? "successful" : "unsuccessful"));
-
-        System.out.println("Directory count:\t" + ftp.listDirectories().length);
-
-        String status = ftp.getStatus();
-        System.out.println(status);
-
-        // After connection attempt, you should check the reply code to verify
-        // success.
-        reply = ftp.getReplyCode();
-
-        if (!FTPReply.isPositiveCompletion(reply)) {
+            String status = ftp.getStatus();
+            logger.debug("FTP connection status: {}", status);
+            logger.info("Connected successfully to {}", NCBI_FTP_SERVER);
+        } catch (Exception e) {
+            logger.error("Could not connect to FTP server '{}'. FTP status was: {}. Reply code: {}. Reply string: {}",
+                         NCBI_FTP_SERVER, ftp.getStatus(), ftp.getReply(), ftp.getReplyString());
             ftp.disconnect();
-            System.err.println("FTP server refused connection.");
+            throw e;
         }
     }
 
     public void disconnect() throws IOException {
-        if (ftp != null) {
-            if (ftp.isConnected()) {
-                ftp.logout();
-                ftp.disconnect();
-                ftp = null;
-            }
+        if (ftp.isConnected()) {
+            ftp.logout();
+            ftp.disconnect();
         }
     }
 
     public FTPFile[] listDir() throws IOException {
-
-        FTPFile[] ftpFiles = null;
-        ftpFiles = ftp.listFiles();
-
-//        if (ftpFiles != null) {
-//            System.out.println(ftpFiles.length);
-//
-//            for (FTPFile ftpFile : ftpFiles) {
-//                System.out.println(ftpFile.getRawListing());
-//            }
-//        }
-
+        FTPFile[] ftpFiles = ftp.listFiles();
         return ftpFiles;
-
     }
 
 }
