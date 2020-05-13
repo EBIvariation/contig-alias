@@ -7,8 +7,10 @@ public class FTPBrowserTest {
 
     @Test
     void connectToServer(){
-        FTPBrowser browser = new FTPBrowser();
-        browser.main();
+        FTPBrowser ftpBrowser = new FTPBrowser();
+        ftpBrowser.connect();
+        ftpBrowser.listDir();
+        ftpBrowser.disconnect();
     }
 
 }
