@@ -75,7 +75,7 @@ public class FTPBrowserTest {
             String assemblyReport = "GCA_000002305.1_EquCab2.0_assembly_report.txt";
             boolean found = Stream.of(ftpFiles)
                                   .anyMatch(f -> f.getName().contains(assemblyReport));
-            assertTrue(found, "didn't find the assembly report '" + assemblyReport + "' in the folder. Contents are: "
+            assertTrue(found, "didn't find the assembly report '" + assemblyReport + "' in the folder. Contents are:\n"
                     + Stream.of(ftpFiles).map(FTPFile::toString).collect(Collectors.joining("\n")));
         } finally {
             ftpBrowser.disconnect();

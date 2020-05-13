@@ -30,6 +30,7 @@ public class FTPBrowser {
             }
 
             // Login as anonymous user
+            ftp.enterLocalPassiveMode();
             boolean login = ftp.login("anonymous", "anonymous");
             logger.debug("Login {}.", (login ? "successful" : "unsuccessful"));
             if (!login) {
