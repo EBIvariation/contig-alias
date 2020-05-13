@@ -26,11 +26,12 @@ public class FTPBrowserTest {
     }
 
     @Test
-    void jshellTest() throws IOException {
+    void FTPClientTest() throws IOException {
         FTPClient ftp = new FTPClient();
         try {
             String server = "ftp.ncbi.nlm.nih.gov";
             ftp.connect(server, 21);
+            ftp.enterLocalPassiveMode();
             boolean login = ftp.login("anonymous", "anonymous");
             assertTrue(login);
             FTPFile[] ftpFiles = ftp.listDirectories();
