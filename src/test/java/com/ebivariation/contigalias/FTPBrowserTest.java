@@ -47,7 +47,7 @@ public class FTPBrowserTest {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
             ftpBrowser.connect(server, null);
-            ftpBrowser.changeToDirectory("genomes");
+            ftpBrowser.navigateToDirectory("genomes");
         } finally {
             ftpBrowser.disconnect();
         }
@@ -58,7 +58,7 @@ public class FTPBrowserTest {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
             ftpBrowser.connect(server, null);
-            ftpBrowser.changeToDirectory("genomes");
+            ftpBrowser.navigateToDirectory("genomes");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
         } finally {
@@ -71,7 +71,7 @@ public class FTPBrowserTest {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
             ftpBrowser.connect(server, null);
-            ftpBrowser.changeToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
+            ftpBrowser.navigateToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
             String assemblyReport = "GCA_000002305.1_EquCab2.0_assembly_report.txt";

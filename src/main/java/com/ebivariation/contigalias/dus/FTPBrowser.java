@@ -61,7 +61,7 @@ public class FTPBrowser {
         return ftp.listFiles();
     }
 
-    public void changeToDirectory(String directory) throws IOException {
+    public void navigateToDirectory(String directory) throws IOException {
         if (!ftp.changeWorkingDirectory(directory)) {
             throw new RuntimeException("Unable to change to directory '" + directory + "'");
         }
