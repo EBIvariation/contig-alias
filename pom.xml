@@ -47,6 +47,14 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+		<!-- Embedded H2 database for testing and CI testing -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+			<version>1.4.199</version>
+		</dependency>
+
     </dependencies>
 
 	<build>
