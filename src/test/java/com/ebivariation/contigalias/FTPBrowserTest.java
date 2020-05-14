@@ -13,11 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FTPBrowserTest {
 
+    private final String server = "ftp.ncbi.nlm.nih.gov";
+
     @Test
     void connectToServer() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect();
+            ftpBrowser.connect(server, null);
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
         } finally {
@@ -29,7 +31,6 @@ public class FTPBrowserTest {
     void FTPClientTest() throws IOException {
         FTPClient ftp = new FTPClient();
         try {
-            String server = "ftp.ncbi.nlm.nih.gov";
             ftp.connect(server, 21);
             ftp.enterLocalPassiveMode();
             boolean login = ftp.login("anonymous", "anonymous");
@@ -45,7 +46,7 @@ public class FTPBrowserTest {
     void changeDirectory() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect();
+            ftpBrowser.connect(server, null);
             ftpBrowser.changeToDirectory("genomes");
         } finally {
             ftpBrowser.disconnect();
@@ -56,7 +57,7 @@ public class FTPBrowserTest {
     void changeDirectoryAndList() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect();
+            ftpBrowser.connect(server, null);
             ftpBrowser.changeToDirectory("genomes");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
@@ -69,7 +70,7 @@ public class FTPBrowserTest {
     void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect();
+            ftpBrowser.connect(server, null);
             ftpBrowser.changeToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
