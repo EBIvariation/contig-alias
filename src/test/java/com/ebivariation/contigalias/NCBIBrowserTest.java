@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NCBIBrowserTest {
@@ -21,6 +22,30 @@ public class NCBIBrowserTest {
         ncbiBrowser.connect();
         ncbiBrowser.navigateToAllGenomesDirectory();
         assertTrue(ncbiBrowser.listFiles().length > 0);
+    }
+
+    @Test
+    void navigateToSubDirectoryPath() throws IOException {
+        NCBIBrowser ncbiBrowser = new NCBIBrowser();
+        ncbiBrowser.connect();
+        ncbiBrowser.navigateToSubDirectoryPath("/genomes/INFLUENZA/");
+        assertTrue(ncbiBrowser.listFiles().length > 0);
+    }
+
+    @Test
+    void getGenomeReportDirectory_GCATest() throws IOException{
+        NCBIBrowser ncbiBrowser = new NCBIBrowser();
+        ncbiBrowser.connect();
+        String path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
+        assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path);
+    }
+
+    @Test
+    void getGenomeReportDirectory_GCFTest() throws IOException{
+        NCBIBrowser ncbiBrowser = new NCBIBrowser();
+        ncbiBrowser.connect();
+        String path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
+        assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path);
     }
 
 }

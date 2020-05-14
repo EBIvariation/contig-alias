@@ -83,4 +83,16 @@ public class FTPBrowserTest {
             ftpBrowser.disconnect();
         }
     }
+
+    @Test
+    void listDirectories() throws IOException{
+        FTPBrowser ftpBrowser = new FTPBrowser();
+        try {
+            ftpBrowser.connect(server, null);
+            FTPFile[] ftpFiles = ftpBrowser.listDirectories();
+            assertTrue(ftpFiles.length > 0);
+        } finally {
+            ftpBrowser.disconnect();
+        }
+    }
 }
