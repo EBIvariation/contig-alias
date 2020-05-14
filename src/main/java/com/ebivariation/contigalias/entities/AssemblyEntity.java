@@ -83,4 +83,7 @@ public class AssemblyEntity {
         this.scaffolds = scaffolds;
         return this;
     }
+
+    public AssemblyEntity() {
+    }
 }
