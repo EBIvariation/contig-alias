@@ -10,9 +10,9 @@ import java.io.IOException;
 
 public class FTPBrowser {
 
-    public static final int FTP_PORT = 21;
+    private static final int FTP_PORT = 21;
 
-    public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
+    private static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
 
     private final Logger logger = LoggerFactory.getLogger(FTPBrowser.class);
 
@@ -55,7 +55,7 @@ public class FTPBrowser {
         }
     }
 
-    public FTPFile[] listDirectories() throws IOException {
+    public FTPFile[] listFiles() throws IOException {
         FTPFile[] ftpFiles = ftp.listFiles();
         return ftpFiles;
     }
