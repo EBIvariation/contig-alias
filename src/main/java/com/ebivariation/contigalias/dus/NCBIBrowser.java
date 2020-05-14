@@ -3,12 +3,17 @@ package com.ebivariation.contigalias.dus;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class NCBIBrowser extends FTPBrowser {
 
     public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
+    private static final int FTP_PORT = 21;
 
     public void connect() throws IOException {
         super.connect(NCBI_FTP_SERVER);
@@ -66,6 +71,28 @@ public class NCBIBrowser extends FTPBrowser {
         } else path = null;
 
         return path;
+    }
+
+    /**
+     * @param directoryPath The path of the directory in which target report is located related to current directory.
+     * @return An InputStream of the first *assembly_report.txt file it finds.
+     * @throws IOException Passes exception thrown by FTPBrowser.retrieveFileStream()
+     */
+    public InputStream getAssemblyReportInputStream(String directoryPath) throws IOException {
+
+        InputStream fileStream = null;
+
+        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
+        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
+        Optional<FTPFile> optionalAssemblyReport = assemblyReportFilteredStream.findFirst();
+
+        if (optionalAssemblyReport.isPresent()) {
+            directoryPath += optionalAssemblyReport.get().getName();
+            fileStream = super.retrieveFileStream(directoryPath);
+        } else
+            throw new IllegalArgumentException("Assembly Report File not present in given directory: " + directoryPath);
+
+        return fileStream;
     }
 
 }
