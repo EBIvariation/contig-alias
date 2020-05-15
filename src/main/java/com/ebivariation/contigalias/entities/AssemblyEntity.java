@@ -13,9 +13,13 @@ public class AssemblyEntity {
     private long id;
 
     private String name;
+
     private String organism;
+
     private long taxid;
+
     private String genbank;
+
     private String refseq;
 
     @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
