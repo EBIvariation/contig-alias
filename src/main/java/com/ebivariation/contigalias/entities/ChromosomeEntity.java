@@ -1,17 +1,31 @@
 package com.ebivariation.contigalias.entities;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.GenerationType;
+
 
 @Entity
 @Table
 public class ChromosomeEntity {
 
+    public ChromosomeEntity() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private long id;
+
     private String name;
+
     private String genbank;
+
     private String refseq;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -62,6 +76,4 @@ public class ChromosomeEntity {
         return this;
     }
 
-    public ChromosomeEntity() {
-    }
 }
