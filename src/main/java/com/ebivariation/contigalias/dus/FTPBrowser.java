@@ -10,16 +10,17 @@ import java.io.IOException;
 
 public class FTPBrowser {
 
+    private static final int DEFAULT_FTP_PORT = 21;
+
     private final Logger logger = LoggerFactory.getLogger(FTPBrowser.class);
 
     private final FTPClient ftp = new FTPClient();
 
-    public void connect(String address, Integer port) throws IOException {
+    public void connect(String address) throws IOException {
+        connect(address, DEFAULT_FTP_PORT);
+    }
 
-        // If port is not specified (null) then set it to 21.
-        if (port == null) {
-            port = 21;
-        }
+    public void connect(String address, int port) throws IOException {
 
         try {
             ftp.connect(address, port);
