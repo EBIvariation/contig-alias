@@ -14,9 +14,6 @@ import javax.persistence.GenerationType;
 @Table
 public class ChromosomeEntity {
 
-    public ChromosomeEntity() {
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
