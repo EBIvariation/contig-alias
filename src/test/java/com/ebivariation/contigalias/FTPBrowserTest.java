@@ -3,6 +3,9 @@ package com.ebivariation.contigalias;
 import com.ebivariation.contigalias.dus.FTPBrowser;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -13,64 +16,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FTPBrowserTest {
 
-    private final String server = "ftp.ncbi.nlm.nih.gov";
+    private static final String SERVER_NCBI = "ftp.ncbi.nlm.nih.gov";
 
-    @Test
-    void connectToServer() throws IOException {
-        FTPBrowser ftpBrowser = new FTPBrowser();
-        try {
-            ftpBrowser.connect(server, 21);
-            FTPFile[] ftpFiles = ftpBrowser.listFiles();
-            assertTrue(ftpFiles.length > 0);
-        } finally {
+    @Nested
+    class WithSetupAndTeardown {
+
+        private FTPBrowser ftpBrowser;
+
+        @BeforeEach
+        void setUp() throws IOException {
+            ftpBrowser = new FTPBrowser();
+            ftpBrowser.connect(SERVER_NCBI);
+        }
+
+        @AfterEach
+        void tearDown() throws IOException {
             ftpBrowser.disconnect();
         }
-    }
 
-    @Test
-    void FTPClientTest() throws IOException {
-        FTPClient ftp = new FTPClient();
-        try {
-            ftp.connect(server, 21);
-            ftp.enterLocalPassiveMode();
-            boolean login = ftp.login("anonymous", "anonymous");
-            assertTrue(login);
-            FTPFile[] ftpFiles = ftp.listDirectories();
-            assertTrue(ftpFiles.length > 0);
-        } finally {
-            ftp.disconnect();
-        }
-    }
-
-    @Test
-    void changeDirectory() throws IOException {
-        FTPBrowser ftpBrowser = new FTPBrowser();
-        try {
-            ftpBrowser.connect(server);
+        @Test
+        void changeDirectory() throws IOException {
             ftpBrowser.navigateToDirectory("genomes");
-        } finally {
-            ftpBrowser.disconnect();
         }
-    }
 
-    @Test
-    void changeDirectoryAndList() throws IOException {
-        FTPBrowser ftpBrowser = new FTPBrowser();
-        try {
-            ftpBrowser.connect(server);
+        @Test
+        void changeDirectoryAndList() throws IOException {
             ftpBrowser.navigateToDirectory("genomes");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
-        } finally {
-            ftpBrowser.disconnect();
         }
-    }
 
-    @Test
-    void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
-        FTPBrowser ftpBrowser = new FTPBrowser();
-        try {
-            ftpBrowser.connect(server);
+        @Test
+        void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
             ftpBrowser.navigateToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
@@ -79,21 +56,48 @@ public class FTPBrowserTest {
                     .anyMatch(f -> f.getName().contains(assemblyReport));
             assertTrue(found, "didn't find the assembly report '" + assemblyReport + "' in the folder. Contents are:\n"
                     + Stream.of(ftpFiles).map(FTPFile::toString).collect(Collectors.joining("\n")));
-        } finally {
-            ftpBrowser.disconnect();
         }
-    }
 
-    @Test
-    void listDirectories() throws IOException {
-        FTPBrowser ftpBrowser = new FTPBrowser();
-        try {
-            ftpBrowser.connect(server);
+        @Test
+        void listDirectories() throws IOException {
             FTPFile[] ftpFiles = ftpBrowser.listDirectories();
             assertTrue(ftpFiles.length > 0);
-        } finally {
-            ftpBrowser.disconnect();
         }
+
+    }
+
+    @Nested
+    class WithoutSetupAndTeardown {
+
+        private final int PORT_NCBI_FTP = 21;
+
+        @Test
+        void connectToServerWithExplicitPort() throws IOException {
+            FTPBrowser ftpBrowser = new FTPBrowser();
+            try {
+                ftpBrowser.connect(SERVER_NCBI, PORT_NCBI_FTP);
+                FTPFile[] ftpFiles = ftpBrowser.listFiles();
+                assertTrue(ftpFiles.length > 0);
+            } finally {
+                ftpBrowser.disconnect();
+            }
+        }
+
+        @Test
+        void FTPClientTest() throws IOException {
+            FTPClient ftp = new FTPClient();
+            try {
+                ftp.connect(SERVER_NCBI, PORT_NCBI_FTP);
+                ftp.enterLocalPassiveMode();
+                boolean login = ftp.login("anonymous", "anonymous");
+                assertTrue(login);
+                FTPFile[] ftpFiles = ftp.listDirectories();
+                assertTrue(ftpFiles.length > 0);
+            } finally {
+                ftp.disconnect();
+            }
+        }
+
     }
 
 }
