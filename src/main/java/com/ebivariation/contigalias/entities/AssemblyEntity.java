@@ -25,6 +25,9 @@ public class AssemblyEntity {
     @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
 
+    public AssemblyEntity() {
+    }
+
     public long getId() {
         return id;
     }
@@ -88,6 +91,4 @@ public class AssemblyEntity {
         return this;
     }
 
-    public AssemblyEntity() {
-    }
 }
