@@ -19,7 +19,7 @@ public class AssemblyEntity {
     private String refseq;
 
     @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
-    private List<ScaffoldEntity> scaffolds;
+    private List<ChromosomeEntity> chromosomes;
 
     public long getId() {
         return id;
@@ -45,8 +45,8 @@ public class AssemblyEntity {
         return refseq;
     }
 
-    public List<ScaffoldEntity> getScaffolds() {
-        return scaffolds;
+    public List<ChromosomeEntity> getChromosomes() {
+        return chromosomes;
     }
 
     public AssemblyEntity setId(long id) {
@@ -79,8 +79,8 @@ public class AssemblyEntity {
         return this;
     }
 
-    public AssemblyEntity setScaffolds(List<ScaffoldEntity> scaffolds) {
-        this.scaffolds = scaffolds;
+    public AssemblyEntity setChromosomes(List<ChromosomeEntity> scaffolds) {
+        this.chromosomes = scaffolds;
         return this;
     }
 
