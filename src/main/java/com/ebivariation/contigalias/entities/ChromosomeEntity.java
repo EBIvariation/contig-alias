@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table
-public class ScaffoldEntity {
+public class ChromosomeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -37,31 +37,31 @@ public class ScaffoldEntity {
         return assembly;
     }
 
-    public ScaffoldEntity setId(long id) {
+    public ChromosomeEntity setId(long id) {
         this.id = id;
         return this;
     }
 
-    public ScaffoldEntity setName(String name) {
+    public ChromosomeEntity setName(String name) {
         this.name = name;
         return this;
     }
 
-    public ScaffoldEntity setGenbank(String genbank) {
+    public ChromosomeEntity setGenbank(String genbank) {
         this.genbank = genbank;
         return this;
     }
 
-    public ScaffoldEntity setRefseq(String refseq) {
+    public ChromosomeEntity setRefseq(String refseq) {
         this.refseq = refseq;
         return this;
     }
 
-    public ScaffoldEntity setAssembly(AssemblyEntity assembly) {
+    public ChromosomeEntity setAssembly(AssemblyEntity assembly) {
         this.assembly = assembly;
         return this;
     }
 
-    public ScaffoldEntity() {
+    public ChromosomeEntity() {
     }
 }
