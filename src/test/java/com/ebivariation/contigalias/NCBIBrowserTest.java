@@ -57,17 +57,8 @@ public class NCBIBrowserTest {
 
     @Test
     void getAssemblyReportInputStream() throws IOException {
-        NCBIBrowser ncbiBrowser = new NCBIBrowser();
-        try {
-            ncbiBrowser.connect();
-            InputStream stream = ncbiBrowser.getAssemblyReportInputStream("/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
-            int available = stream.available();
-            if (available > 0) {
-                stream.close();
-                System.out.println("Stream closed with availability: " + available);
-            }
-        } finally {
-            ncbiBrowser.disconnect();
-        }
+        InputStream stream = ncbiBrowser.getAssemblyReportInputStream("/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
+        assertTrue(stream.read() != -1);
+        stream.close();
     }
 }

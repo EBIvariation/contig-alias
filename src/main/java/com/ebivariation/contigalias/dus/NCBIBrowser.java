@@ -13,7 +13,6 @@ public class NCBIBrowser extends FTPBrowser {
     public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
-    private static final int FTP_PORT = 21;
 
     public void connect() throws IOException {
         super.connect(NCBI_FTP_SERVER);
@@ -80,7 +79,7 @@ public class NCBIBrowser extends FTPBrowser {
      */
     public InputStream getAssemblyReportInputStream(String directoryPath) throws IOException {
 
-        InputStream fileStream = null;
+        InputStream fileStream;
 
         Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
         Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
@@ -89,9 +88,9 @@ public class NCBIBrowser extends FTPBrowser {
         if (optionalAssemblyReport.isPresent()) {
             directoryPath += optionalAssemblyReport.get().getName();
             fileStream = super.retrieveFileStream(directoryPath);
-        } else
+        } else {
             throw new IllegalArgumentException("Assembly Report File not present in given directory: " + directoryPath);
-
+        }
         return fileStream;
     }
 
