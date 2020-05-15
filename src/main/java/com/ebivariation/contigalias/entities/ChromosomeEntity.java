@@ -14,9 +14,6 @@ import javax.persistence.GenerationType;
 @Table
 public class ChromosomeEntity {
 
-    public ChromosomeEntity() {
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -30,6 +27,9 @@ public class ChromosomeEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private AssemblyEntity assembly;
+
+    public ChromosomeEntity() {
+    }
 
     public long getId() {
         return id;
