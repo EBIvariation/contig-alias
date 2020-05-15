@@ -76,4 +76,6 @@ public class ChromosomeEntity {
         return this;
     }
 
+    public ChromosomeEntity() {
+    }
 }
