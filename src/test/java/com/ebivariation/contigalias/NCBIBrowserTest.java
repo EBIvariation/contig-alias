@@ -13,9 +13,9 @@ public class NCBIBrowserTest {
     @Test
     void connect() throws IOException {
         NCBIBrowser ncbiBrowser = new NCBIBrowser();
-        try{
-        ncbiBrowser.connect();
-        }finally {
+        try {
+            ncbiBrowser.connect();
+        } finally {
             ncbiBrowser.disconnect();
         }
     }
