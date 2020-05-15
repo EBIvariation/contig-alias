@@ -13,13 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FTPBrowserTest {
 
-    private final String server = "ftp.ncbi.nlm.nih.gov";
+    private static final String STATIC = "ftp.ncbi.nlm.nih.gov";
 
     @Test
     void connectToServer() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server, 21);
+            ftpBrowser.connect(STATIC, 21);
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
         } finally {
@@ -31,7 +31,7 @@ public class FTPBrowserTest {
     void FTPClientTest() throws IOException {
         FTPClient ftp = new FTPClient();
         try {
-            ftp.connect(server, 21);
+            ftp.connect(STATIC, 21);
             ftp.enterLocalPassiveMode();
             boolean login = ftp.login("anonymous", "anonymous");
             assertTrue(login);
@@ -46,7 +46,7 @@ public class FTPBrowserTest {
     void changeDirectory() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server);
+            ftpBrowser.connect(STATIC);
             ftpBrowser.navigateToDirectory("genomes");
         } finally {
             ftpBrowser.disconnect();
@@ -57,7 +57,7 @@ public class FTPBrowserTest {
     void changeDirectoryAndList() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server);
+            ftpBrowser.connect(STATIC);
             ftpBrowser.navigateToDirectory("genomes");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
@@ -70,7 +70,7 @@ public class FTPBrowserTest {
     void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server);
+            ftpBrowser.connect(STATIC);
             ftpBrowser.navigateToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
@@ -88,7 +88,7 @@ public class FTPBrowserTest {
     void listDirectories() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server);
+            ftpBrowser.connect(STATIC);
             FTPFile[] ftpFiles = ftpBrowser.listDirectories();
             assertTrue(ftpFiles.length > 0);
         } finally {
