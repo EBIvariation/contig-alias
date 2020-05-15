@@ -19,7 +19,7 @@ public class FTPBrowserTest {
     void connectToServer() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server, null);
+            ftpBrowser.connect(server, 21);
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
         } finally {
@@ -46,7 +46,7 @@ public class FTPBrowserTest {
     void changeDirectory() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server, null);
+            ftpBrowser.connect(server);
             ftpBrowser.navigateToDirectory("genomes");
         } finally {
             ftpBrowser.disconnect();
@@ -57,7 +57,7 @@ public class FTPBrowserTest {
     void changeDirectoryAndList() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server, null);
+            ftpBrowser.connect(server);
             ftpBrowser.navigateToDirectory("genomes");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
@@ -70,7 +70,7 @@ public class FTPBrowserTest {
     void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server, null);
+            ftpBrowser.connect(server);
             ftpBrowser.navigateToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
             FTPFile[] ftpFiles = ftpBrowser.listFiles();
             assertTrue(ftpFiles.length > 0);
@@ -85,14 +85,15 @@ public class FTPBrowserTest {
     }
 
     @Test
-    void listDirectories() throws IOException{
+    void listDirectories() throws IOException {
         FTPBrowser ftpBrowser = new FTPBrowser();
         try {
-            ftpBrowser.connect(server, null);
+            ftpBrowser.connect(server);
             FTPFile[] ftpFiles = ftpBrowser.listDirectories();
             assertTrue(ftpFiles.length > 0);
         } finally {
             ftpBrowser.disconnect();
         }
     }
+
 }
