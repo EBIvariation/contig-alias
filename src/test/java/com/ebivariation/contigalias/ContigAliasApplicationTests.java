@@ -6,13 +6,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ContigAliasApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
-	@Test
-	void actionsTest(){
-		System.out.println("Github actions is running tests.");
-	}
+    @Test
+    void actionsTest() {
+        System.out.println("Github actions is running tests.");
+    }
 
 }

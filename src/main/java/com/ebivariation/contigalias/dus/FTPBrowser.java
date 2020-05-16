@@ -45,7 +45,7 @@ public class FTPBrowser {
             logger.info("Connected successfully to {}", address);
         } catch (Exception e) {
             logger.error("Could not connect to FTP server '{}'. FTP status was: {}. Reply code: {}. Reply string: {}",
-                    address, ftp.getStatus(), ftp.getReply(), ftp.getReplyString());
+                         address, ftp.getStatus(), ftp.getReply(), ftp.getReplyString());
             ftp.disconnect();
             throw e;
         }

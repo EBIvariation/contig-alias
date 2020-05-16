@@ -32,26 +32,26 @@ public class NCBIBrowserTest {
 
     @Test
     void navigateToAllGenomesDirectory() throws IOException {
-            ncbiBrowser.navigateToAllGenomesDirectory();
-            assertTrue(ncbiBrowser.listFiles().length > 0);
+        ncbiBrowser.navigateToAllGenomesDirectory();
+        assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
     @Test
     void navigateToSubDirectoryPath() throws IOException {
-            ncbiBrowser.navigateToSubDirectoryPath("/genomes/INFLUENZA/");
-            assertTrue(ncbiBrowser.listFiles().length > 0);
+        ncbiBrowser.navigateToSubDirectoryPath("/genomes/INFLUENZA/");
+        assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
     @Test
     void getGenomeReportDirectoryGCATest() throws IOException {
-            String path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
-            assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path);
+        String path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
+        assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path);
     }
 
     @Test
     void getGenomeReportDirectoryGCFTest() throws IOException {
-            String path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
-            assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path);
+        String path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
+        assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path);
     }
 
 }

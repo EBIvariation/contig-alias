@@ -7,6 +7,7 @@ import java.io.IOException;
 public class NCBIBrowser extends FTPBrowser {
 
     public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
+
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
     public void connect() throws IOException {
@@ -24,6 +25,7 @@ public class NCBIBrowser extends FTPBrowser {
     /**
      * Takes a Genbank or Refseq accession and converts it to the equivalent path used by NCBI's FTP server.
      * For example, on input "GCF_007608995.1" the output path is "GCF/007/608/995/GCF_007608995.1_ASM760899v1/".
+     *
      * @param accession Any GCA or GCF String
      * @return Path relative to ftp.ncbi.nlm.nih.gov/genomes/all/
      * @throws IOException Passes exception thrown by FTPBrowser.listDirectories()
