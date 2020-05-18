@@ -1,43 +1,47 @@
 package com.ebivariation.contigalias.dus;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.util.LinkedList;
+import java.util.List;
 
-public class AssemblyReportReader extends BufferedReader {
+public class AssemblyReportReader {
 
-    private final AssemblyEntity assemblyEntity = new AssemblyEntity();
+    private final BufferedReader reader;
 
-    public AssemblyReportReader(Reader reader) {
-        super(reader);
-    }
+    private AssemblyEntity assemblyEntity;
+
+    private boolean reportParsed = false;
 
     public AssemblyReportReader(InputStreamReader inputStreamReader) {
-        super(new BufferedReader(inputStreamReader));
+        reader = new BufferedReader(inputStreamReader);
     }
 
-    @Override
-    public String readLine() throws IOException {
-        String line = super.readLine();
-        if (line == null) {
-            return null;
+    private void parseReport() throws IOException {
+        String line = reader.readLine();
+        while (line != null) {
+            if (line.startsWith("# ")) {
+                if (assemblyEntity == null) {
+                    assemblyEntity = new AssemblyEntity();
+                }
+                parseAssemblyData(line);
+            } else if (!line.startsWith("#")) {
+                parseChromosomeLine(line);
+            }
+            line = reader.readLine();
         }
-
-        if (line.startsWith("# ")) {
-            parseAssemblyData(line);
-        } else {
-            parseScaffoldLine(line);
-        }
-
-        return line;
+        reportParsed = true;
     }
 
     private void parseAssemblyData(String line) {
         int tagEnd = line.indexOf(':');
-        if (tagEnd == -1) return;
+        if (tagEnd == -1) {
+            return;
+        }
         String tag = line.substring(2, tagEnd);
         String tagData = line.substring(tagEnd + 1).trim();
         switch (tag) {
@@ -64,7 +68,75 @@ public class AssemblyReportReader extends BufferedReader {
         }
     }
 
-    private void parseScaffoldLine(String line) {
-        //TODO
+    private void parseChromosomeLine(String line) {
+
+        ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
+
+        int tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            String sequaenceName = line.substring(0, tabIndex);
+            chromosomeEntity.setName(sequaenceName);
+            line = line.substring(tabIndex + 1);
+        }
+
+        tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            line = line.substring(tabIndex + 1);
+        }
+
+        tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            line = line.substring(tabIndex + 1);
+        }
+
+        tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            String assignedModeculeLocationType = line.substring(0, tabIndex);
+            if (!assignedModeculeLocationType.equals("Chromosome")) {
+                return;
+            }
+            line = line.substring(tabIndex + 1);
+        }
+
+        tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            String genbankAccn = line.substring(0, tabIndex);
+            chromosomeEntity.setGenbank(genbankAccn);
+            line = line.substring(tabIndex + 1);
+        }
+
+        tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            line = line.substring(tabIndex + 1);
+        }
+
+        tabIndex = line.indexOf('\t');
+        if (tabIndex != -1) {
+            String refseqAccn = line.substring(0, tabIndex);
+            chromosomeEntity.setRefseq(refseqAccn);
+        }
+
+        chromosomeEntity.setAssembly(this.assemblyEntity);
+        if (assemblyEntity == null) {
+            assemblyEntity = new AssemblyEntity();
+        }
+        List<ChromosomeEntity> chromosomes = this.assemblyEntity.getChromosomes();
+        if (chromosomes == null) {
+            chromosomes = new LinkedList<>();
+            assemblyEntity.setChromosomes(chromosomes);
+        }
+        chromosomes.add(chromosomeEntity);
+
+    }
+
+    public long getLineCount() {
+        return reader.lines().count();
+    }
+
+    public AssemblyEntity getAssemblyEntity() throws IOException {
+        if (!reportParsed || assemblyEntity == null) {
+            parseReport();
+        }
+        return assemblyEntity;
     }
 }
