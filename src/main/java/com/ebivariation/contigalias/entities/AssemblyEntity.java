@@ -22,6 +22,8 @@ public class AssemblyEntity {
 
     private String refseq;
 
+    private boolean isGenbankRefseqIdentical;
+
     @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
 
@@ -50,6 +52,10 @@ public class AssemblyEntity {
 
     public String getRefseq() {
         return refseq;
+    }
+
+    public boolean isGenbankRefseqIdentical() {
+        return isGenbankRefseqIdentical;
     }
 
     public List<ChromosomeEntity> getChromosomes() {
@@ -91,4 +97,8 @@ public class AssemblyEntity {
         return this;
     }
 
+    public AssemblyEntity setGenbankRefseqIdentical(boolean genbankRefseqIdentical) {
+        isGenbankRefseqIdentical = genbankRefseqIdentical;
+        return this;
+    }
 }

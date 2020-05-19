@@ -30,6 +30,8 @@ class AssemblyReportReaderTest {
 
     private static final String ASSEMBLY_REFSEQ_ACCESSION = "GCF_000003055.4";
 
+    private static final boolean ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL = false;
+
     private static final String CHROMOSOME_CHR1_SEQUENCE_NAME = "Chr1";
 
     private static final String CHROMOSOME_CHR1_GENBANK_ACCESSION = "GK000001.2";
@@ -73,6 +75,7 @@ class AssemblyReportReaderTest {
         assertEquals(ASSEMBLY_TAX_ID, assembly.getTaxid());
         assertEquals(ASSEMBLY_GENBANK_ACCESSION, assembly.getGenbank());
         assertEquals(ASSEMBLY_REFSEQ_ACCESSION, assembly.getRefseq());
+        assertEquals(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL, assembly.isGenbankRefseqIdentical());
     }
 
     @Test
