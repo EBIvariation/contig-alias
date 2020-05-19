@@ -28,9 +28,9 @@ class AssemblyReportReaderTest {
 
     private static final String ASSEMBLY_GENBANK_ACCESSION = "GCA_000003055.3";
 
-    private static final String ASSEMBLY_REFSEQ_ACCESSION = "GCF_000003055.4";
+    private static final String ASSEMBLY_REFSEQ_ACCESSION = "GCF_000003055.3";
 
-    private static final boolean ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL = false;
+    private static final boolean ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL = true;
 
     private static final String CHROMOSOME_CHR1_SEQUENCE_NAME = "Chr1";
 
@@ -47,7 +47,7 @@ class AssemblyReportReaderTest {
     @BeforeEach
     void setup() throws FileNotFoundException {
         stream = new FileInputStream(
-                new File("src/test/resources/GCF_000003055.4_Bos_taurus_UMD_3.1_assembly_report.txt"));
+                new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
         streamReader = new InputStreamReader(stream);
         reader = new AssemblyReportReader(streamReader);
     }

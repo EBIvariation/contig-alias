@@ -73,7 +73,7 @@ public class AssemblyReportReader {
                 break;
             }
             case "RefSeq assembly and GenBank assemblies identical": {
-                assemblyEntity.setGenbankRefseqIdentical(!tagData.equals("no"));
+                assemblyEntity.setGenbankRefseqIdentical(tagData.equals("yes"));
                 break;
             }
         }

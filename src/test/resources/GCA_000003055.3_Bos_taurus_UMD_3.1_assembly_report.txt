@@ -8,7 +8,7 @@
 # Submitter:      Center for Bioinformatics and Computational Biology, University of Maryland
 # Date:           2009-12-1
 # Assembly type:  haploid
-# Release type:   
+# Release type:   major
 # Assembly level: Chromosome
 # Genome representation: full
 # WGS project:    DAAA02
@@ -16,13 +16,12 @@
 # Genome coverage: 9x
 # Sequencing technology: Sanger
 # GenBank assembly accession: GCA_000003055.3
-# RefSeq assembly accession: GCF_000003055.4
-# RefSeq assembly and GenBank assemblies identical: no
+# RefSeq assembly accession: GCF_000003055.3
+# RefSeq assembly and GenBank assemblies identical: yes
 #
 ## Assembly-Units:
 ## GenBank Unit Accession	RefSeq Unit Accession	Assembly-Unit name
 ## GCA_000001245.3	GCF_000001245.3	Primary Assembly
-## 	GCF_000001285.1	non-nuclear
 #
 # Ordered by chromosome/plasmid; the chromosomes/plasmids are followed by
 # unlocalized scaffolds.
@@ -3346,4 +3345,3 @@ ChrU_9824053	unplaced-scaffold	na	na	GJ060419.1	=	NW_003101164.1	Primary Assembl
 ChrU_9825169	unplaced-scaffold	na	na	GJ060420.1	=	NW_003101165.1	Primary Assembly	934	na
 ChrU_9826203	unplaced-scaffold	na	na	GJ060421.1	=	NW_003101166.1	Primary Assembly	1015	na
 ChrU_9827318	unplaced-scaffold	na	na	GJ060422.1	=	NW_003101167.1	Primary Assembly	739	na
-MT	assembled-molecule	MT	Mitochondrion	na	<>	NC_006853.1	non-nuclear	16338	na
