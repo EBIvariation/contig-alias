@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias;
+package com.ebivariation.contigalias.dus;
 
 import com.ebivariation.contigalias.dus.NCBIBrowser;
 import org.junit.jupiter.api.AfterEach;
