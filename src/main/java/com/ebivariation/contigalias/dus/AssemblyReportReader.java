@@ -70,63 +70,29 @@ public class AssemblyReportReader {
 
     private void parseChromosomeLine(String line) {
 
+        String[] columns = line.split("\t", -1);
+
+        if (columns.length < 6 || !columns[3].equals("Chromosome")) {
+            return;
+        }
+
         ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
 
-        int tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            String sequaenceName = line.substring(0, tabIndex);
-            chromosomeEntity.setName(sequaenceName);
-            line = line.substring(tabIndex + 1);
-        }
+        chromosomeEntity.setName(columns[0]);
+        chromosomeEntity.setGenbank(columns[4]);
+        chromosomeEntity.setRefseq(columns[6]);
 
-        tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            line = line.substring(tabIndex + 1);
-        }
-
-        tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            line = line.substring(tabIndex + 1);
-        }
-
-        tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            String assignedModeculeLocationType = line.substring(0, tabIndex);
-            if (!assignedModeculeLocationType.equals("Chromosome")) {
-                return;
-            }
-            line = line.substring(tabIndex + 1);
-        }
-
-        tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            String genbankAccn = line.substring(0, tabIndex);
-            chromosomeEntity.setGenbank(genbankAccn);
-            line = line.substring(tabIndex + 1);
-        }
-
-        tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            line = line.substring(tabIndex + 1);
-        }
-
-        tabIndex = line.indexOf('\t');
-        if (tabIndex != -1) {
-            String refseqAccn = line.substring(0, tabIndex);
-            chromosomeEntity.setRefseq(refseqAccn);
-        }
-
-        chromosomeEntity.setAssembly(this.assemblyEntity);
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();
         }
+        chromosomeEntity.setAssembly(this.assemblyEntity);
+
         List<ChromosomeEntity> chromosomes = this.assemblyEntity.getChromosomes();
         if (chromosomes == null) {
             chromosomes = new LinkedList<>();
             assemblyEntity.setChromosomes(chromosomes);
         }
         chromosomes.add(chromosomeEntity);
-
     }
 
     public long getLineCount() {
