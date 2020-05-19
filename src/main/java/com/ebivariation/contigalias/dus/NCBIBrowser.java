@@ -83,10 +83,10 @@ public class NCBIBrowser extends FTPBrowser {
 
         Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
         Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
-        Optional<FTPFile> optionalAssemblyReport = assemblyReportFilteredStream.findFirst();
+        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
 
-        if (optionalAssemblyReport.isPresent()) {
-            directoryPath += optionalAssemblyReport.get().getName();
+        if (assemblyReport.isPresent()) {
+            directoryPath += assemblyReport.get().getName();
             fileStream = super.retrieveFileStream(directoryPath);
         } else {
             throw new IllegalArgumentException("Assembly Report File not present in given directory: " + directoryPath);
