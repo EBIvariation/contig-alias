@@ -21,6 +21,13 @@ public class AssemblyReportReader {
         reader = new BufferedReader(inputStreamReader);
     }
 
+    public AssemblyEntity getAssemblyEntity() throws IOException {
+        if (!reportParsed || assemblyEntity == null) {
+            parseReport();
+        }
+        return assemblyEntity;
+    }
+
     private void parseReport() throws IOException {
         String line = reader.readLine();
         while (line != null) {
@@ -97,12 +104,5 @@ public class AssemblyReportReader {
 
     public long getLineCount() {
         return reader.lines().count();
-    }
-
-    public AssemblyEntity getAssemblyEntity() throws IOException {
-        if (!reportParsed || assemblyEntity == null) {
-            parseReport();
-        }
-        return assemblyEntity;
     }
 }
