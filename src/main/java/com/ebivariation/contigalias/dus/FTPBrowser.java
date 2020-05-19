@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class FTPBrowser {
 
@@ -62,6 +63,10 @@ public class FTPBrowser {
         return ftp.listFiles();
     }
 
+    public FTPFile[] listFiles(String path) throws IOException{
+        return ftp.listFiles(path);
+    }
+
     public FTPFile[] listDirectories() throws IOException {
         return ftp.listDirectories();
     }
@@ -74,6 +79,10 @@ public class FTPBrowser {
         if (!ftp.changeWorkingDirectory(directory)) {
             throw new RuntimeException("Unable to change to directory '" + directory + "'");
         }
+    }
+
+    public InputStream retrieveFileStream(String filePath) throws IOException {
+        return ftp.retrieveFileStream(filePath);
     }
 
 }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,4 +55,14 @@ public class NCBIBrowserTest {
         assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path);
     }
 
+    @Test
+    void getAssemblyReportInputStream() throws IOException {
+        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(
+                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
+        try {
+            assertTrue(stream.read() != -1);
+        } finally {
+            stream.close();
+        }
+    }
 }
