@@ -75,8 +75,8 @@ class AssemblyReportReaderTest {
     }
 
     @Test
-    void getAssemblyReportReader() {
-        assertTrue(reader.getLineCount() > 0);
+    void getAssemblyReportReader() throws IOException {
+        assertTrue(reader.ready());
     }
 
     AssemblyEntity getAssemblyEntity() throws IOException {

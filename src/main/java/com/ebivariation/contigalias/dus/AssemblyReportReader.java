@@ -145,7 +145,7 @@ public class AssemblyReportReader {
         chromosomes.add(chromosomeEntity);
     }
 
-    public long getLineCount() {
-        return reader.lines().count();
+    public boolean ready() throws IOException {
+        return reader.ready();
     }
 }
