@@ -21,6 +21,14 @@ public class AssemblyReportReader {
         reader = new BufferedReader(inputStreamReader);
     }
 
+    /**
+     * Returns the class-level instance variable of {@link AssemblyEntity}. If the variable has not been initialized
+     * or the assembly report has not been parsed yet, it calls {@link #parseReport()} and then returns the variable
+     * that would have been initialized by {@link #parseReport()}.
+     * @return {@link AssemblyEntity} containing all metadata extracted from the report along with a list of
+     * {@link ChromosomeEntity} which also contain their own metadata.
+     * @throws IOException Passes IOException thrown by {@link #parseReport()}
+     */
     public AssemblyEntity getAssemblyEntity() throws IOException {
         if (!reportParsed || assemblyEntity == null) {
             parseReport();
@@ -28,6 +36,10 @@ public class AssemblyReportReader {
         return assemblyEntity;
     }
 
+    /**
+     * Reads the report line-by-line and calls the relevant methods to parse each line based on its starting characters.
+     * @throws IOException Passes IOException thrown by {@link BufferedReader#readLine()}
+     */
     private void parseReport() throws IOException {
         String line = reader.readLine();
         while (line != null) {
@@ -44,6 +56,11 @@ public class AssemblyReportReader {
         reportParsed = true;
     }
 
+    /**
+     * Parses lines in assembly report containing Assembly metadata. Breaks line into a tag:tagData format and
+     * sets tagData in {@link AssemblyEntity} fields corresponding to the tag found in given line.
+     * @param line A line of assembly report file starting with "# ".
+     */
     private void parseAssemblyData(String line) {
         int tagEnd = line.indexOf(':');
         if (tagEnd == -1) {
@@ -79,6 +96,12 @@ public class AssemblyReportReader {
         }
     }
 
+    /**
+     * Parses lines in assembly report containing Chromosome metadata. Splits line into an array of fields using
+     * {@link String#split(String)} with "\t" as the separator. This array is used to set metadata to corresponding
+     * fields in {@link ChromosomeEntity}.
+     * @param line A line of assembly report file not starting with "#".
+     */
     private void parseChromosomeLine(String line) {
 
         String[] columns = line.split("\t", -1);
