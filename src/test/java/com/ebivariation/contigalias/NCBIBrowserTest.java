@@ -57,8 +57,12 @@ public class NCBIBrowserTest {
 
     @Test
     void getAssemblyReportInputStream() throws IOException {
-        InputStream stream = ncbiBrowser.getAssemblyReportInputStream("/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
-        assertTrue(stream.read() != -1);
-        stream.close();
+        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(
+                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
+        try {
+            assertTrue(stream.read() != -1);
+        } finally {
+            stream.close();
+        }
     }
 }
