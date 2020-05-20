@@ -52,19 +52,19 @@ public class PassiveAnonymousFTPClientTest {
 
         @Test
         void changeDirectory() throws IOException {
-            ftpClient.navigateToDirectory("genomes");
+            ftpClient.changeWorkingDirectory("genomes");
         }
 
         @Test
         void changeDirectoryAndList() throws IOException {
-            ftpClient.navigateToDirectory("genomes");
+            ftpClient.changeWorkingDirectory("genomes");
             FTPFile[] ftpFiles = ftpClient.listFiles();
             assertTrue(ftpFiles.length > 0);
         }
 
         @Test
         void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
-            ftpClient.navigateToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
+            ftpClient.changeWorkingDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
             FTPFile[] ftpFiles = ftpClient.listFiles();
             assertTrue(ftpFiles.length > 0);
             String assemblyReport = "GCA_000002305.1_EquCab2.0_assembly_report.txt";

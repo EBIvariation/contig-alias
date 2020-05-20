@@ -73,10 +73,4 @@ public class PassiveAnonymousFTPClient extends FTPClient {
         }
     }
 
-    public void navigateToDirectory(String directory) throws IOException {
-        if (!super.changeWorkingDirectory(directory)) {
-            throw new RuntimeException("Unable to change to directory '" + directory + "'");
-        }
-    }
-
 }

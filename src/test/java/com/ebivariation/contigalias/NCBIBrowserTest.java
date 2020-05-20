@@ -49,13 +49,14 @@ public class NCBIBrowserTest {
 
     @Test
     void navigateToAllGenomesDirectory() throws IOException {
-        ncbiBrowser.navigateToAllGenomesDirectory();
+        boolean b = ncbiBrowser.changeWorkingDirectoryToGenomesAll();
+        assertTrue(b);
         assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
     @Test
     void navigateToSubDirectoryPath() throws IOException {
-        ncbiBrowser.navigateToSubDirectoryPath("/genomes/INFLUENZA/");
+        ncbiBrowser.changeWorkingDirectory("/genomes/INFLUENZA/");
         assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
