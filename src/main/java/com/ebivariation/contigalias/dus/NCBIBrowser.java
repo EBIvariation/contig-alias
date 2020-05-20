@@ -84,6 +84,10 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         return path;
     }
 
+    public String getAbsolutePath(String relativePath){
+        return NCBI_FTP_SERVER + PATH_GENOMES_ALL + relativePath;
+    }
+
     /**
      * @param directoryPath The path of the directory in which target report is located relative to root of FTP server.
      *                      Eg:- "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/"

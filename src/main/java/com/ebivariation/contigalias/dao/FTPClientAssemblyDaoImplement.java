@@ -34,7 +34,9 @@ public class FTPClientAssemblyDaoImplement implements AssemblyDao {
         ncbiBrowser.connect();
         ncbiBrowser.navigateToAllGenomesDirectory();
         String directory = ncbiBrowser.getGenomeReportDirectory(accession);
-        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(directory);
+        ncbiBrowser.navigateToSubDirectoryPath(directory);
+        String path = ncbiBrowser.getAbsolutePath(directory);
+        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(path);
         InputStreamReader streamReader = new InputStreamReader(stream);
         AssemblyReportReader reader = new AssemblyReportReader(streamReader);
         AssemblyEntity assemblyEntity = reader.getAssemblyEntity();
