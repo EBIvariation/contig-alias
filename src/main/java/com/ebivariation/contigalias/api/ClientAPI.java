@@ -19,15 +19,15 @@ package com.ebivariation.contigalias.api;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
 @RequestMapping("contig-alias/api")
-@Controller
+@RestController
 public class ClientAPI {
 
     private final AssemblyService service;
@@ -39,7 +39,8 @@ public class ClientAPI {
 
     @GetMapping(value = "{accession}")
     public AssemblyEntity getAssemblyByAccession(@PathVariable String accession) throws IOException {
-        return service.getAssemblyByAccession(accession);
+        AssemblyEntity assemblyByAccession = service.getAssemblyByAccession(accession);
+        return assemblyByAccession;
     }
 
 }

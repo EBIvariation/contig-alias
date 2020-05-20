@@ -35,7 +35,9 @@ public class AssemblyService {
     }
 
     public AssemblyEntity getAssemblyByAccession(String accession) throws IOException {
-        return assemblyDao.getAssemblyByAccession(accession);
+        AssemblyEntity assembly = assemblyDao.getAssemblyByAccession(accession);
+        assembly.getChromosomes().forEach(it -> it.setAssembly(null));
+        return assembly;
     }
 
 }

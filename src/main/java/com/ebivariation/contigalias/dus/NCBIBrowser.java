@@ -74,18 +74,20 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         FTPFile[] ftpFiles = super.listDirectories(currPath);
 
         if (ftpFiles.length > 0) {
-            String dirName = ftpFiles[0].getName();
-            if (dirName.contains(rawQuery)) {
+            Optional<FTPFile> dir = Arrays.stream(ftpFiles).filter(it -> it.getName().contains(rawQuery)).findFirst();
+            if (dir.isPresent()) {
                 // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
-                path += dirName + "/";
+                path += dir.get().getName() + "/";
+                return path;
             }
-        } else path = null;
+        }
 
-        return path;
+        return null;
+
     }
 
-    public String getAbsolutePath(String relativePath){
-        return NCBI_FTP_SERVER + PATH_GENOMES_ALL + relativePath;
+    public String getPathFromRoot(String relativePath) {
+        return PATH_GENOMES_ALL + relativePath;
     }
 
     /**
@@ -99,7 +101,8 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         InputStream fileStream;
 
         Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
-        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
+        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(
+                f -> f.getName().contains("assembly_report.txt"));
         Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
 
         if (assemblyReport.isPresent()) {
