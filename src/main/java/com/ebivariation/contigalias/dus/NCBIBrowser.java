@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NCBIBrowser extends FTPBrowser {
+public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
 
