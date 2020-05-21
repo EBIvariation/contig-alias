@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
+
 @Repository("ftpDao")
 public class FTPClientAssemblyDaoImplement implements AssemblyDao {
 
@@ -33,8 +35,7 @@ public class FTPClientAssemblyDaoImplement implements AssemblyDao {
         NCBIBrowser ncbiBrowser = new NCBIBrowser();
         ncbiBrowser.connect();
         String directory = ncbiBrowser.getGenomeReportDirectory(accession);
-        String path = ncbiBrowser.getPathFromRoot(directory);
-        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(path);
+        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(PATH_GENOMES_ALL + directory);
         InputStreamReader streamReader = new InputStreamReader(stream);
         AssemblyReportReader reader = new AssemblyReportReader(streamReader);
         AssemblyEntity assemblyEntity = reader.getAssemblyEntity();
