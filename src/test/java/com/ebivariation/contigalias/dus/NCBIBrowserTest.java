@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,14 +62,16 @@ public class NCBIBrowserTest {
 
     @Test
     void getGenomeReportDirectoryGCATest() throws IOException {
-        String path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
-        assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path);
+        Optional<String> path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
+        assertTrue(path.isPresent());
+        assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path.get());
     }
 
     @Test
     void getGenomeReportDirectoryGCFTest() throws IOException {
-        String path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
-        assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path);
+        Optional<String> path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
+        assertTrue(path.isPresent());
+        assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path.get());
     }
 
     @Test

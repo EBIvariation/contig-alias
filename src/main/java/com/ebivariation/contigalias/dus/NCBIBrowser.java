@@ -42,7 +42,7 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
      * @return Path relative to ftp.ncbi.nlm.nih.gov/genomes/all/
      * @throws IOException Passes exception thrown by FTPBrowser.listDirectories()
      */
-    public String getGenomeReportDirectory(String accession) throws IOException {
+    public Optional<String> getGenomeReportDirectory(String accession) throws IOException {
 
         //GCA_004051055.1
         String rawQuery = accession;
@@ -74,11 +74,11 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
             if (dir.isPresent()) {
                 // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
                 path += dir.get().getName() + "/";
-                return path;
+                return Optional.of(path);
             }
         }
 
-        return null;
+        return Optional.empty();
 
     }
 

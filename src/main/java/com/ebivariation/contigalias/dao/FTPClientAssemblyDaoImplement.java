@@ -35,14 +35,17 @@ public class FTPClientAssemblyDaoImplement implements AssemblyDao {
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         NCBIBrowser ncbiBrowser = new NCBIBrowser();
         ncbiBrowser.connect();
-        String directory = ncbiBrowser.getGenomeReportDirectory(accession);
+        Optional<String> directory = ncbiBrowser.getGenomeReportDirectory(accession);
+        if (directory.isEmpty()) {
+            return Optional.empty();
+        }
         AssemblyEntity assemblyEntity;
         try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(PATH_GENOMES_ALL + directory)) {
             InputStreamReader streamReader = new InputStreamReader(stream);
             AssemblyReportReader reader = new AssemblyReportReader(streamReader);
             assemblyEntity = reader.getAssemblyEntity();
             streamReader.close();
-        }finally {
+        } finally {
             ncbiBrowser.disconnect();
         }
         return Optional.of(assemblyEntity);
