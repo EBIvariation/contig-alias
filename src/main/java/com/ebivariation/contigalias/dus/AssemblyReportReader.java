@@ -77,6 +77,7 @@ public class AssemblyReportReader {
             line = reader.readLine();
         }
         reportParsed = true;
+        reader.close();
     }
 
     /**
