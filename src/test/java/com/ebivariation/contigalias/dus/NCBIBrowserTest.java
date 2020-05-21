@@ -50,7 +50,7 @@ public class NCBIBrowserTest {
 
     @Test
     void navigateToAllGenomesDirectory() throws IOException {
-        assertTrue(ncbiBrowser.changeWorkingDirectoryToGenomesAll());
+        assertTrue(ncbiBrowser.changeWorkingDirectory(PATH_GENOMES_ALL));
         assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
