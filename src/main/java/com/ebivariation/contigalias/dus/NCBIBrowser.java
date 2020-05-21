@@ -34,10 +34,6 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         super.connect(NCBI_FTP_SERVER);
     }
 
-    public boolean changeWorkingDirectoryToGenomesAll() throws IOException {
-        return super.changeWorkingDirectory(PATH_GENOMES_ALL);
-    }
-
     /**
      * Takes a Genbank or Refseq accession and converts it to the equivalent path used by NCBI's FTP server.
      * For example, on input "GCF_007608995.1" the output path is "GCF/007/608/995/GCF_007608995.1_ASM760899v1/".

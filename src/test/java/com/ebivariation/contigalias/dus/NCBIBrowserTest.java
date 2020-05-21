@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -72,12 +73,9 @@ public class NCBIBrowserTest {
 
     @Test
     void getAssemblyReportInputStream() throws IOException {
-        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(
-                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
-        try {
+        try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(
+                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/")) {
             assertTrue(stream.read() != -1);
-        } finally {
-            stream.close();
         }
     }
 }
