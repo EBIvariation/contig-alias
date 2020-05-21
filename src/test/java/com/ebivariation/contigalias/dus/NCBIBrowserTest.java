@@ -64,14 +64,14 @@ public class NCBIBrowserTest {
     void getGenomeReportDirectoryGCATest() throws IOException {
         Optional<String> path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
         assertTrue(path.isPresent());
-        assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path.get());
+        assertEquals("/genomes/all/GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path.get());
     }
 
     @Test
     void getGenomeReportDirectoryGCFTest() throws IOException {
         Optional<String> path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
         assertTrue(path.isPresent());
-        assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path.get());
+        assertEquals("/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path.get());
     }
 
     @Test

@@ -36,10 +36,11 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     /**
      * Takes a Genbank or Refseq accession and converts it to the equivalent path used by NCBI's FTP server.
-     * For example, on input "GCF_007608995.1" the output path is "GCF/007/608/995/GCF_007608995.1_ASM760899v1/".
+     * For example, on input "GCF_007608995.1" the output path is "/genomes/all/GCF/007/608/995/GCF_007608995
+     * .1_ASM760899v1/".
      *
      * @param accession Any GCA or GCF String
-     * @return Path relative to ftp.ncbi.nlm.nih.gov/genomes/all/
+     * @return Path relative to ftp.ncbi.nlm.nih.gov
      * @throws IOException Passes exception thrown by FTPBrowser.listDirectories()
      */
     public Optional<String> getGenomeReportDirectory(String accession) throws IOException {
@@ -74,7 +75,7 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
             if (dir.isPresent()) {
                 // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
                 path += dir.get().getName() + "/";
-                return Optional.of(path);
+                return Optional.of(PATH_GENOMES_ALL + path);
             }
         }
 
