@@ -23,7 +23,6 @@ import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Optional;
 
 import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
@@ -41,10 +40,8 @@ public class FTPClientAssemblyDaoImplement implements AssemblyDao {
         }
         AssemblyEntity assemblyEntity;
         try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(PATH_GENOMES_ALL + directory)) {
-            InputStreamReader streamReader = new InputStreamReader(stream);
-            AssemblyReportReader reader = new AssemblyReportReader(streamReader);
+            AssemblyReportReader reader = new AssemblyReportReader(stream);
             assemblyEntity = reader.getAssemblyEntity();
-            streamReader.close();
         } finally {
             ncbiBrowser.disconnect();
         }
