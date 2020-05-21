@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Optional;
 
 import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
 
@@ -31,7 +32,7 @@ import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
 public class FTPClientAssemblyDaoImplement implements AssemblyDao {
 
     @Override
-    public AssemblyEntity getAssemblyByAccession(String accession) throws IOException {
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         NCBIBrowser ncbiBrowser = new NCBIBrowser();
         ncbiBrowser.connect();
         String directory = ncbiBrowser.getGenomeReportDirectory(accession);
@@ -42,7 +43,7 @@ public class FTPClientAssemblyDaoImplement implements AssemblyDao {
         stream.close();
         streamReader.close();
         ncbiBrowser.disconnect();
-        return assemblyEntity;
+        return Optional.of(assemblyEntity);
     }
 
 }

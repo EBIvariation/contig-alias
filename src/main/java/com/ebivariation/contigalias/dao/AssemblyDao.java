@@ -19,9 +19,10 @@ package com.ebivariation.contigalias.dao;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public interface AssemblyDao {
 
-    AssemblyEntity getAssemblyByAccession(String accession) throws IOException;
+    Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException;
 
 }

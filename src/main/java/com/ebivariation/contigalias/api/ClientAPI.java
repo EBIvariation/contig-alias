@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RequestMapping("contig-alias")
 @RestController
@@ -38,9 +39,8 @@ public class ClientAPI {
     }
 
     @GetMapping(value = "assemblies/{accession}")
-    public AssemblyEntity getAssemblyByAccession(@PathVariable String accession) throws IOException {
-        AssemblyEntity assemblyByAccession = service.getAssemblyByAccession(accession);
-        return assemblyByAccession;
+    public Optional<AssemblyEntity> getAssemblyByAccession(@PathVariable String accession) throws IOException {
+        return service.getAssemblyByAccession(accession);
     }
 
 }

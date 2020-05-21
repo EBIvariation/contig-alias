@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class AssemblyService {
@@ -34,9 +35,9 @@ public class AssemblyService {
         this.assemblyDao = assemblyDao;
     }
 
-    public AssemblyEntity getAssemblyByAccession(String accession) throws IOException {
-        AssemblyEntity assembly = assemblyDao.getAssemblyByAccession(accession);
-        assembly.getChromosomes().forEach(it -> it.setAssembly(null));
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
+        Optional<AssemblyEntity> assembly = assemblyDao.getAssemblyByAccession(accession);
+        assembly.ifPresent(asm -> asm.getChromosomes().forEach(chr -> chr.setAssembly(null)));
         return assembly;
     }
 
