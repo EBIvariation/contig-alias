@@ -16,7 +16,7 @@
 
 package com.ebivariation.contigalias;
 
-import com.ebivariation.contigalias.dus.FTPBrowser;
+import com.ebivariation.contigalias.dus.PassiveAnonymousFTPClient;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.junit.jupiter.api.AfterEach;
@@ -30,42 +30,42 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FTPBrowserTest {
+public class PassiveAnonymousFTPClientTest {
 
     private static final String SERVER_NCBI = "ftp.ncbi.nlm.nih.gov";
 
     @Nested
     class WithSetupAndTeardown {
 
-        private FTPBrowser ftpBrowser;
+        private PassiveAnonymousFTPClient ftpClient;
 
         @BeforeEach
         void setUp() throws IOException {
-            ftpBrowser = new FTPBrowser();
-            ftpBrowser.connect(SERVER_NCBI);
+            ftpClient = new PassiveAnonymousFTPClient();
+            ftpClient.connect(SERVER_NCBI);
         }
 
         @AfterEach
         void tearDown() throws IOException {
-            ftpBrowser.disconnect();
+            ftpClient.disconnect();
         }
 
         @Test
         void changeDirectory() throws IOException {
-            ftpBrowser.navigateToDirectory("genomes");
+            ftpClient.changeWorkingDirectory("genomes");
         }
 
         @Test
         void changeDirectoryAndList() throws IOException {
-            ftpBrowser.navigateToDirectory("genomes");
-            FTPFile[] ftpFiles = ftpBrowser.listFiles();
+            ftpClient.changeWorkingDirectory("genomes");
+            FTPFile[] ftpFiles = ftpClient.listFiles();
             assertTrue(ftpFiles.length > 0);
         }
 
         @Test
         void changeToNestedDirectoryAndFindAssemblyReport() throws IOException {
-            ftpBrowser.navigateToDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
-            FTPFile[] ftpFiles = ftpBrowser.listFiles();
+            ftpClient.changeWorkingDirectory("genomes/all/GCA/000/002/305/GCA_000002305.1_EquCab2.0/");
+            FTPFile[] ftpFiles = ftpClient.listFiles();
             assertTrue(ftpFiles.length > 0);
             String assemblyReport = "GCA_000002305.1_EquCab2.0_assembly_report.txt";
             boolean found = Stream.of(ftpFiles)
@@ -76,7 +76,7 @@ public class FTPBrowserTest {
 
         @Test
         void listDirectories() throws IOException {
-            FTPFile[] ftpFiles = ftpBrowser.listDirectories();
+            FTPFile[] ftpFiles = ftpClient.listDirectories();
             assertTrue(ftpFiles.length > 0);
         }
 
@@ -89,13 +89,13 @@ public class FTPBrowserTest {
 
         @Test
         void connectToServerWithExplicitPort() throws IOException {
-            FTPBrowser ftpBrowser = new FTPBrowser();
+            PassiveAnonymousFTPClient passiveAnonymousFtpClient = new PassiveAnonymousFTPClient();
             try {
-                ftpBrowser.connect(SERVER_NCBI, PORT_NCBI_FTP);
-                FTPFile[] ftpFiles = ftpBrowser.listFiles();
+                passiveAnonymousFtpClient.connect(SERVER_NCBI, PORT_NCBI_FTP);
+                FTPFile[] ftpFiles = passiveAnonymousFtpClient.listFiles();
                 assertTrue(ftpFiles.length > 0);
             } finally {
-                ftpBrowser.disconnect();
+                passiveAnonymousFtpClient.disconnect();
             }
         }
 

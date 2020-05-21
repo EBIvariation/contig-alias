@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NCBIBrowser extends FTPBrowser {
+public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
 
@@ -34,12 +34,8 @@ public class NCBIBrowser extends FTPBrowser {
         super.connect(NCBI_FTP_SERVER);
     }
 
-    public void navigateToSubDirectoryPath(String path) throws IOException {
-        super.navigateToDirectory(path);
-    }
-
-    public void navigateToAllGenomesDirectory() throws IOException {
-        navigateToSubDirectoryPath(PATH_GENOMES_ALL);
+    public boolean changeWorkingDirectoryToGenomesAll() throws IOException {
+        return super.changeWorkingDirectory(PATH_GENOMES_ALL);
     }
 
     /**
@@ -89,7 +85,8 @@ public class NCBIBrowser extends FTPBrowser {
     }
 
     /**
-     * @param directoryPath The path of the directory in which target report is located related to current directory.
+     * @param directoryPath The path of the directory in which target report is located relative to root of FTP server.
+     *                      Eg:- "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/"
      * @return An InputStream of the first *assembly_report.txt file it finds.
      * @throws IOException Passes exception thrown by FTPBrowser.retrieveFileStream()
      */
