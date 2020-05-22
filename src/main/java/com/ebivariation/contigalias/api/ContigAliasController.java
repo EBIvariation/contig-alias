@@ -31,12 +31,12 @@ import java.util.Optional;
 
 @RequestMapping("contig-alias")
 @RestController
-public class ClientAPI {
+public class ContigAliasController {
 
     private final AssemblyService service;
 
     @Autowired
-    public ClientAPI(AssemblyService service) {
+    public ContigAliasController(AssemblyService service) {
         this.service = service;
     }
 
