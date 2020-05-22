@@ -35,14 +35,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-public class ClientAPITest {
+public class ContigAliasControllerTest {
 
     private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.3";
 
     private static final String GCF_ACCESSION_NO_CHROMOSOMES = "GCF_006125015.1";
 
     @Autowired
-    private ClientAPI api;
+    private ContigAliasController api;
 
     @Test
     public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
