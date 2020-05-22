@@ -34,19 +34,16 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         super.connect(NCBI_FTP_SERVER);
     }
 
-    public boolean changeWorkingDirectoryToGenomesAll() throws IOException {
-        return super.changeWorkingDirectory(PATH_GENOMES_ALL);
-    }
-
     /**
      * Takes a Genbank or Refseq accession and converts it to the equivalent path used by NCBI's FTP server.
-     * For example, on input "GCF_007608995.1" the output path is "GCF/007/608/995/GCF_007608995.1_ASM760899v1/".
+     * For example, on input "GCF_007608995.1" the output path is "/genomes/all/GCF/007/608/995/GCF_007608995
+     * .1_ASM760899v1/".
      *
      * @param accession Any GCA or GCF String
-     * @return Path relative to ftp.ncbi.nlm.nih.gov/genomes/all/
+     * @return Path relative to ftp.ncbi.nlm.nih.gov
      * @throws IOException Passes exception thrown by FTPBrowser.listDirectories()
      */
-    public String getGenomeReportDirectory(String accession) throws IOException {
+    public Optional<String> getGenomeReportDirectory(String accession) throws IOException {
 
         //GCA_004051055.1
         String rawQuery = accession;
@@ -74,14 +71,16 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         FTPFile[] ftpFiles = super.listDirectories(currPath);
 
         if (ftpFiles.length > 0) {
-            String dirName = ftpFiles[0].getName();
-            if (dirName.contains(rawQuery)) {
+            Optional<FTPFile> dir = Arrays.stream(ftpFiles).filter(it -> it.getName().contains(rawQuery)).findFirst();
+            if (dir.isPresent()) {
                 // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
-                path += dirName + "/";
+                path += dir.get().getName() + "/";
+                return Optional.of(PATH_GENOMES_ALL + path);
             }
-        } else path = null;
+        }
 
-        return path;
+        return Optional.empty();
+
     }
 
     /**
@@ -95,7 +94,8 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         InputStream fileStream;
 
         Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
-        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
+        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(
+                f -> f.getName().contains("assembly_report.txt"));
         Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
 
         if (assemblyReport.isPresent()) {

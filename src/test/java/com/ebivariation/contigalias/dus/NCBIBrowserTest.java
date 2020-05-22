@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias;
+package com.ebivariation.contigalias.dus;
 
-import com.ebivariation.contigalias.dus.NCBIBrowser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
+import static com.ebivariation.contigalias.dus.NCBIBrowser.PATH_GENOMES_ALL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,7 +50,7 @@ public class NCBIBrowserTest {
 
     @Test
     void navigateToAllGenomesDirectory() throws IOException {
-        assertTrue(ncbiBrowser.changeWorkingDirectoryToGenomesAll());
+        assertTrue(ncbiBrowser.changeWorkingDirectory(PATH_GENOMES_ALL));
         assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
@@ -61,24 +62,23 @@ public class NCBIBrowserTest {
 
     @Test
     void getGenomeReportDirectoryGCATest() throws IOException {
-        String path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
-        assertEquals("GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path);
+        Optional<String> path = ncbiBrowser.getGenomeReportDirectory("GCA_004051055.1");
+        assertTrue(path.isPresent());
+        assertEquals("/genomes/all/GCA/004/051/055/GCA_004051055.1_ASM405105v1/", path.get());
     }
 
     @Test
     void getGenomeReportDirectoryGCFTest() throws IOException {
-        String path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
-        assertEquals("GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path);
+        Optional<String> path = ncbiBrowser.getGenomeReportDirectory("GCF_007608995.1");
+        assertTrue(path.isPresent());
+        assertEquals("/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/", path.get());
     }
 
     @Test
     void getAssemblyReportInputStream() throws IOException {
-        InputStream stream = ncbiBrowser.getAssemblyReportInputStream(
-                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
-        try {
+        try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(
+                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/")) {
             assertTrue(stream.read() != -1);
-        } finally {
-            stream.close();
         }
     }
 }

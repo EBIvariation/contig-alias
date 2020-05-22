@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias;
+package com.ebivariation.contigalias.dus;
 
-import com.ebivariation.contigalias.dus.PassiveAnonymousFTPClient;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.junit.jupiter.api.AfterEach;
