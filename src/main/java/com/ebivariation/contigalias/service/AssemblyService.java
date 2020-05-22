@@ -16,35 +16,26 @@
 
 package com.ebivariation.contigalias.service;
 
-import com.ebivariation.contigalias.dao.AssemblyDao;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
-import com.ebivariation.contigalias.entities.ChromosomeEntity;
+import com.ebivariation.contigalias.repo.AssemblyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AssemblyService {
 
-    private final AssemblyDao assemblyDao;
+    private final AssemblyRepository assemblyRepository;
 
     @Autowired
-    public AssemblyService(@Qualifier("ftpDao") AssemblyDao assemblyDao) {
-        this.assemblyDao = assemblyDao;
+    public AssemblyService(AssemblyRepository assemblyRepository) {
+        this.assemblyRepository = assemblyRepository;
     }
 
-    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
-        Optional<AssemblyEntity> assembly = assemblyDao.getAssemblyByAccession(accession);
-        assembly.ifPresent(asm -> {
-            List<ChromosomeEntity> chromosomes = asm.getChromosomes();
-            if (chromosomes != null) {
-                chromosomes.forEach(chr -> chr.setAssembly(null));
-            }
-        });
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
+        Optional<AssemblyEntity> assembly = assemblyRepository.dFindAssemblyEntityByAccession(accession);
+        assembly.ifPresent(asm -> asm.getChromosomes().forEach(chr -> chr.setAssembly(null)));
         return assembly;
     }
 
