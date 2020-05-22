@@ -18,44 +18,57 @@ package com.ebivariation.contigalias.service;
 
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
-import com.ebivariation.contigalias.entities.ChromosomeEntity;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class AssemblyServiceTest {
 
-    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.3";
+    private static final String ASSEMBLY_NAME = "Fakus Animulus";
 
-    private static final String GCF_ACCESSION_NO_CHROMOSOMES = "GCF_006125015.1";
+    private static final String ASSEMBLY_ORGANISM = "Fakus_Animulus_(Cattle)";
+
+    private static final String ASSEMBLY_GENBANK = "GCA648945645.7";
+
+    private static final String ASSEMBLY_REFSEQ = "GCF915656489";
+
+    private static final long ASSEMBLY_TAXID = 9834;
+
+    private static final boolean ASSEMBLY_GENBANK_REFSEQ_IDENTICAL = false;
 
     @Autowired
     private AssemblyService service;
 
-    @Test
-    public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = service.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNotNull(chromosomes);
-        assertFalse(chromosomes.isEmpty());
+    private AssemblyEntity entity;
+
+    @BeforeEach
+    void setup() {
+        entity = new AssemblyEntity();
+        entity.setName(ASSEMBLY_NAME)
+              .setOrganism(ASSEMBLY_ORGANISM)
+              .setGenbank(ASSEMBLY_GENBANK)
+              .setRefseq(ASSEMBLY_REFSEQ)
+              .setTaxid(ASSEMBLY_TAXID)
+              .setGenbankRefseqIdentical(ASSEMBLY_GENBANK_REFSEQ_IDENTICAL);
+        service.insertAssembly(entity);
+    }
+
+    @AfterEach
+    void tearDown() {
+        service.deleteAssembly(entity);
     }
 
     @Test
-    public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = service.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
+    void getAssemblyByAccessionGCA() {
+        Optional<AssemblyEntity> accession = service.getAssemblyByAccession(ASSEMBLY_GENBANK);
         assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNull(chromosomes);
     }
+
 }

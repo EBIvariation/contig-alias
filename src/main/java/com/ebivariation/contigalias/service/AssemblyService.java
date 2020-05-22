@@ -17,26 +17,63 @@
 package com.ebivariation.contigalias.service;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.repo.AssemblyRepository;
+import org.hibernate.LazyInitializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AssemblyService {
 
-    private final AssemblyRepository assemblyRepository;
+    private final AssemblyRepository repository;
+
+    private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
-    public AssemblyService(AssemblyRepository assemblyRepository) {
-        this.assemblyRepository = assemblyRepository;
+    public AssemblyService(AssemblyRepository repository) {
+        this.repository = repository;
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
-        Optional<AssemblyEntity> assembly = assemblyRepository.dFindAssemblyEntityByAccession(accession);
-        assembly.ifPresent(asm -> asm.getChromosomes().forEach(chr -> chr.setAssembly(null)));
+        Optional<AssemblyEntity> assembly = repository.dFindAssemblyEntityByAccession(accession);
+        assembly.ifPresent(asm -> {
+            try {
+                List<ChromosomeEntity> chromosomes = asm.getChromosomes();
+                if (chromosomes != null && chromosomes.size() > 0) {
+                    chromosomes.forEach(chr -> chr.setAssembly(null));
+                }
+            } catch (LazyInitializationException e) {
+                logger.error("LazyInitializationException when getting List<ChromosomeEntity>.");
+            }
+        });
         return assembly;
+    }
+
+    public void insertAssembly(AssemblyEntity entity) {
+        boolean b = !isEntityPresent(entity);
+        if (b) {
+            throw new IllegalArgumentException(
+                    "An assembly with the same genbank or refseq accession already exists!");
+        }
+        repository.save(entity);
+    }
+
+    public void deleteAssembly(AssemblyEntity entity) {
+        if (isEntityPresent(entity)) {
+            repository.delete(entity);
+        }
+    }
+
+    public boolean isEntityPresent(AssemblyEntity entity) {
+        AssemblyEntity existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
+                entity.getGenbank(), entity.getRefseq());
+        return existingAssembly == null;
     }
 
 }
