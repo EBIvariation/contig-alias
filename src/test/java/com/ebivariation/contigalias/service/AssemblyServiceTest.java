@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.api;
+package com.ebivariation.contigalias.service;
+
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
-import com.ebivariation.contigalias.service.AssemblyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-public class ClientAPITest {
+public class AssemblyServiceTest {
 
     private static final String GCA_ACCESSION = "GCA_000003055.3";
 
