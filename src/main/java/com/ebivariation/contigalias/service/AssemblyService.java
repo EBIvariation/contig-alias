@@ -16,6 +16,7 @@
 
 package com.ebivariation.contigalias.service;
 
+import com.ebivariation.contigalias.dao.AssemblyDao;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.repo.AssemblyRepository;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +35,37 @@ public class AssemblyService {
 
     private final AssemblyRepository repository;
 
+    private final AssemblyDao dao;
+
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
-    public AssemblyService(AssemblyRepository repository) {
+    public AssemblyService(AssemblyRepository repository, AssemblyDao dao) {
         this.repository = repository;
+        this.dao = dao;
+    }
+
+    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) {
+        Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
+        if (assembly.isPresent()) {
+            return assembly;
+        }
+        try {
+            Optional<AssemblyEntity> fetchAssembly = dao.getAssemblyByAccession(accession);
+            if (fetchAssembly.isPresent()) {
+                AssemblyEntity asm = fetchAssembly.get();
+                insertAssembly(asm);
+                List<ChromosomeEntity> chromosomes = asm.getChromosomes();
+                if (chromosomes != null) {
+                    chromosomes.forEach(chr -> chr.setAssembly(null));
+                }
+                return fetchAssembly;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {

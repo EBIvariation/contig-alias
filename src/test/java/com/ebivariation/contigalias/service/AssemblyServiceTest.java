@@ -71,4 +71,9 @@ public class AssemblyServiceTest {
         assertTrue(accession.isPresent());
     }
 
+    @Test
+    void getAssemblyOrFetchByAccession() {
+        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession("GCF_006125015.1");
+        assertTrue(entity.isPresent());
+    }
 }
