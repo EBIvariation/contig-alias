@@ -84,12 +84,12 @@ public class AssemblyService {
     }
 
     public void insertAssembly(AssemblyEntity entity) {
-        boolean b = !isEntityPresent(entity);
-        if (b) {
+        if (isEntityPresent(entity)) {
             throw new IllegalArgumentException(
                     "An assembly with the same genbank or refseq accession already exists!");
+        } else {
+            repository.save(entity);
         }
-        repository.save(entity);
     }
 
     public void deleteAssembly(AssemblyEntity entity) {
@@ -101,7 +101,7 @@ public class AssemblyService {
     public boolean isEntityPresent(AssemblyEntity entity) {
         AssemblyEntity existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
                 entity.getGenbank(), entity.getRefseq());
-        return existingAssembly == null;
+        return existingAssembly != null;
     }
 
 }

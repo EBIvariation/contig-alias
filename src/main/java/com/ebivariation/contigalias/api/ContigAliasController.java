@@ -42,7 +42,7 @@ public class ContigAliasController {
 
     @GetMapping(value = "assemblies/{accession}")
     public Optional<AssemblyEntity> getAssemblyByAccession(@PathVariable String accession) throws IOException {
-        return service.getAssemblyByAccession(accession);
+        return service.getAssemblyOrFetchByAccession(accession);
     }
 
     @GetMapping(value = "assemblies")

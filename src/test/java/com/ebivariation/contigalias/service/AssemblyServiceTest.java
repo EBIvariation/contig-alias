@@ -16,7 +16,6 @@
 
 package com.ebivariation.contigalias.service;
 
-
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,9 +34,9 @@ public class AssemblyServiceTest {
 
     private static final String ASSEMBLY_ORGANISM = "Fakus_Animulus_(Cattle)";
 
-    private static final String ASSEMBLY_GENBANK = "GCA648945645.7";
+    private static final String ASSEMBLY_GENBANK = "GCA_648945645.7";
 
-    private static final String ASSEMBLY_REFSEQ = "GCF915656489";
+    private static final String ASSEMBLY_REFSEQ = "GCF_915656489.3";
 
     private static final long ASSEMBLY_TAXID = 9834;
 
