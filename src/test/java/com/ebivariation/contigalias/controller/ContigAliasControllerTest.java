@@ -55,6 +55,6 @@ public class ContigAliasControllerTest {
         Optional<AssemblyEntity> accession = api.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
         assertTrue(accession.isPresent());
         List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNull(chromosomes);
+        assertTrue(chromosomes == null || chromosomes.size() == 0);
     }
 }
