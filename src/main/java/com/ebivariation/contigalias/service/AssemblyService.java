@@ -18,11 +18,13 @@ package com.ebivariation.contigalias.service;
 
 import com.ebivariation.contigalias.dao.AssemblyDao;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,7 +39,12 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         Optional<AssemblyEntity> assembly = assemblyDao.getAssemblyByAccession(accession);
-        assembly.ifPresent(asm -> asm.getChromosomes().forEach(chr -> chr.setAssembly(null)));
+        assembly.ifPresent(asm -> {
+            List<ChromosomeEntity> chromosomes = asm.getChromosomes();
+            if (chromosomes != null) {
+                chromosomes.forEach(chr -> chr.setAssembly(null));
+            }
+        });
         return assembly;
     }
 
