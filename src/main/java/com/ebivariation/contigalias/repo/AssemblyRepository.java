@@ -18,9 +18,11 @@ package com.ebivariation.contigalias.repo;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long> {
 
     default Optional<AssemblyEntity> findAssemblyEntityByAccession(String accession) {
