@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.dao;
+package com.ebivariation.contigalias.datasource;
 
 import com.ebivariation.contigalias.dus.AssemblyReportReader;
 import com.ebivariation.contigalias.dus.NCBIBrowser;
@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-@Repository("ftpDao")
-public class FTPClientAssemblyDaoImplement implements AssemblyDao {
+@Repository("NCBIDataSource")
+public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
     @Override
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {

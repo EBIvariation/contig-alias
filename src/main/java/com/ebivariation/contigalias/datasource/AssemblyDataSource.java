@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.dao;
+package com.ebivariation.contigalias.datasource;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 
 import java.io.IOException;
 import java.util.Optional;
 
-public interface AssemblyDao {
+public interface AssemblyDataSource {
 
     Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException;
 

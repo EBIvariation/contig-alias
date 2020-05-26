@@ -16,7 +16,7 @@
 
 package com.ebivariation.contigalias.service;
 
-import com.ebivariation.contigalias.dao.AssemblyDao;
+import com.ebivariation.contigalias.datasource.AssemblyDataSource;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.repo.AssemblyRepository;
@@ -24,6 +24,7 @@ import org.hibernate.LazyInitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,14 +36,14 @@ public class AssemblyService {
 
     private final AssemblyRepository repository;
 
-    private final AssemblyDao dao;
+    private final AssemblyDataSource dataSource;
 
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
-    public AssemblyService(AssemblyRepository repository, AssemblyDao dao) {
+    public AssemblyService(AssemblyRepository repository,@Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
         this.repository = repository;
-        this.dao = dao;
+        this.dataSource = dataSource;
     }
 
     public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) {
@@ -51,7 +52,7 @@ public class AssemblyService {
             return assembly;
         }
         try {
-            Optional<AssemblyEntity> fetchAssembly = dao.getAssemblyByAccession(accession);
+            Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
             if (fetchAssembly.isPresent()) {
                 AssemblyEntity asm = fetchAssembly.get();
                 insertAssembly(asm);
