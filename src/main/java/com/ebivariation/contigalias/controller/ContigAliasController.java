@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.api;
+package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;

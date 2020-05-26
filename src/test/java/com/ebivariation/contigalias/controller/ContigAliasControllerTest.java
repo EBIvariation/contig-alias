@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.api;
+package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
@@ -41,8 +41,7 @@ public class ContigAliasControllerTest {
     @Autowired
     private ContigAliasController api;
 
-    // TODO replace these tests as persistent db may not have these test cases present
-//    @Test
+    @Test
     public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
         Optional<AssemblyEntity> accession = api.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
         assertTrue(accession.isPresent());
@@ -51,7 +50,7 @@ public class ContigAliasControllerTest {
         assertFalse(chromosomes.isEmpty());
     }
 
-//    @Test
+    @Test
     public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
         Optional<AssemblyEntity> accession = api.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
         assertTrue(accession.isPresent());
