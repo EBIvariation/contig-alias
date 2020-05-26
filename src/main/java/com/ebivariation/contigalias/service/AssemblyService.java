@@ -20,9 +20,6 @@ import com.ebivariation.contigalias.datasource.AssemblyDataSource;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.repo.AssemblyRepository;
-import org.hibernate.LazyInitializationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,8 +34,6 @@ public class AssemblyService {
     private final AssemblyRepository repository;
 
     private final AssemblyDataSource dataSource;
-
-    private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
     public AssemblyService(AssemblyRepository repository, @Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
@@ -67,13 +62,9 @@ public class AssemblyService {
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> assembly = repository.findAssemblyEntityByAccession(accession);
         assembly.ifPresent(asm -> {
-            try {
-                List<ChromosomeEntity> chromosomes = asm.getChromosomes();
-                if (chromosomes != null && chromosomes.size() > 0) {
-                    chromosomes.forEach(chr -> chr.setAssembly(null));
-                }
-            } catch (LazyInitializationException e) {
-                logger.error("LazyInitializationException when getting List<ChromosomeEntity>.");
+            List<ChromosomeEntity> chromosomes = asm.getChromosomes();
+            if (chromosomes != null && chromosomes.size() > 0) {
+                chromosomes.forEach(chr -> chr.setAssembly(null));
             }
         });
         return assembly;

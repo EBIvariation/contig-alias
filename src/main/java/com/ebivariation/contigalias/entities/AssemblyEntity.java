@@ -19,6 +19,7 @@ package com.ebivariation.contigalias.entities;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,7 +48,7 @@ public class AssemblyEntity {
 
     private boolean isGenbankRefseqIdentical;
 
-    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
 
     public AssemblyEntity() {
