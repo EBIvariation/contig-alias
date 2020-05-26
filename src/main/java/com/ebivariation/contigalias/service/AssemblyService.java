@@ -41,7 +41,7 @@ public class AssemblyService {
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
-    public AssemblyService(AssemblyRepository repository,@Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
+    public AssemblyService(AssemblyRepository repository, @Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
         this.repository = repository;
         this.dataSource = dataSource;
     }
@@ -70,7 +70,7 @@ public class AssemblyService {
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
-        Optional<AssemblyEntity> assembly = repository.dFindAssemblyEntityByAccession(accession);
+        Optional<AssemblyEntity> assembly = repository.findAssemblyEntityByAccession(accession);
         assembly.ifPresent(asm -> {
             try {
                 List<ChromosomeEntity> chromosomes = asm.getChromosomes();
@@ -100,9 +100,9 @@ public class AssemblyService {
     }
 
     public boolean isEntityPresent(AssemblyEntity entity) {
-        AssemblyEntity existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
+        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
                 entity.getGenbank(), entity.getRefseq());
-        return existingAssembly != null;
+        return existingAssembly.isPresent();
     }
 
 }

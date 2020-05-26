@@ -23,13 +23,10 @@ import java.util.Optional;
 
 public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long> {
 
-    default Optional<AssemblyEntity> dFindAssemblyEntityByAccession(String accession) {
-        AssemblyEntity assemblyEntity = this.findAssemblyEntityByGenbankOrRefseq(accession, accession);
-        if (assemblyEntity == null) {
-            return Optional.empty();
-        } else return Optional.of(assemblyEntity);
+    default Optional<AssemblyEntity> findAssemblyEntityByAccession(String accession) {
+        return this.findAssemblyEntityByGenbankOrRefseq(accession, accession);
     }
 
-    AssemblyEntity findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq);
+    Optional<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq);
 
 }
