@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,7 +72,7 @@ public class AssemblyServiceTest {
     }
 
     @Test
-    void getAssemblyOrFetchByAccession() {
+    void getAssemblyOrFetchByAccession() throws IOException {
         Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession("GCF_006125015.1");
         assertTrue(entity.isPresent());
     }

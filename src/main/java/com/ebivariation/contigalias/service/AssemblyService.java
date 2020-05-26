@@ -46,25 +46,20 @@ public class AssemblyService {
         this.dataSource = dataSource;
     }
 
-    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) {
+    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
         Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
         if (assembly.isPresent()) {
             return assembly;
         }
-        try {
-            Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
-            if (fetchAssembly.isPresent()) {
-                AssemblyEntity asm = fetchAssembly.get();
-                insertAssembly(asm);
-                List<ChromosomeEntity> chromosomes = asm.getChromosomes();
-                if (chromosomes != null) {
-                    chromosomes.forEach(chr -> chr.setAssembly(null));
-                }
-                return fetchAssembly;
+        Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
+        if (fetchAssembly.isPresent()) {
+            AssemblyEntity asm = fetchAssembly.get();
+            insertAssembly(asm);
+            List<ChromosomeEntity> chromosomes = asm.getChromosomes();
+            if (chromosomes != null) {
+                chromosomes.forEach(chr -> chr.setAssembly(null));
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            return fetchAssembly;
         }
         return Optional.empty();
     }
