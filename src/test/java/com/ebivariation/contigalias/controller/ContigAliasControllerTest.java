@@ -17,44 +17,56 @@
 package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
-import com.ebivariation.contigalias.entities.ChromosomeEntity;
+import com.ebivariation.contigalias.service.AssemblyService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
-@SpringBootTest
 public class ContigAliasControllerTest {
 
-    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.3";
+    public static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
 
-    private static final String GCF_ACCESSION_NO_CHROMOSOMES = "GCF_006125015.1";
+    public static final String ASSEMBLY_ORGANISM_NAME = "Bos taurus (cattle)";
 
-    @Autowired
-    private ContigAliasController api;
+    public static final long ASSEMBLY_TAX_ID = 9913;
 
-    @Test
-    public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = api.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNotNull(chromosomes);
-        assertFalse(chromosomes.isEmpty());
+    public static final String ASSEMBLY_GENBANK_ACCESSION = "GCA_000003055.3";
+
+    public static final String ASSEMBLY_REFSEQ_ACCESSION = "GCF_000003055.3";
+
+    public static final boolean ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL = true;
+
+    private ContigAliasController controller;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        AssemblyEntity entity = new AssemblyEntity()
+                .setName(ASSEMBLY_NAME)
+                .setOrganism(ASSEMBLY_ORGANISM_NAME)
+                .setGenbank(ASSEMBLY_GENBANK_ACCESSION)
+                .setRefseq(ASSEMBLY_REFSEQ_ACCESSION)
+                .setTaxid(ASSEMBLY_TAX_ID)
+                .setGenbankRefseqIdentical(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL);
+
+        AssemblyService mockAssemblyService = mock(AssemblyService.class);
+        Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(ASSEMBLY_GENBANK_ACCESSION))
+               .thenReturn(Optional.of(entity));
+
+        controller = new ContigAliasController(mockAssemblyService);
     }
 
     @Test
-    public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = api.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNull(chromosomes);
+    public void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
+        Optional<AssemblyEntity> assemblyByAccession = controller.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION);
+        assertTrue(assemblyByAccession.isPresent());
+        assertEquals(ASSEMBLY_NAME, assemblyByAccession.get().getName());
     }
 }
