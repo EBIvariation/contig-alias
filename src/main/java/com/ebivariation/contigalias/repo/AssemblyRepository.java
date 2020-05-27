@@ -31,4 +31,8 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long> 
 
     Optional<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq);
 
+    long countByIdNotNull();
+
+    Optional<AssemblyEntity> findTopByIdNotNullOrderById();
+
 }

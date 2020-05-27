@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,17 +47,28 @@ public class AssemblyService {
         if (assembly.isPresent()) {
             return assembly;
         }
-        Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
+        Optional<AssemblyEntity> fetchAssembly = fetchAndInsertAssembly(accession);
         if (fetchAssembly.isPresent()) {
             AssemblyEntity asm = fetchAssembly.get();
-            insertAssembly(asm);
             List<ChromosomeEntity> chromosomes = asm.getChromosomes();
             if (chromosomes != null) {
                 chromosomes.forEach(chr -> chr.setAssembly(null));
             }
+            // Setting this to null to remove inconsistency in results
+            // When fetching from db bring no results, chromosomes is an empty list
+            // whereas here chromosomes is value
+            else {
+                asm.setChromosomes(new LinkedList<>());
+            }
             return fetchAssembly;
         }
         return Optional.empty();
+    }
+
+    public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException {
+        Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
+        fetchAssembly.ifPresent(this::insertAssembly);
+        return fetchAssembly;
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
@@ -71,6 +83,11 @@ public class AssemblyService {
     }
 
     public void insertAssembly(AssemblyEntity entity) {
+        // Limit cache size to 10 assemblies
+        while (repository.countByIdNotNull() >= 10) {
+            repository.findTopByIdNotNullOrderById().ifPresent(it -> repository.deleteById(it.getId()));
+        }
+
         if (isEntityPresent(entity)) {
             throw new IllegalArgumentException(
                     "An assembly with the same genbank or refseq accession already exists!");
@@ -87,7 +104,9 @@ public class AssemblyService {
 
     public boolean isEntityPresent(AssemblyEntity entity) {
         Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
-                entity.getGenbank(), entity.getRefseq());
+                // Setting to invalid prevents finding random accessions with null GCA/GCF
+                entity.getGenbank() == null ? "##########" : entity.getGenbank(),
+                entity.getRefseq() == null ? "##########" : entity.getRefseq());
         return existingAssembly.isPresent();
     }
 
