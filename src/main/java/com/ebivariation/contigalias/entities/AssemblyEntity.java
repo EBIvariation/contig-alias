@@ -28,7 +28,7 @@ import javax.persistence.Table;
 import java.util.List;
 
 @Entity
-@Table
+@Table(name = "assembly")
 public class AssemblyEntity {
 
     @Id
@@ -58,37 +58,13 @@ public class AssemblyEntity {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getOrganism() {
-        return organism;
-    }
-
-    public long getTaxid() {
-        return taxid;
-    }
-
-    public String getGenbank() {
-        return genbank;
-    }
-
-    public String getRefseq() {
-        return refseq;
-    }
-
-    public boolean isGenbankRefseqIdentical() {
-        return isGenbankRefseqIdentical;
-    }
-
-    public List<ChromosomeEntity> getChromosomes() {
-        return chromosomes;
-    }
-
     public AssemblyEntity setId(long id) {
         this.id = id;
         return this;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public AssemblyEntity setName(String name) {
@@ -96,9 +72,17 @@ public class AssemblyEntity {
         return this;
     }
 
+    public String getOrganism() {
+        return organism;
+    }
+
     public AssemblyEntity setOrganism(String organism) {
         this.organism = organism;
         return this;
+    }
+
+    public long getTaxid() {
+        return taxid;
     }
 
     public AssemblyEntity setTaxid(long taxid) {
@@ -106,9 +90,17 @@ public class AssemblyEntity {
         return this;
     }
 
+    public String getGenbank() {
+        return genbank;
+    }
+
     public AssemblyEntity setGenbank(String genbank) {
         this.genbank = genbank;
         return this;
+    }
+
+    public String getRefseq() {
+        return refseq;
     }
 
     public AssemblyEntity setRefseq(String refseq) {
@@ -116,13 +108,21 @@ public class AssemblyEntity {
         return this;
     }
 
-    public AssemblyEntity setChromosomes(List<ChromosomeEntity> scaffolds) {
-        this.chromosomes = scaffolds;
-        return this;
+    public boolean isGenbankRefseqIdentical() {
+        return isGenbankRefseqIdentical;
     }
 
     public AssemblyEntity setGenbankRefseqIdentical(boolean genbankRefseqIdentical) {
         isGenbankRefseqIdentical = genbankRefseqIdentical;
+        return this;
+    }
+
+    public List<ChromosomeEntity> getChromosomes() {
+        return chromosomes;
+    }
+
+    public AssemblyEntity setChromosomes(List<ChromosomeEntity> scaffolds) {
+        this.chromosomes = scaffolds;
         return this;
     }
 }
