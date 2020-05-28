@@ -42,6 +42,13 @@ public class AssemblyServiceTest {
     private AssemblyService service;
 
     @Test
+    void getAssemblyOrFetchByAccession() throws IOException {
+        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession("GCF_006125015.1");
+        assertTrue(entity.isPresent());
+        service.deleteAssembly(entity.get());
+    }
+
+    @Test
     void cacheLimitTest() throws IOException {
 
         String ACCESSION_BOS_TAURUS = "GCA_000003055.3";
@@ -70,8 +77,14 @@ public class AssemblyServiceTest {
             service.fetchAndInsertAssembly(accession);
         }
 
-        Optional<AssemblyEntity> assembly1 = service.getAssemblyByAccession(ACCESSION_BOS_TAURUS);
-        assertFalse(assembly1.isPresent());
+        Optional<AssemblyEntity> bos_taurus = service.getAssemblyByAccession(ACCESSION_BOS_TAURUS);
+        assertFalse(bos_taurus.isPresent());
+
+        for (String accession : accessions) {
+            Optional<AssemblyEntity> entity = service.getAssemblyByAccession(accession);
+            assertTrue(entity.isPresent());
+            service.deleteAssembly(entity.get());
+        }
     }
 
     @Nested
@@ -114,10 +127,5 @@ public class AssemblyServiceTest {
             assertTrue(accession.isPresent());
         }
 
-        @Test
-        void getAssemblyOrFetchByAccession() throws IOException {
-            Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession("GCF_006125015.1");
-            assertTrue(entity.isPresent());
-        }
     }
 }
