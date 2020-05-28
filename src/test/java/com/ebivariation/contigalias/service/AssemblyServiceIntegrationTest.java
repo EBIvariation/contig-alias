@@ -30,13 +30,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @SpringBootTest
-public class AssemblyServiceTest {
+public class AssemblyServiceIntegrationTest {
 
     @Autowired
     private AssemblyService service;
@@ -122,9 +123,17 @@ public class AssemblyServiceTest {
         }
 
         @Test
-        void getAssemblyByAccessionGCA() {
+        void getAssemblyByAccession() {
             Optional<AssemblyEntity> accession = service.getAssemblyByAccession(ASSEMBLY_GENBANK);
             assertTrue(accession.isPresent());
+            AssemblyEntity entity = accession.get();
+            assertEquals(entity.getName(), ASSEMBLY_NAME);
+            assertEquals(entity.getOrganism(), ASSEMBLY_ORGANISM);
+            assertEquals(entity.getGenbank(), ASSEMBLY_GENBANK);
+            assertEquals(entity.getRefseq(), ASSEMBLY_REFSEQ);
+            assertEquals(entity.getTaxid(), ASSEMBLY_TAXID);
+            assertEquals(entity.isGenbankRefseqIdentical(), ASSEMBLY_GENBANK_REFSEQ_IDENTICAL);
+
         }
 
     }

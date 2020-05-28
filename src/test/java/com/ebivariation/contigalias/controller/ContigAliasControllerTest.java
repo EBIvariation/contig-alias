@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +45,7 @@ public class ContigAliasControllerTest {
     private ContigAliasController controller;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         AssemblyEntity entity = new AssemblyEntity()
                 .setName(ASSEMBLY_NAME)
                 .setOrganism(ASSEMBLY_ORGANISM_NAME)
