@@ -1,6 +1,8 @@
 package com.ebivariation.contigalias.controller;
 
+import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +23,11 @@ public class AdminController {
         this.service = service;
     }
 
+    @GetMapping(value = "assemblies/{accession}")
+    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(@PathVariable String accession) throws IOException {
+        return service.getAssemblyOrFetchByAccession(accession);
+    }
+
     @PostMapping(value = "assemblies/{accession}")
     public void fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
         service.fetchAndInsertAssembly(accession);
@@ -31,7 +38,7 @@ public class AdminController {
         accessions.ifPresentOrElse((list -> {
             if (list.size() > 0) {
                 service.fetchAndInsertAssembly(list);
-            }else throw new IllegalArgumentException("List of accessions can not be empty!");
+            } else throw new IllegalArgumentException("List of accessions can not be empty!");
         }), (() -> {
             throw new IllegalArgumentException("List of accessions must be provided!");
         }));

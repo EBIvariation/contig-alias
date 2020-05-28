@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
  * annotations that were used in this test class.
- *
+ * <p>
  * See https://github.com/json-path/JsonPath for the jsonPath syntax.
  */
 @WebMvcTest(ContigAliasController.class)
@@ -71,8 +71,8 @@ public class ContigAliasControllerIntegrationTest {
                 .setTaxid(ASSEMBLY_TAX_ID)
                 .setGenbankRefseqIdentical(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL);
 
-        when(mockAssemblyService.getAssemblyOrFetchByAccession(ASSEMBLY_GENBANK_ACCESSION))
-               .thenReturn(Optional.of(entity));
+        when(mockAssemblyService.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION))
+                .thenReturn(Optional.of(entity));
     }
 
     @Test

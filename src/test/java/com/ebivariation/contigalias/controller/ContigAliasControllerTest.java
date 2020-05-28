@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,14 +56,14 @@ public class ContigAliasControllerTest {
                 .setGenbankRefseqIdentical(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL);
 
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
-        Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(ASSEMBLY_GENBANK_ACCESSION))
+        Mockito.when(mockAssemblyService.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION))
                .thenReturn(Optional.of(entity));
 
         controller = new ContigAliasController(mockAssemblyService);
     }
 
     @Test
-    public void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
+    public void getAssemblyByAccession() throws Exception {
         Optional<AssemblyEntity> assemblyByAccession = controller.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION);
         assertTrue(assemblyByAccession.isPresent());
         assertEquals(ASSEMBLY_NAME, assemblyByAccession.get().getName());
