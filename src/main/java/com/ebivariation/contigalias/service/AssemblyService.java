@@ -28,13 +28,20 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class AssemblyService {
 
+    private static final IllegalArgumentException duplicateAssemblyInsertionException = new IllegalArgumentException(
+            "An assembly with the same genbank or refseq accession already exists!");
+
     private final AssemblyRepository repository;
 
     private final AssemblyDataSource dataSource;
+
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     @Autowired
     public AssemblyService(AssemblyRepository repository, @Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
@@ -66,6 +73,11 @@ public class AssemblyService {
     }
 
     public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException {
+
+        if (repository.findAssemblyEntityByAccession(accession).isPresent()) {
+            throw duplicateAssemblyInsertionException;
+        }
+
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
         return fetchAssembly;
@@ -89,8 +101,7 @@ public class AssemblyService {
         }
 
         if (isEntityPresent(entity)) {
-            throw new IllegalArgumentException(
-                    "An assembly with the same genbank or refseq accession already exists!");
+            throw duplicateAssemblyInsertionException;
         } else {
             repository.save(entity);
         }
@@ -110,4 +121,13 @@ public class AssemblyService {
         return existingAssembly.isPresent();
     }
 
+    public void fetchAndInsertAssembly(List<String> accessions) {
+        accessions.forEach(it -> executor.submit(() -> {
+            try {
+                this.fetchAndInsertAssembly(it);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+    }
 }
