@@ -130,4 +130,9 @@ public class AssemblyService {
             }
         }));
     }
+
+    public void deleteAssembly(String accession) {
+        Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
+        assembly.ifPresent(repository::delete);
+    }
 }

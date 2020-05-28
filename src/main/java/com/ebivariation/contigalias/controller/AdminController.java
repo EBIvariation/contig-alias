@@ -2,6 +2,7 @@ package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,11 @@ public class AdminController {
         }), (() -> {
             throw new IllegalArgumentException("List of accessions must be provided!");
         }));
+    }
+
+    @DeleteMapping(value = "assemblies/{accession}")
+    public void deleteAssemblyByAccession(@PathVariable String accession) {
+        service.deleteAssembly(accession);
     }
 
 }
