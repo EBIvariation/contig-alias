@@ -127,10 +127,15 @@ public class AssemblyService {
     }
 
     public boolean isEntityPresent(AssemblyEntity entity) {
+        String genbank = entity.getGenbank();
+        String refseq = entity.getRefseq();
+        if (genbank == null && refseq == null) {
+            return false;
+        }
         Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
-                entity.getGenbank() == null ? "##########" : entity.getGenbank(),
-                entity.getRefseq() == null ? "##########" : entity.getRefseq());
+                genbank == null ? "##########" : genbank,
+                refseq == null ? "##########" : refseq);
         return existingAssembly.isPresent();
     }
 
