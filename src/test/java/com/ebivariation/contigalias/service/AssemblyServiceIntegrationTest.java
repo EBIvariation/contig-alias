@@ -51,7 +51,6 @@ public class AssemblyServiceIntegrationTest {
 
     @Test
     void cacheLimitTest() throws IOException {
-
         String ACCESSION_BOS_TAURUS = "GCA_000003055.3";
 
         service.fetchAndInsertAssembly(ACCESSION_BOS_TAURUS);

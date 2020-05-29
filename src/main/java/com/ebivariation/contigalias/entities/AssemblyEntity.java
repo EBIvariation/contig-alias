@@ -125,4 +125,33 @@ public class AssemblyEntity {
         this.chromosomes = scaffolds;
         return this;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Name :\t")
+               .append(this.name)
+               .append("\n")
+               .append("Organism :\t")
+               .append(this.organism)
+               .append("\n")
+               .append("Tax ID :\t")
+               .append(this.taxid)
+               .append("\n")
+               .append("Genbank :\t")
+               .append(this.genbank)
+               .append("\n")
+               .append("Refseq :\t")
+               .append(this.refseq)
+               .append("\n")
+               .append("Genbank & Refseq identical :\t")
+               .append(isGenbankRefseqIdentical)
+               .append("\n");
+        if (this.chromosomes != null) {
+            builder.append("No of chromosome :\t")
+                   .append(this.chromosomes.size())
+                   .append("\n");
+        }
+        return builder.toString();
+    }
 }

@@ -34,9 +34,6 @@ import java.util.concurrent.Executors;
 @Service
 public class AssemblyService {
 
-    private static final IllegalArgumentException duplicateAssemblyInsertionException = new IllegalArgumentException(
-            "An assembly with the same genbank or refseq accession already exists!");
-
     private final AssemblyRepository repository;
 
     private final AssemblyDataSource dataSource;
@@ -73,11 +70,9 @@ public class AssemblyService {
     }
 
     public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException {
-
         if (repository.findAssemblyEntityByAccession(accession).isPresent()) {
-            throw duplicateAssemblyInsertionException;
+            throw duplicateAssemblyInsertionException(accession);
         }
-
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
         return fetchAssembly;
@@ -85,25 +80,43 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> assembly = repository.findAssemblyEntityByAccession(accession);
-        assembly.ifPresent(asm -> {
-            List<ChromosomeEntity> chromosomes = asm.getChromosomes();
-            if (chromosomes != null && chromosomes.size() > 0) {
-                chromosomes.forEach(chr -> chr.setAssembly(null));
-            }
-        });
+        assembly.ifPresent(this::stripAssemblyFromChromosomes);
         return assembly;
     }
 
+    private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
+        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
+        if (chromosomes != null && chromosomes.size() > 0) {
+            chromosomes.forEach(chr -> chr.setAssembly(null));
+        }
+    }
+
     public void insertAssembly(AssemblyEntity entity) {
+        setCacheSizeLimit();
+
+        if (isEntityPresent(entity)) {
+            throw duplicateAssemblyInsertionException(entity);
+        } else {
+            repository.save(entity);
+        }
+    }
+
+    /**
+     * Limits the size of the cache to a maximum of 10 assemblies
+     * <p>
+     * I'm using a while loop instead of an if statement because
+     * if two requests reach at once, they both might read cache
+     * size < 10 and add an entry leading to cache having more than
+     * 10 entries. While loop on next run deletes entities till cache
+     * size < 10. Now of course the same problem can arise if two
+     * requests start deleting at the same time but all that will lead
+     * to is the cache getting completely emptied.
+     * </p>
+     */
+    private void setCacheSizeLimit() {
         // Limit cache size to 10 assemblies
         while (repository.countByIdNotNull() >= 10) {
             repository.findTopByIdNotNullOrderById().ifPresent(it -> repository.deleteById(it.getId()));
-        }
-
-        if (isEntityPresent(entity)) {
-            throw duplicateAssemblyInsertionException;
-        } else {
-            repository.save(entity);
         }
     }
 
@@ -135,4 +148,15 @@ public class AssemblyService {
         Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
         assembly.ifPresent(repository::delete);
     }
+
+    private IllegalArgumentException duplicateAssemblyInsertionException(String accession) {
+        return new IllegalArgumentException(
+                "An assembly having the accession " + accession + " already exists!");
+    }
+
+    private IllegalArgumentException duplicateAssemblyInsertionException(AssemblyEntity accession) {
+        return new IllegalArgumentException(
+                "A similar assembly already exists!\n" + accession.toString());
+    }
+
 }
