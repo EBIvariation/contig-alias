@@ -87,4 +87,10 @@ public class ContigAliasControllerIntegrationTest {
                     .andExpect(jsonPath("$.genbankRefseqIdentical", is(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL)));
     }
 
+    @Test
+    public void test404NotFound() throws Exception {
+        this.mockMvc.perform(get("/contig-alias/assemblies/{accession}", "##INVALID##"))
+                    .andExpect(status().isNotFound());
+    }
+
 }
