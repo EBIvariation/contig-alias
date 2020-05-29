@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,12 +46,12 @@ public class AdminController {
         return service.getAssemblyOrFetchByAccession(accession);
     }
 
-    @PostMapping(value = "assemblies/{accession}")
+    @PutMapping(value = "assemblies/{accession}")
     public void fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
         service.fetchAndInsertAssembly(accession);
     }
 
-    @PostMapping(value = "assemblies")
+    @PutMapping(value = "assemblies")
     public void fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
         accessions.ifPresentOrElse((list -> {
             if (list.size() > 0) {
