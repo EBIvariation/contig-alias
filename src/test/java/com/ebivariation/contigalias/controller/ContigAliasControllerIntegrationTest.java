@@ -31,6 +31,7 @@ import java.util.Optional;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,8 +79,15 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     public void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
         this.mockMvc.perform(get("/contig-alias/assemblies/{accession}", ASSEMBLY_GENBANK_ACCESSION))
+                    .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name", is(ASSEMBLY_NAME)));
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.name", is(ASSEMBLY_NAME)))
+                    .andExpect(jsonPath("$.organism", is(ASSEMBLY_ORGANISM_NAME)))
+                    .andExpect(jsonPath("$.taxid").value(ASSEMBLY_TAX_ID))
+                    .andExpect(jsonPath("$.genbank", is(ASSEMBLY_GENBANK_ACCESSION)))
+                    .andExpect(jsonPath("$.refseq", is(ASSEMBLY_REFSEQ_ACCESSION)))
+                    .andExpect(jsonPath("$.genbankRefseqIdentical", is(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL)));
     }
 
 }

@@ -65,6 +65,13 @@ public class ContigAliasControllerTest {
     public void getAssemblyByAccession() throws Exception {
         Optional<AssemblyEntity> assemblyByAccession = controller.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION);
         assertTrue(assemblyByAccession.isPresent());
-        assertEquals(ASSEMBLY_NAME, assemblyByAccession.get().getName());
+        AssemblyEntity entity = assemblyByAccession.get();
+        assertEquals(entity.getName(), ASSEMBLY_NAME);
+        assertEquals(entity.getOrganism(), ASSEMBLY_ORGANISM_NAME);
+        assertEquals(entity.getGenbank(), ASSEMBLY_GENBANK_ACCESSION);
+        assertEquals(entity.getRefseq(), ASSEMBLY_REFSEQ_ACCESSION);
+        assertEquals(entity.getTaxid(), ASSEMBLY_TAX_ID);
+        assertEquals(entity.isGenbankRefseqIdentical(), ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL);
+
     }
 }
