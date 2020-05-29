@@ -20,6 +20,8 @@ import com.ebivariation.contigalias.datasource.AssemblyDataSource;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.repo.AssemblyRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,8 @@ public class AssemblyService {
     private final AssemblyDataSource dataSource;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     private int CACHE_SIZE = 10;
 
@@ -61,7 +65,8 @@ public class AssemblyService {
         return Optional.empty();
     }
 
-    public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException, IllegalArgumentException {
+    public Optional<AssemblyEntity> fetchAndInsertAssembly(
+            String accession) throws IOException, IllegalArgumentException {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
         if (entity.isPresent()) {
             throw duplicateAssemblyInsertionException(accession, entity.get());
@@ -138,7 +143,7 @@ public class AssemblyService {
             try {
                 this.fetchAndInsertAssembly(it);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("IOException while fetching and inserting " + it, e);
             }
         }));
     }
