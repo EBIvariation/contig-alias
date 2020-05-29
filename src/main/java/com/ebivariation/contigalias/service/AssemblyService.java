@@ -61,7 +61,7 @@ public class AssemblyService {
         return Optional.empty();
     }
 
-    public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException {
+    public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException, IllegalArgumentException {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
         if (entity.isPresent()) {
             throw duplicateAssemblyInsertionException(accession, entity.get());

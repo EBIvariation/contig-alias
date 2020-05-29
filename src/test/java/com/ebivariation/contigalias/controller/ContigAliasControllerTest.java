@@ -21,6 +21,8 @@ import com.ebivariation.contigalias.service.AssemblyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
@@ -62,10 +64,12 @@ public class ContigAliasControllerTest {
     }
 
     @Test
-    public void getAssemblyByAccession() throws Exception {
-        Optional<AssemblyEntity> assemblyByAccession = controller.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION);
-        assertTrue(assemblyByAccession.isPresent());
-        AssemblyEntity entity = assemblyByAccession.get();
+    public void getAssemblyByAccession() {
+        ResponseEntity<Optional<AssemblyEntity>> assemblyByAccession = controller.getAssemblyByAccession(
+                ASSEMBLY_GENBANK_ACCESSION);
+        assertEquals(assemblyByAccession.getStatusCode(), HttpStatus.OK);
+        assertTrue(assemblyByAccession.hasBody());
+        AssemblyEntity entity = assemblyByAccession.getBody().get();
         assertEquals(entity.getName(), ASSEMBLY_NAME);
         assertEquals(entity.getOrganism(), ASSEMBLY_ORGANISM_NAME);
         assertEquals(entity.getGenbank(), ASSEMBLY_GENBANK_ACCESSION);

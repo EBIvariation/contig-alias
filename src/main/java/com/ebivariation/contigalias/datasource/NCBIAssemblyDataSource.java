@@ -29,7 +29,7 @@ import java.util.Optional;
 public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
     @Override
-    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException, IllegalArgumentException {
         NCBIBrowser ncbiBrowser = new NCBIBrowser();
         ncbiBrowser.connect();
         Optional<String> directory = ncbiBrowser.getGenomeReportDirectory(accession);

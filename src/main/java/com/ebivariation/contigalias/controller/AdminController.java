@@ -18,6 +18,8 @@ package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,8 +43,19 @@ public class AdminController {
     }
 
     @GetMapping(value = "assemblies/{accession}")
-    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(@PathVariable String accession) throws IOException {
-        return service.getAssemblyOrFetchByAccession(accession);
+    public ResponseEntity<Optional<AssemblyEntity>> getAssemblyOrFetchByAccession(
+            @PathVariable String accession) throws IOException {
+        Optional<AssemblyEntity> entity;
+        try {
+            entity = service.getAssemblyOrFetchByAccession(accession);
+        } catch (IllegalArgumentException e) {
+            entity = Optional.empty();
+        }
+        if (entity.isPresent()) {
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(entity, HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping(value = "assemblies/{accession}")
