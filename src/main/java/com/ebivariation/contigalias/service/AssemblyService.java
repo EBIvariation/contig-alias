@@ -62,8 +62,9 @@ public class AssemblyService {
     }
 
     public Optional<AssemblyEntity> fetchAndInsertAssembly(String accession) throws IOException {
-        if (repository.findAssemblyEntityByAccession(accession).isPresent()) {
-            throw duplicateAssemblyInsertionException(accession);
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
+        if (entity.isPresent()) {
+            throw duplicateAssemblyInsertionException(accession, entity.get());
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
@@ -89,14 +90,14 @@ public class AssemblyService {
         setCacheSizeLimit();
 
         if (isEntityPresent(entity)) {
-            throw duplicateAssemblyInsertionException(entity);
+            throw duplicateAssemblyInsertionException((String) null, entity);
         } else {
             repository.save(entity);
         }
     }
 
     /**
-     * Limits the size of the cache to a maximum of {@link CACHE_SIZE} assemblies
+     * Limits the size of the cache to a maximum of CACHE_SIZE assemblies
      * <p>
      * I'm using a while loop instead of an if statement because
      * if two requests reach at once, they both might read cache
@@ -147,14 +148,38 @@ public class AssemblyService {
         assembly.ifPresent(repository::delete);
     }
 
-    private IllegalArgumentException duplicateAssemblyInsertionException(String accession) {
-        return new IllegalArgumentException(
-                "An assembly having the accession " + accession + " already exists!");
+    private IllegalArgumentException duplicateAssemblyInsertionException(String accession, AssemblyEntity present) {
+        StringBuilder exception = new StringBuilder("A similar assembly already exists!");
+        if (accession != null) {
+            exception.append("\n");
+            exception.append("Assembly trying to insert:");
+            exception.append("\t");
+            exception.append(accession);
+        }
+        if (present != null) {
+            exception.append("\n");
+            exception.append("Assembly already present");
+            exception.append("\t");
+            exception.append(present.toString());
+        }
+        return new IllegalArgumentException(exception.toString());
     }
 
-    private IllegalArgumentException duplicateAssemblyInsertionException(AssemblyEntity accession) {
-        return new IllegalArgumentException(
-                "A similar assembly already exists!\n" + accession.toString());
+    private IllegalArgumentException duplicateAssemblyInsertionException(AssemblyEntity given, AssemblyEntity present) {
+        StringBuilder exception = new StringBuilder("A similar assembly already exists!");
+        if (given != null) {
+            exception.append("\n");
+            exception.append("Assembly trying to insert:");
+            exception.append("\t");
+            exception.append(given.toString());
+        }
+        if (present != null) {
+            exception.append("\n");
+            exception.append("Assembly already present");
+            exception.append("\t");
+            exception.append(present.toString());
+        }
+        return new IllegalArgumentException(exception.toString());
     }
 
     public int getCacheSize() {
