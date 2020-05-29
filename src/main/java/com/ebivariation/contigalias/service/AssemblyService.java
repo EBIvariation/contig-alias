@@ -40,6 +40,8 @@ public class AssemblyService {
 
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
+    private int CACHE_SIZE = 10;
+
     @Autowired
     public AssemblyService(AssemblyRepository repository, @Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
         this.repository = repository;
@@ -53,17 +55,7 @@ public class AssemblyService {
         }
         Optional<AssemblyEntity> fetchAssembly = fetchAndInsertAssembly(accession);
         if (fetchAssembly.isPresent()) {
-            AssemblyEntity asm = fetchAssembly.get();
-            List<ChromosomeEntity> chromosomes = asm.getChromosomes();
-            if (chromosomes != null) {
-                chromosomes.forEach(chr -> chr.setAssembly(null));
-            }
-            // Setting this to null to remove inconsistency in results
-            // When fetching from db bring no results, chromosomes is an empty list
-            // whereas here chromosomes is value
-            else {
-                asm.setChromosomes(new LinkedList<>());
-            }
+            stripAssemblyFromChromosomes(fetchAssembly.get());
             return fetchAssembly;
         }
         return Optional.empty();
@@ -88,6 +80,8 @@ public class AssemblyService {
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         if (chromosomes != null && chromosomes.size() > 0) {
             chromosomes.forEach(chr -> chr.setAssembly(null));
+        } else {
+            assembly.setChromosomes(new LinkedList<>());
         }
     }
 
@@ -102,20 +96,19 @@ public class AssemblyService {
     }
 
     /**
-     * Limits the size of the cache to a maximum of 10 assemblies
+     * Limits the size of the cache to a maximum of {@link CACHE_SIZE} assemblies
      * <p>
      * I'm using a while loop instead of an if statement because
      * if two requests reach at once, they both might read cache
-     * size < 10 and add an entry leading to cache having more than
+     * size < CACHE_SIZE and add an entry leading to cache having more than
      * 10 entries. While loop on next run deletes entities till cache
-     * size < 10. Now of course the same problem can arise if two
+     * size < CACHE_SIZE. Now of course the same problem can arise if two
      * requests start deleting at the same time but all that will lead
      * to is the cache getting completely emptied.
      * </p>
      */
     private void setCacheSizeLimit() {
-        // Limit cache size to 10 assemblies
-        while (repository.countByIdNotNull() >= 10) {
+        while (repository.count() >= CACHE_SIZE) {
             repository.findTopByIdNotNullOrderById().ifPresent(it -> repository.deleteById(it.getId()));
         }
     }
@@ -164,4 +157,12 @@ public class AssemblyService {
                 "A similar assembly already exists!\n" + accession.toString());
     }
 
+    public int getCacheSize() {
+        return CACHE_SIZE;
+    }
+
+    public AssemblyService setCacheSize(int CACHE_SIZE) {
+        this.CACHE_SIZE = CACHE_SIZE;
+        return this;
+    }
 }

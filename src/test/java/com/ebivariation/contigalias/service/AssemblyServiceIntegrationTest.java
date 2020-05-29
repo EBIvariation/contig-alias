@@ -51,6 +51,9 @@ public class AssemblyServiceIntegrationTest {
 
     @Test
     void cacheLimitTest() throws IOException {
+        int cacheSize = service.getCacheSize();
+        service.setCacheSize(10);
+
         String ACCESSION_BOS_TAURUS = "GCA_000003055.3";
 
         service.fetchAndInsertAssembly(ACCESSION_BOS_TAURUS);
@@ -85,6 +88,8 @@ public class AssemblyServiceIntegrationTest {
             assertTrue(entity.isPresent());
             service.deleteAssembly(entity.get());
         }
+
+        service.setCacheSize(cacheSize);
     }
 
     @Nested

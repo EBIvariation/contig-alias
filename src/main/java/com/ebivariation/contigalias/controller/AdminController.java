@@ -21,7 +21,6 @@ import com.ebivariation.contigalias.service.AssemblyService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,7 +55,9 @@ public class AdminController {
         accessions.ifPresentOrElse((list -> {
             if (list.size() > 0) {
                 service.fetchAndInsertAssembly(list);
-            } else throw new IllegalArgumentException("List of accessions can not be empty!");
+            } else {
+                throw new IllegalArgumentException("List of accessions can not be empty!");
+            }
         }), (() -> {
             throw new IllegalArgumentException("List of accessions must be provided!");
         }));

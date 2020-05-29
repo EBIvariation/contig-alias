@@ -148,7 +148,7 @@ public class AssemblyEntity {
                .append(isGenbankRefseqIdentical)
                .append("\n");
         if (this.chromosomes != null) {
-            builder.append("No of chromosome :\t")
+            builder.append("Number of chromosomes :\t")
                    .append(this.chromosomes.size())
                    .append("\n");
         }
