@@ -25,13 +25,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,7 +61,7 @@ public class ContigAliasControllerIntegrationTest {
     private AssemblyService mockAssemblyService;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         AssemblyEntity entity = new AssemblyEntity()
                 .setName(ASSEMBLY_NAME)
                 .setOrganism(ASSEMBLY_ORGANISM_NAME)
@@ -79,7 +77,6 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     public void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
         this.mockMvc.perform(get("/contig-alias/assemblies/{accession}", ASSEMBLY_GENBANK_ACCESSION))
-                    .andDo(print())
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(ASSEMBLY_NAME)))
