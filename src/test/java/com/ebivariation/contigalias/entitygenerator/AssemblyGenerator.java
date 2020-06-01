@@ -30,7 +30,6 @@ public class AssemblyGenerator {
 
     public static AssemblyEntity generate(long id) {
         return new AssemblyEntity()
-                .setId(id)
                 .setName("name" + id)
                 .setOrganism("organism" + id)
                 .setGenbank("genbank" + id)

@@ -16,12 +16,16 @@
 
 package com.ebivariation.contigalias.service;
 
+import com.ebivariation.contigalias.datasource.AssemblyDataSource;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
+import com.ebivariation.contigalias.entitygenerator.AssemblyGenerator;
+import com.ebivariation.contigalias.repo.AssemblyRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -34,17 +38,38 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @SpringBootTest
 public class AssemblyServiceIntegrationTest {
 
+    private static final int TEST_ENTITIES_NUMBERS = 11;
+
+    private final AssemblyEntity[] entities = new AssemblyEntity[TEST_ENTITIES_NUMBERS];
+
     @Autowired
+    AssemblyRepository repository;
+
     private AssemblyService service;
+
+    @BeforeEach
+    void setup() throws IOException {
+        AssemblyDataSource mockDataSource = mock(AssemblyDataSource.class);
+        for (int i = 0; i < entities.length; i++) {
+            AssemblyEntity generate = AssemblyGenerator.generate(i);
+            entities[i] = generate;
+            Mockito.when(mockDataSource.getAssemblyByAccession(generate.getGenbank()))
+                   .thenReturn(Optional.of(generate));
+            Mockito.when(mockDataSource.getAssemblyByAccession(generate.getRefseq()))
+                   .thenReturn(Optional.of(generate));
+        }
+        service = new AssemblyService(repository, mockDataSource);
+    }
 
     @Test
     void getAssemblyOrFetchByAccession() throws IOException {
-        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession("GCF_006125015.1");
+        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession(entities[0].getGenbank());
         assertTrue(entity.isPresent());
         service.deleteAssembly(entity.get());
     }
@@ -54,89 +79,57 @@ public class AssemblyServiceIntegrationTest {
         int cacheSize = service.getCacheSize();
         service.setCacheSize(10);
 
-        String ACCESSION_BOS_TAURUS = "GCA_000003055.3";
-
-        service.fetchAndInsertAssembly(ACCESSION_BOS_TAURUS);
-        Optional<AssemblyEntity> assembly = service.getAssemblyByAccession(ACCESSION_BOS_TAURUS);
+        String targetGenbank = entities[0].getGenbank();
+        service.fetchAndInsertAssembly(targetGenbank);
+        Optional<AssemblyEntity> assembly = service.getAssemblyByAccession(targetGenbank);
         assertTrue(assembly.isPresent());
         List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
         assertNotNull(chromosomes);
-        assertTrue(chromosomes.size() > 0);
 
-        String[] accessions = new String[]{
-                "GCA_006125015.1",
-                "GCA_007007145.1",
-                "GCA_007003565.1",
-                "GCA_002041205.1",
-                "GCA_002021185.1",
-                "GCA_007608995.1",
-                "GCA_011100115.1",
-                "GCA_004051055.1",
-                "GCA_004051015.1",
-                "GCA_004031555.1"
-        };
-
-        for (String accession : accessions) {
-            service.fetchAndInsertAssembly(accession);
+        for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
+            String genbank = entities[i].getGenbank();
+            service.fetchAndInsertAssembly(genbank);
+            Optional<AssemblyEntity> entity = service.getAssemblyByAccession(genbank);
+            assertTrue(entity.isPresent());
         }
 
-        Optional<AssemblyEntity> bos_taurus = service.getAssemblyByAccession(ACCESSION_BOS_TAURUS);
-        assertFalse(bos_taurus.isPresent());
+        Optional<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
+        assertFalse(targetGenbankEntity.isPresent());
 
-        for (String accession : accessions) {
-            Optional<AssemblyEntity> entity = service.getAssemblyByAccession(accession);
-            assertTrue(entity.isPresent());
-            service.deleteAssembly(entity.get());
+        for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
+            String genbank = entities[i].getGenbank();
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
+            assertTrue(accession.isPresent());
+            service.deleteAssembly(accession.get());
         }
 
         service.setCacheSize(cacheSize);
     }
 
     @Nested
-    class WithFakeData {
-
-        private static final String ASSEMBLY_NAME = "Fakus Animulus";
-
-        private static final String ASSEMBLY_ORGANISM = "Fakus_Animulus_(Cattle)";
-
-        private static final String ASSEMBLY_GENBANK = "GCA_648945645.7";
-
-        private static final String ASSEMBLY_REFSEQ = "GCF_915656489.3";
-
-        private static final long ASSEMBLY_TAXID = 9834;
-
-        private static final boolean ASSEMBLY_GENBANK_REFSEQ_IDENTICAL = false;
-
-        private AssemblyEntity entity;
+    class NoDataSource {
 
         @BeforeEach
         void setup() {
-            entity = new AssemblyEntity();
-            entity.setName(ASSEMBLY_NAME)
-                  .setOrganism(ASSEMBLY_ORGANISM)
-                  .setGenbank(ASSEMBLY_GENBANK)
-                  .setRefseq(ASSEMBLY_REFSEQ)
-                  .setTaxid(ASSEMBLY_TAXID)
-                  .setGenbankRefseqIdentical(ASSEMBLY_GENBANK_REFSEQ_IDENTICAL);
-            service.insertAssembly(entity);
+            service.insertAssembly(entities[0]);
         }
 
         @AfterEach
         void tearDown() {
-            service.deleteAssembly(entity);
+            service.deleteAssembly(entities[0]);
         }
 
         @Test
         void getAssemblyByAccession() {
-            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(ASSEMBLY_GENBANK);
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entities[0].getGenbank());
             assertTrue(accession.isPresent());
             AssemblyEntity entity = accession.get();
-            assertEquals(entity.getName(), ASSEMBLY_NAME);
-            assertEquals(entity.getOrganism(), ASSEMBLY_ORGANISM);
-            assertEquals(entity.getGenbank(), ASSEMBLY_GENBANK);
-            assertEquals(entity.getRefseq(), ASSEMBLY_REFSEQ);
-            assertEquals(entity.getTaxid(), ASSEMBLY_TAXID);
-            assertEquals(entity.isGenbankRefseqIdentical(), ASSEMBLY_GENBANK_REFSEQ_IDENTICAL);
+            assertEquals(entity.getName(), entities[0].getName());
+            assertEquals(entity.getOrganism(), entities[0].getOrganism());
+            assertEquals(entity.getGenbank(), entities[0].getGenbank());
+            assertEquals(entity.getRefseq(), entities[0].getRefseq());
+            assertEquals(entity.getTaxid(), entities[0].getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), entities[0].isGenbankRefseqIdentical());
 
         }
 
