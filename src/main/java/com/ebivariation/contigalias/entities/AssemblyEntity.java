@@ -19,6 +19,7 @@ package com.ebivariation.contigalias.entities;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,7 +28,7 @@ import javax.persistence.Table;
 import java.util.List;
 
 @Entity
-@Table
+@Table(name = "assembly")
 public class AssemblyEntity {
 
     @Id
@@ -47,7 +48,7 @@ public class AssemblyEntity {
 
     private boolean isGenbankRefseqIdentical;
 
-    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
 
     public AssemblyEntity() {
@@ -61,38 +62,13 @@ public class AssemblyEntity {
         return name;
     }
 
-    public String getOrganism() {
-        return organism;
-    }
-
-    public long getTaxid() {
-        return taxid;
-    }
-
-    public String getGenbank() {
-        return genbank;
-    }
-
-    public String getRefseq() {
-        return refseq;
-    }
-
-    public boolean isGenbankRefseqIdentical() {
-        return isGenbankRefseqIdentical;
-    }
-
-    public List<ChromosomeEntity> getChromosomes() {
-        return chromosomes;
-    }
-
-    public AssemblyEntity setId(long id) {
-        this.id = id;
-        return this;
-    }
-
     public AssemblyEntity setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public String getOrganism() {
+        return organism;
     }
 
     public AssemblyEntity setOrganism(String organism) {
@@ -100,9 +76,17 @@ public class AssemblyEntity {
         return this;
     }
 
+    public long getTaxid() {
+        return taxid;
+    }
+
     public AssemblyEntity setTaxid(long taxid) {
         this.taxid = taxid;
         return this;
+    }
+
+    public String getGenbank() {
+        return genbank;
     }
 
     public AssemblyEntity setGenbank(String genbank) {
@@ -110,9 +94,26 @@ public class AssemblyEntity {
         return this;
     }
 
+    public String getRefseq() {
+        return refseq;
+    }
+
     public AssemblyEntity setRefseq(String refseq) {
         this.refseq = refseq;
         return this;
+    }
+
+    public boolean isGenbankRefseqIdentical() {
+        return isGenbankRefseqIdentical;
+    }
+
+    public AssemblyEntity setGenbankRefseqIdentical(boolean genbankRefseqIdentical) {
+        isGenbankRefseqIdentical = genbankRefseqIdentical;
+        return this;
+    }
+
+    public List<ChromosomeEntity> getChromosomes() {
+        return chromosomes;
     }
 
     public AssemblyEntity setChromosomes(List<ChromosomeEntity> scaffolds) {
@@ -120,8 +121,32 @@ public class AssemblyEntity {
         return this;
     }
 
-    public AssemblyEntity setGenbankRefseqIdentical(boolean genbankRefseqIdentical) {
-        isGenbankRefseqIdentical = genbankRefseqIdentical;
-        return this;
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Name :\t")
+               .append(this.name)
+               .append("\n")
+               .append("Organism :\t")
+               .append(this.organism)
+               .append("\n")
+               .append("Tax ID :\t")
+               .append(this.taxid)
+               .append("\n")
+               .append("Genbank :\t")
+               .append(this.genbank)
+               .append("\n")
+               .append("Refseq :\t")
+               .append(this.refseq)
+               .append("\n")
+               .append("Genbank & Refseq identical :\t")
+               .append(isGenbankRefseqIdentical)
+               .append("\n");
+        if (this.chromosomes != null) {
+            builder.append("Number of chromosomes :\t")
+                   .append(this.chromosomes.size())
+                   .append("\n");
+        }
+        return builder.toString();
     }
 }

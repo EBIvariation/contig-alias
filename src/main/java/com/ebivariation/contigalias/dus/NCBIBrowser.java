@@ -43,7 +43,11 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
      * @return Path relative to ftp.ncbi.nlm.nih.gov
      * @throws IOException Passes exception thrown by FTPBrowser.listDirectories()
      */
-    public Optional<String> getGenomeReportDirectory(String accession) throws IOException {
+    public Optional<String> getGenomeReportDirectory(String accession) throws IOException, IllegalArgumentException {
+
+        if (accession.length() < 15) {
+            throw new IllegalArgumentException("Accession should be at least 15 characters long!");
+        }
 
         //GCA_004051055.1
         String rawQuery = accession;

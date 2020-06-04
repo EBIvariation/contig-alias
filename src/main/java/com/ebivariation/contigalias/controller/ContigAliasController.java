@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.api;
+package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,8 +42,14 @@ public class ContigAliasController {
     }
 
     @GetMapping(value = "assemblies/{accession}")
-    public Optional<AssemblyEntity> getAssemblyByAccession(@PathVariable String accession) throws IOException {
-        return service.getAssemblyByAccession(accession);
+    public ResponseEntity<Optional<AssemblyEntity>> getAssemblyByAccession(
+            @PathVariable String accession) {
+        Optional<AssemblyEntity> entity = service.getAssemblyByAccession(accession);
+        if (entity.isPresent()) {
+            return new ResponseEntity<>(entity, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(entity, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(value = "assemblies")

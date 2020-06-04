@@ -27,7 +27,7 @@ import javax.persistence.GenerationType;
 
 
 @Entity
-@Table
+@Table(name = "chromosome")
 public class ChromosomeEntity {
 
     @Id

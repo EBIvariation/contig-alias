@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.service;
-
+package com.ebivariation.contigalias.datasource;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -33,18 +33,19 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class AssemblyServiceTest {
+public class AssemblyDataSourceTest {
 
     private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.3";
 
     private static final String GCF_ACCESSION_NO_CHROMOSOMES = "GCF_006125015.1";
 
     @Autowired
-    private AssemblyService service;
+    @Qualifier("NCBIDataSource")
+    private AssemblyDataSource dataSource;
 
     @Test
-    public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = service.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
+    public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException{
+        Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
         assertTrue(accession.isPresent());
         List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
         assertNotNull(chromosomes);
@@ -53,9 +54,10 @@ public class AssemblyServiceTest {
 
     @Test
     public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = service.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
+        Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
         assertTrue(accession.isPresent());
         List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
         assertNull(chromosomes);
     }
+
 }

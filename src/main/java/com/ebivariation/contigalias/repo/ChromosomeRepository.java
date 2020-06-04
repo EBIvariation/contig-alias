@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.dao;
+package com.ebivariation.contigalias.repo;
 
-import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
-import java.util.Optional;
-
-public interface AssemblyDao {
-
-    Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException;
+@Repository
+public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
 
 }
