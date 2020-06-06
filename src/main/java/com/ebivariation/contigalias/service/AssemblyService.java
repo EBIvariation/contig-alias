@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -195,4 +197,14 @@ public class AssemblyService {
         this.CACHE_SIZE = CACHE_SIZE;
         return this;
     }
+
+    public List<AssemblyEntity> getAssemblyByExample(AssemblyEntity entity) {
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                                               .withIgnorePaths("id")
+                                               .withIgnorePaths("isGenbankRefseqIdentical")
+                                               .withIgnoreNullValues();
+        Example<AssemblyEntity> example = Example.of(entity, matcher);
+        return repository.findAll(example);
+    }
+
 }

@@ -109,28 +109,90 @@ public class AssemblyServiceIntegrationTest {
     @Nested
     class NoDataSource {
 
+        private final AssemblyEntity entity = AssemblyGenerator.generate(8924);
+
         @BeforeEach
         void setup() {
-            service.insertAssembly(entities[0]);
+            service.insertAssembly(entity);
         }
 
         @AfterEach
         void tearDown() {
-            service.deleteAssembly(entities[0]);
+            service.deleteAssembly(entity);
         }
 
         @Test
         void getAssemblyByAccession() {
-            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entities[0].getGenbank());
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
             assertTrue(accession.isPresent());
             AssemblyEntity entity = accession.get();
-            assertEquals(entity.getName(), entities[0].getName());
-            assertEquals(entity.getOrganism(), entities[0].getOrganism());
-            assertEquals(entity.getGenbank(), entities[0].getGenbank());
-            assertEquals(entity.getRefseq(), entities[0].getRefseq());
-            assertEquals(entity.getTaxid(), entities[0].getTaxid());
-            assertEquals(entity.isGenbankRefseqIdentical(), entities[0].isGenbankRefseqIdentical());
+            assertEquals(entity.getName(), entity.getName());
+            assertEquals(entity.getOrganism(), entity.getOrganism());
+            assertEquals(entity.getGenbank(), entity.getGenbank());
+            assertEquals(entity.getRefseq(), entity.getRefseq());
+            assertEquals(entity.getTaxid(), entity.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), entity.isGenbankRefseqIdentical());
+        }
 
+        @Test
+        void getAssemblyByExampleExactMatch() {
+            List<AssemblyEntity> entities = service.getAssemblyByExample(entity);
+            assertNotNull(entities);
+            assertEquals(1, entities.size());
+            AssemblyEntity entity = entities.get(0);
+            assertEquals(entity.getName(), entity.getName());
+            assertEquals(entity.getOrganism(), entity.getOrganism());
+            assertEquals(entity.getGenbank(), entity.getGenbank());
+            assertEquals(entity.getRefseq(), entity.getRefseq());
+            assertEquals(entity.getTaxid(), entity.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), entity.isGenbankRefseqIdentical());
+        }
+
+        @Test
+        void getAssemblyByExampleAnyMatches() {
+            String FAKE_NAME = "FAKE_NAME";
+
+            AssemblyEntity e1 = new AssemblyEntity().setTaxid(entity.getTaxid()).setRefseq(null);
+            AssemblyEntity e2 = new AssemblyEntity().setTaxid(entity.getTaxid()).setName(FAKE_NAME);
+            AssemblyEntity e3 = new AssemblyEntity().setName(FAKE_NAME);
+
+            service.insertAssembly(e1);
+            service.insertAssembly(e2);
+            service.insertAssembly(e3);
+
+            List<AssemblyEntity> allEntities = service.getAssemblyByExample(new AssemblyEntity());
+            // Fixme this only returns e3
+            assertTrue(allEntities.size() >= 4);
+
+            AssemblyEntity query = new AssemblyEntity().setTaxid(entity.getTaxid());
+
+            List<AssemblyEntity> entities = service.getAssemblyByExample(query);
+            assertNotNull(entities);
+            assertEquals(3, entities.size());
+            entities.forEach(it -> assertEquals(it.getTaxid(), entity.getTaxid()));
+
+            query = new AssemblyEntity().setName(FAKE_NAME);
+            entities = service.getAssemblyByExample(query);
+            assertNotNull(entities);
+            // Fixme e2 is not a part of the result
+            assertEquals(2, entities.size());
+            entities.forEach(it -> assertEquals(it.getName(), FAKE_NAME));
+
+            query = new AssemblyEntity().setRefseq(entity.getRefseq());
+            entities = service.getAssemblyByExample(query);
+            assertNotNull(entities);
+            // Fixme @BeforeEach entity should match with this
+            assertEquals(1, entities.size());
+            entities.forEach(it -> assertEquals(it.getRefseq(), entity.getRefseq()));
+
+            query = new AssemblyEntity().setTaxid(-9834).setRefseq("#######").setName("oOOoOOooOOOOoo");
+            entities = service.getAssemblyByExample(query);
+            assertNotNull(entities);
+            assertEquals(0, entities.size());
+
+            service.deleteAssembly(e1);
+            service.deleteAssembly(e2);
+            service.deleteAssembly(e3);
         }
 
     }
