@@ -135,8 +135,8 @@ public class AssemblyServiceIntegrationTest {
         }
 
         @Test
-        void getAssemblyByExampleExactMatch() {
-            List<AssemblyEntity> entities = service.getAssemblyByExample(entity);
+        void getAssembliesResolveAliasExactMatch() {
+            List<AssemblyEntity> entities = service.getAssembliesResolveAlias(entity);
             assertNotNull(entities);
             assertEquals(1, entities.size());
             AssemblyEntity entity = entities.get(0);
@@ -149,7 +149,7 @@ public class AssemblyServiceIntegrationTest {
         }
 
         @Test
-        void getAssemblyByExampleAnyMatches() {
+        void getAssembliesResolveAliasAnyMatches() {
             String FAKE_NAME = "FAKE_NAME";
 
             AssemblyEntity e1 = new AssemblyEntity().setTaxid(entity.getTaxid()).setRefseq(null);
@@ -160,33 +160,33 @@ public class AssemblyServiceIntegrationTest {
             service.insertAssembly(e2);
             service.insertAssembly(e3);
 
-            List<AssemblyEntity> allEntities = service.getAssemblyByExample(new AssemblyEntity());
+            List<AssemblyEntity> allEntities = service.getAssembliesResolveAlias(new AssemblyEntity());
             // Fixme this only returns e3
             assertTrue(allEntities.size() >= 4);
 
             AssemblyEntity query = new AssemblyEntity().setTaxid(entity.getTaxid());
 
-            List<AssemblyEntity> entities = service.getAssemblyByExample(query);
+            List<AssemblyEntity> entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
             assertEquals(3, entities.size());
             entities.forEach(it -> assertEquals(it.getTaxid(), entity.getTaxid()));
 
             query = new AssemblyEntity().setName(FAKE_NAME);
-            entities = service.getAssemblyByExample(query);
+            entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
             // Fixme e2 is not a part of the result
             assertEquals(2, entities.size());
             entities.forEach(it -> assertEquals(it.getName(), FAKE_NAME));
 
             query = new AssemblyEntity().setRefseq(entity.getRefseq());
-            entities = service.getAssemblyByExample(query);
+            entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
             // Fixme @BeforeEach entity should match with this
             assertEquals(1, entities.size());
             entities.forEach(it -> assertEquals(it.getRefseq(), entity.getRefseq()));
 
             query = new AssemblyEntity().setTaxid(-9834).setRefseq("#######").setName("oOOoOOooOOOOoo");
-            entities = service.getAssemblyByExample(query);
+            entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
             assertEquals(0, entities.size());
 

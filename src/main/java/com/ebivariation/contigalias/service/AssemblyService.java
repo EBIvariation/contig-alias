@@ -198,7 +198,7 @@ public class AssemblyService {
         return this;
     }
 
-    public List<AssemblyEntity> getAssemblyByExample(AssemblyEntity entity) {
+    public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity entity) {
         ExampleMatcher matcher = ExampleMatcher.matching()
                                                .withIgnorePaths("id")
                                                .withIgnorePaths("isGenbankRefseqIdentical")

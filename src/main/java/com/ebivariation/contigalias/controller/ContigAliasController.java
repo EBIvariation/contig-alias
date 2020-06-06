@@ -53,12 +53,20 @@ public class ContigAliasController {
     }
 
     @GetMapping(value = "assemblies")
-    public Optional<List<AssemblyEntity>> getAssembliesQuery(
-            @RequestParam Optional<String> name,
-            @RequestParam Optional<Long> taxid,
-            @RequestParam Optional<String> genbank,
-            @RequestParam Optional<String> refseq) {
-        throw new UnsupportedOperationException();
+    public ResponseEntity<List<AssemblyEntity>> getAssembliesResolveAlias(
+            @RequestParam(required = false) Optional<String> name,
+            @RequestParam(required = false) Optional<Long> taxid,
+            @RequestParam(required = false) Optional<String> genbank,
+            @RequestParam(required = false) Optional<String> refseq) {
+        AssemblyEntity e = new AssemblyEntity();
+        name.ifPresent(e::setName);
+        taxid.ifPresent(e::setTaxid);
+        genbank.ifPresent(e::setGenbank);
+        refseq.ifPresent(e::setRefseq);
+        List<AssemblyEntity> assemblyByExample = service.getAssembliesResolveAlias(e);
+        if (assemblyByExample != null && assemblyByExample.size() > 0) {
+            return new ResponseEntity<>(assemblyByExample, HttpStatus.OK);
+        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 }
