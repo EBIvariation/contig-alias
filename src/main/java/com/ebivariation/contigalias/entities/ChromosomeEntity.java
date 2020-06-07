@@ -20,10 +20,10 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Id;
-import javax.persistence.GenerationType;
 
 
 @Entity
@@ -55,26 +55,13 @@ public class ChromosomeEntity {
         return name;
     }
 
-    public String getGenbank() {
-        return genbank;
-    }
-
-    public String getRefseq() {
-        return refseq;
-    }
-
-    public AssemblyEntity getAssembly() {
-        return assembly;
-    }
-
-    public ChromosomeEntity setId(long id) {
-        this.id = id;
-        return this;
-    }
-
     public ChromosomeEntity setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public String getGenbank() {
+        return genbank;
     }
 
     public ChromosomeEntity setGenbank(String genbank) {
@@ -82,9 +69,17 @@ public class ChromosomeEntity {
         return this;
     }
 
+    public String getRefseq() {
+        return refseq;
+    }
+
     public ChromosomeEntity setRefseq(String refseq) {
         this.refseq = refseq;
         return this;
+    }
+
+    public AssemblyEntity getAssembly() {
+        return assembly;
     }
 
     public ChromosomeEntity setAssembly(AssemblyEntity assembly) {

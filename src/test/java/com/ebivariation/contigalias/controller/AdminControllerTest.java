@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
 
 public class AdminControllerTest {
 
-    private final AssemblyEntity entity = AssemblyGenerator.generate(new Random().nextLong());
+    private final AssemblyEntity entity = AssemblyGenerator.generate();
 
     private AdminController controller;
 

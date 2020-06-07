@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 
 public class ContigAliasControllerTest {
 
-    AssemblyEntity entity = AssemblyGenerator.generate(39287);
+    AssemblyEntity entity = AssemblyGenerator.generate();
 
     private ContigAliasController controller;
 

@@ -116,8 +116,8 @@ public class AssemblyEntity {
         return chromosomes;
     }
 
-    public AssemblyEntity setChromosomes(List<ChromosomeEntity> scaffolds) {
-        this.chromosomes = scaffolds;
+    public AssemblyEntity setChromosomes(List<ChromosomeEntity> chromosomes) {
+        this.chromosomes = chromosomes;
         return this;
     }
 

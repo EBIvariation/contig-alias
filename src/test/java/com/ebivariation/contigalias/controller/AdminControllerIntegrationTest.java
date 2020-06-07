@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AdminController.class)
 public class AdminControllerIntegrationTest {
 
-    private final AssemblyEntity entity = AssemblyGenerator.generate(new Random().nextLong());
+    private final AssemblyEntity entity = AssemblyGenerator.generate();
 
     @Autowired
     private MockMvc mockMvc;

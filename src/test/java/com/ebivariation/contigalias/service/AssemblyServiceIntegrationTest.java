@@ -109,7 +109,7 @@ public class AssemblyServiceIntegrationTest {
     @Nested
     class NoDataSource {
 
-        private final AssemblyEntity entity = AssemblyGenerator.generate(8924);
+        private final AssemblyEntity entity = AssemblyGenerator.generate();
 
         @BeforeEach
         void setup() {
