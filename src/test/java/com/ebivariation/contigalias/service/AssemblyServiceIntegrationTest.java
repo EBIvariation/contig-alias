@@ -161,7 +161,6 @@ public class AssemblyServiceIntegrationTest {
             service.insertAssembly(e3);
 
             List<AssemblyEntity> allEntities = service.getAssembliesResolveAlias(new AssemblyEntity());
-            // Fixme this only returns e3
             assertTrue(allEntities.size() >= 4);
 
             AssemblyEntity query = new AssemblyEntity().setTaxid(entity.getTaxid());
@@ -174,18 +173,16 @@ public class AssemblyServiceIntegrationTest {
             query = new AssemblyEntity().setName(FAKE_NAME);
             entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
-            // Fixme e2 is not a part of the result
             assertEquals(2, entities.size());
             entities.forEach(it -> assertEquals(it.getName(), FAKE_NAME));
 
             query = new AssemblyEntity().setRefseq(entity.getRefseq());
             entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
-            // Fixme @BeforeEach entity should match with this
             assertEquals(1, entities.size());
             entities.forEach(it -> assertEquals(it.getRefseq(), entity.getRefseq()));
 
-            query = new AssemblyEntity().setTaxid(-9834).setRefseq("#######").setName("oOOoOOooOOOOoo");
+            query = new AssemblyEntity().setTaxid(-9834L).setRefseq("#######").setName("oOOoOOooOOOOoo");
             entities = service.getAssembliesResolveAlias(query);
             assertNotNull(entities);
             assertEquals(0, entities.size());

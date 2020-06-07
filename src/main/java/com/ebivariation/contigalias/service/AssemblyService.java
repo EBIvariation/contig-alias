@@ -199,10 +199,10 @@ public class AssemblyService {
     }
 
     public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity entity) {
-        ExampleMatcher matcher = ExampleMatcher.matching()
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
                                                .withIgnorePaths("id")
-                                               .withIgnorePaths("isGenbankRefseqIdentical")
-                                               .withIgnoreNullValues();
+                                               .withIgnorePaths("chromosomes")
+                                               .withIgnorePaths("isGenbankRefseqIdentical");
         Example<AssemblyEntity> example = Example.of(entity, matcher);
         return repository.findAll(example);
     }

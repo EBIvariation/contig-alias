@@ -40,7 +40,7 @@ public class AssemblyEntity {
 
     private String organism;
 
-    private long taxid;
+    private Long taxid;
 
     private String genbank;
 
@@ -76,11 +76,11 @@ public class AssemblyEntity {
         return this;
     }
 
-    public long getTaxid() {
+    public Long getTaxid() {
         return taxid;
     }
 
-    public AssemblyEntity setTaxid(long taxid) {
+    public AssemblyEntity setTaxid(Long taxid) {
         this.taxid = taxid;
         return this;
     }
