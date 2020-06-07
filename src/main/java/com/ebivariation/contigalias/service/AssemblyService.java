@@ -84,6 +84,17 @@ public class AssemblyService {
         return assembly;
     }
 
+    public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity entity) {
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                                               .withIgnorePaths("id")
+                                               .withIgnorePaths("chromosomes")
+                                               .withIgnorePaths("isGenbankRefseqIdentical");
+        Example<AssemblyEntity> example = Example.of(entity, matcher);
+        List<AssemblyEntity> entityList = repository.findAll(example);
+        entityList.forEach(this::stripAssemblyFromChromosomes);
+        return entityList;
+    }
+
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         if (chromosomes != null && chromosomes.size() > 0) {
@@ -196,15 +207,6 @@ public class AssemblyService {
     public AssemblyService setCacheSize(int CACHE_SIZE) {
         this.CACHE_SIZE = CACHE_SIZE;
         return this;
-    }
-
-    public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity entity) {
-        ExampleMatcher matcher = ExampleMatcher.matchingAll()
-                                               .withIgnorePaths("id")
-                                               .withIgnorePaths("chromosomes")
-                                               .withIgnorePaths("isGenbankRefseqIdentical");
-        Example<AssemblyEntity> example = Example.of(entity, matcher);
-        return repository.findAll(example);
     }
 
 }
