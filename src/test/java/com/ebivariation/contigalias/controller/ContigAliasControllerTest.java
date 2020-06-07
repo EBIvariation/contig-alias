@@ -17,6 +17,7 @@
 package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entitygenerator.AssemblyGenerator;
 import com.ebivariation.contigalias.service.AssemblyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,37 +28,20 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class ContigAliasControllerTest {
 
-    public static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
-
-    public static final String ASSEMBLY_ORGANISM_NAME = "Bos taurus (cattle)";
-
-    public static final long ASSEMBLY_TAX_ID = 9913;
-
-    public static final String ASSEMBLY_GENBANK_ACCESSION = "GCA_000003055.3";
-
-    public static final String ASSEMBLY_REFSEQ_ACCESSION = "GCF_000003055.3";
-
-    public static final boolean ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL = true;
+    AssemblyEntity entity = AssemblyGenerator.generate(39287);
 
     private ContigAliasController controller;
 
     @BeforeEach
     void setUp() {
-        AssemblyEntity entity = new AssemblyEntity()
-                .setName(ASSEMBLY_NAME)
-                .setOrganism(ASSEMBLY_ORGANISM_NAME)
-                .setGenbank(ASSEMBLY_GENBANK_ACCESSION)
-                .setRefseq(ASSEMBLY_REFSEQ_ACCESSION)
-                .setTaxid(ASSEMBLY_TAX_ID)
-                .setGenbankRefseqIdentical(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL);
-
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
-        Mockito.when(mockAssemblyService.getAssemblyByAccession(ASSEMBLY_GENBANK_ACCESSION))
+        Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
                .thenReturn(Optional.of(entity));
 
         controller = new ContigAliasController(mockAssemblyService);
@@ -66,16 +50,20 @@ public class ContigAliasControllerTest {
     @Test
     public void getAssemblyByAccession() {
         ResponseEntity<Optional<AssemblyEntity>> assemblyByAccession = controller.getAssemblyByAccession(
-                ASSEMBLY_GENBANK_ACCESSION);
+                entity.getGenbank());
         assertEquals(assemblyByAccession.getStatusCode(), HttpStatus.OK);
         assertTrue(assemblyByAccession.hasBody());
-        AssemblyEntity entity = assemblyByAccession.getBody().get();
-        assertEquals(entity.getName(), ASSEMBLY_NAME);
-        assertEquals(entity.getOrganism(), ASSEMBLY_ORGANISM_NAME);
-        assertEquals(entity.getGenbank(), ASSEMBLY_GENBANK_ACCESSION);
-        assertEquals(entity.getRefseq(), ASSEMBLY_REFSEQ_ACCESSION);
-        assertEquals(entity.getTaxid(), ASSEMBLY_TAX_ID);
-        assertEquals(entity.isGenbankRefseqIdentical(), ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL);
+        Optional<AssemblyEntity> body = assemblyByAccession.getBody();
+        assertNotNull(body);
+        assertTrue(body.isPresent());
+
+        AssemblyEntity assembly = body.get();
+        assertEquals(entity.getName(), assembly.getName());
+        assertEquals(entity.getOrganism(), assembly.getOrganism());
+        assertEquals(entity.getGenbank(), assembly.getGenbank());
+        assertEquals(entity.getRefseq(), assembly.getRefseq());
+        assertEquals(entity.getTaxid(), assembly.getTaxid());
+        assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
 
     }
 }
