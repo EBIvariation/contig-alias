@@ -84,12 +84,12 @@ public class AssemblyService {
         return assembly;
     }
 
-    public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity entity) {
+    public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity probe) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                                                .withIgnorePaths("id")
                                                .withIgnorePaths("chromosomes")
                                                .withIgnorePaths("isGenbankRefseqIdentical");
-        Example<AssemblyEntity> example = Example.of(entity, matcher);
+        Example<AssemblyEntity> example = Example.of(probe, matcher);
         List<AssemblyEntity> entityList = repository.findAll(example);
         entityList.forEach(this::stripAssemblyFromChromosomes);
         return entityList;

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.repo;
+package com.ebivariation.contigalias.service;
 
-import com.ebivariation.contigalias.entities.ChromosomeEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.QueryByExampleExecutor;
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@Repository
-public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long>,
-        QueryByExampleExecutor<ChromosomeEntity> {
+@SpringBootTest
+public class ChromosomeServiceIntegrationTest {
+
+    @Autowired
+    private ChromosomeService service;
+
 
 }
