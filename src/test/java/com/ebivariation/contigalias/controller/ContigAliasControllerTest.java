@@ -44,7 +44,7 @@ public class ContigAliasControllerTest {
         Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
                .thenReturn(Optional.of(entity));
 
-        controller = new ContigAliasController(mockAssemblyService);
+        controller = new ContigAliasController(mockAssemblyService, null);
     }
 
     @Test

@@ -17,7 +17,9 @@
 package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
+import com.ebivariation.contigalias.service.ChromosomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,17 +36,21 @@ import java.util.Optional;
 @RestController
 public class ContigAliasController {
 
-    private final AssemblyService service;
+    private final AssemblyService assemblyService;
+
+    private final ChromosomeService chromosomeService;
 
     @Autowired
-    public ContigAliasController(AssemblyService service) {
-        this.service = service;
+    public ContigAliasController(AssemblyService assemblyService,
+                                 ChromosomeService chromosomeService) {
+        this.assemblyService = assemblyService;
+        this.chromosomeService = chromosomeService;
     }
 
     @GetMapping(value = "assemblies/{accession}")
     public ResponseEntity<Optional<AssemblyEntity>> getAssemblyByAccession(
             @PathVariable String accession) {
-        Optional<AssemblyEntity> entity = service.getAssemblyByAccession(accession);
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
         if (entity.isPresent()) {
             return new ResponseEntity<>(entity, HttpStatus.OK);
         } else {
@@ -63,9 +69,24 @@ public class ContigAliasController {
         taxid.ifPresent(e::setTaxid);
         genbank.ifPresent(e::setGenbank);
         refseq.ifPresent(e::setRefseq);
-        List<AssemblyEntity> assemblyByExample = service.getAssembliesResolveAlias(e);
-        if (assemblyByExample != null && assemblyByExample.size() > 0) {
-            return new ResponseEntity<>(assemblyByExample, HttpStatus.OK);
+        List<AssemblyEntity> assemblies = assemblyService.getAssembliesResolveAlias(e);
+        if (assemblies != null && assemblies.size() > 0) {
+            return new ResponseEntity<>(assemblies, HttpStatus.OK);
+        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(value = "chromosomes")
+    public ResponseEntity<List<ChromosomeEntity>> getChromosomesResolveAlias(
+            @RequestParam(required = false) Optional<String> name,
+            @RequestParam(required = false) Optional<String> genbank,
+            @RequestParam(required = false) Optional<String> refseq) {
+        ChromosomeEntity e = new ChromosomeEntity();
+        name.ifPresent(e::setName);
+        genbank.ifPresent(e::setGenbank);
+        refseq.ifPresent(e::setRefseq);
+        List<ChromosomeEntity> chromosomes = chromosomeService.getChromosomesResolveAlias(e);
+        if (chromosomes != null && chromosomes.size() > 0) {
+            return new ResponseEntity<>(chromosomes, HttpStatus.OK);
         } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 

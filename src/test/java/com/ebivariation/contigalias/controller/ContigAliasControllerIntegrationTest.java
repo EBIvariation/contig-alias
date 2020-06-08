@@ -18,6 +18,7 @@ package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
+import com.ebivariation.contigalias.service.ChromosomeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,9 @@ public class ContigAliasControllerIntegrationTest {
 
     @MockBean
     private AssemblyService mockAssemblyService;
+
+    @MockBean
+    private ChromosomeService mockChromosomeService;
 
     @BeforeEach
     void setUp() {
