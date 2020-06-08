@@ -220,7 +220,9 @@ public class AssemblyService {
                 .withIgnorePaths("refseq")
                 .withIgnorePaths("isGenbankRefseqIdentical");
         Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setGenbank(genbank), matcher);
-        return repository.findOne(probe);
+        Optional<AssemblyEntity> one = repository.findOne(probe);
+        one.ifPresent(this::stripAssemblyFromChromosomes);
+        return one;
     }
 
     public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
@@ -234,7 +236,9 @@ public class AssemblyService {
                 .withIgnorePaths("genbank")
                 .withIgnorePaths("isGenbankRefseqIdentical");
         Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setRefseq(refseq), matcher);
-        return repository.findOne(probe);
+        Optional<AssemblyEntity> one = repository.findOne(probe);
+        one.ifPresent(this::stripAssemblyFromChromosomes);
+        return one;
     }
 
     public Optional<AssemblyEntity> getAssemblyByGenbankOrRefseq(String genbank, String refseq) {
@@ -247,7 +251,9 @@ public class AssemblyService {
                 .withIgnorePaths("taxid")
                 .withIgnorePaths("isGenbankRefseqIdentical");
         Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setGenbank(genbank).setRefseq(refseq), matcher);
-        return repository.findOne(probe);
+        Optional<AssemblyEntity> one = repository.findOne(probe);
+        one.ifPresent(this::stripAssemblyFromChromosomes);
+        return one;
     }
 
 }

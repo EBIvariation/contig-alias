@@ -59,11 +59,30 @@ public class ContigAliasController {
     }
 
     @GetMapping(value = "assemblies")
-    public ResponseEntity<List<AssemblyEntity>> getAssembliesResolveAlias(
+    public ResponseEntity<?> getAssembliesResolveAlias(
             @RequestParam(required = false) Optional<String> name,
             @RequestParam(required = false) Optional<Long> taxid,
             @RequestParam(required = false) Optional<String> genbank,
             @RequestParam(required = false) Optional<String> refseq) {
+
+        if (name.isEmpty() && taxid.isEmpty() && (genbank.isPresent() || refseq.isPresent())) {
+            Optional<AssemblyEntity> result;
+            if (genbank.isPresent()) {
+                if (refseq.isPresent()) {
+                    result = assemblyService.getAssemblyByGenbankOrRefseq(genbank.get(), refseq.get());
+                } else {
+                    result = assemblyService.getAssemblyByGenbank(genbank.get());
+                }
+            } else {
+                result = assemblyService.getAssemblyByRefseq(refseq.get());
+            }
+            if (result.isPresent()) {
+                return new ResponseEntity<>(result.get(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
         AssemblyEntity e = new AssemblyEntity();
         name.ifPresent(e::setName);
         taxid.ifPresent(e::setTaxid);
@@ -72,7 +91,9 @@ public class ContigAliasController {
         List<AssemblyEntity> assemblies = assemblyService.getAssembliesResolveAlias(e);
         if (assemblies != null && assemblies.size() > 0) {
             return new ResponseEntity<>(assemblies, HttpStatus.OK);
-        } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(value = "chromosomes")
