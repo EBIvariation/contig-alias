@@ -192,5 +192,59 @@ public class AssemblyServiceIntegrationTest {
             service.deleteAssembly(e3);
         }
 
+        @Test
+        void getAssemblyByGenbank() {
+            Optional<AssemblyEntity> accession = service.getAssemblyByGenbank(entity.getGenbank());
+            assertTrue(accession.isPresent());
+            AssemblyEntity entity = accession.get();
+            assertEquals(entity.getName(), entity.getName());
+            assertEquals(entity.getOrganism(), entity.getOrganism());
+            assertEquals(entity.getGenbank(), entity.getGenbank());
+            assertEquals(entity.getRefseq(), entity.getRefseq());
+            assertEquals(entity.getTaxid(), entity.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), entity.isGenbankRefseqIdentical());
+        }
+
+        @Test
+        void getAssemblyByRefseq() {
+            Optional<AssemblyEntity> accession = service.getAssemblyByRefseq(entity.getRefseq());
+            assertTrue(accession.isPresent());
+            AssemblyEntity entity = accession.get();
+            assertEquals(entity.getName(), entity.getName());
+            assertEquals(entity.getOrganism(), entity.getOrganism());
+            assertEquals(entity.getGenbank(), entity.getGenbank());
+            assertEquals(entity.getRefseq(), entity.getRefseq());
+            assertEquals(entity.getTaxid(), entity.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), entity.isGenbankRefseqIdentical());
+        }
+
+        @Test
+        void getAssemblyByGenbankOrRefseq() {
+            Optional<AssemblyEntity> accession
+                    = service.getAssemblyByGenbankOrRefseq(entity.getGenbank(), entity.getRefseq());
+            assertTrue(accession.isPresent());
+            AssemblyEntity entity = accession.get();
+            assertEquals(entity.getName(), entity.getName());
+            assertEquals(entity.getOrganism(), entity.getOrganism());
+            assertEquals(entity.getGenbank(), entity.getGenbank());
+            assertEquals(entity.getRefseq(), entity.getRefseq());
+            assertEquals(entity.getTaxid(), entity.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), entity.isGenbankRefseqIdentical());
+        }
+
+        @Test
+        void exampleMatcherQueryFalsePositiveTest() {
+            Optional<AssemblyEntity> assemblyByGenbank = service.getAssemblyByGenbank(entity.getRefseq());
+            assertTrue(assemblyByGenbank.isEmpty());
+
+            Optional<AssemblyEntity> assemblyByRefseq = service.getAssemblyByRefseq(entity.getGenbank());
+            assertTrue(assemblyByRefseq.isEmpty());
+
+            Optional<AssemblyEntity> assemblyByGenbankOrRefseq = service.getAssemblyByGenbankOrRefseq(
+                    entity.getRefseq(), entity.getGenbank());
+            assertTrue(assemblyByGenbankOrRefseq.isEmpty());
+
+        }
+
     }
 }

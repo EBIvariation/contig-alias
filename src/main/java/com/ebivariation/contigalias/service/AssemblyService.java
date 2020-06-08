@@ -209,4 +209,45 @@ public class AssemblyService {
         return this;
     }
 
+    public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIncludeNullValues()
+                .withIgnorePaths("id")
+                .withIgnorePaths("name")
+                .withIgnorePaths("organism")
+                .withIgnorePaths("taxid")
+                .withIgnorePaths("refseq")
+                .withIgnorePaths("isGenbankRefseqIdentical");
+        Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setGenbank(genbank), matcher);
+        return repository.findOne(probe);
+    }
+
+    public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIncludeNullValues()
+                .withIgnorePaths("id")
+                .withIgnorePaths("name")
+                .withIgnorePaths("organism")
+                .withIgnorePaths("taxid")
+                .withIgnorePaths("genbank")
+                .withIgnorePaths("isGenbankRefseqIdentical");
+        Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setRefseq(refseq), matcher);
+        return repository.findOne(probe);
+    }
+
+    public Optional<AssemblyEntity> getAssemblyByGenbankOrRefseq(String genbank, String refseq) {
+        ExampleMatcher matcher = ExampleMatcher
+                .matchingAny()
+                .withIncludeNullValues()
+                .withIgnorePaths("id")
+                .withIgnorePaths("name")
+                .withIgnorePaths("organism")
+                .withIgnorePaths("taxid")
+                .withIgnorePaths("isGenbankRefseqIdentical");
+        Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setGenbank(genbank).setRefseq(refseq), matcher);
+        return repository.findOne(probe);
+    }
+
 }
