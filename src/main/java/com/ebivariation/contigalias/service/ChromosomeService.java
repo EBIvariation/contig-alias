@@ -20,11 +20,7 @@ import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.repo.ChromosomeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ChromosomeService {
@@ -34,15 +30,6 @@ public class ChromosomeService {
     @Autowired
     public ChromosomeService(ChromosomeRepository repository) {
         this.repository = repository;
-    }
-
-    public List<ChromosomeEntity> getChromosomesResolveAlias(ChromosomeEntity probe) {
-        ExampleMatcher matcher = ExampleMatcher.matching()
-                                               .withIgnorePaths("id");
-        Example<ChromosomeEntity> example = Example.of(probe, matcher);
-        List<ChromosomeEntity> entityList = repository.findAll(example);
-        entityList.forEach(this::stripChromosomeFromAssembly);
-        return entityList;
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {

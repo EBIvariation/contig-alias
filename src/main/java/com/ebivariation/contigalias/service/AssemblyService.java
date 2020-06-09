@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -82,17 +80,6 @@ public class AssemblyService {
         Optional<AssemblyEntity> assembly = repository.findAssemblyEntityByAccession(accession);
         assembly.ifPresent(this::stripAssemblyFromChromosomes);
         return assembly;
-    }
-
-    public List<AssemblyEntity> getAssembliesResolveAlias(AssemblyEntity probe) {
-        ExampleMatcher matcher = ExampleMatcher.matchingAll()
-                                               .withIgnorePaths("id")
-                                               .withIgnorePaths("chromosomes")
-                                               .withIgnorePaths("isGenbankRefseqIdentical");
-        Example<AssemblyEntity> example = Example.of(probe, matcher);
-        List<AssemblyEntity> entityList = repository.findAll(example);
-        entityList.forEach(this::stripAssemblyFromChromosomes);
-        return entityList;
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
@@ -207,53 +194,6 @@ public class AssemblyService {
     public AssemblyService setCacheSize(int CACHE_SIZE) {
         this.CACHE_SIZE = CACHE_SIZE;
         return this;
-    }
-
-    public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
-        ExampleMatcher matcher = ExampleMatcher
-                .matching()
-                .withIncludeNullValues()
-                .withIgnorePaths("id")
-                .withIgnorePaths("name")
-                .withIgnorePaths("organism")
-                .withIgnorePaths("taxid")
-                .withIgnorePaths("refseq")
-                .withIgnorePaths("isGenbankRefseqIdentical");
-        Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setGenbank(genbank), matcher);
-        Optional<AssemblyEntity> one = repository.findOne(probe);
-        one.ifPresent(this::stripAssemblyFromChromosomes);
-        return one;
-    }
-
-    public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
-        ExampleMatcher matcher = ExampleMatcher
-                .matching()
-                .withIncludeNullValues()
-                .withIgnorePaths("id")
-                .withIgnorePaths("name")
-                .withIgnorePaths("organism")
-                .withIgnorePaths("taxid")
-                .withIgnorePaths("genbank")
-                .withIgnorePaths("isGenbankRefseqIdentical");
-        Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setRefseq(refseq), matcher);
-        Optional<AssemblyEntity> one = repository.findOne(probe);
-        one.ifPresent(this::stripAssemblyFromChromosomes);
-        return one;
-    }
-
-    public Optional<AssemblyEntity> getAssemblyByGenbankOrRefseq(String genbank, String refseq) {
-        ExampleMatcher matcher = ExampleMatcher
-                .matchingAny()
-                .withIncludeNullValues()
-                .withIgnorePaths("id")
-                .withIgnorePaths("name")
-                .withIgnorePaths("organism")
-                .withIgnorePaths("taxid")
-                .withIgnorePaths("isGenbankRefseqIdentical");
-        Example<AssemblyEntity> probe = Example.of(new AssemblyEntity().setGenbank(genbank).setRefseq(refseq), matcher);
-        Optional<AssemblyEntity> one = repository.findOne(probe);
-        one.ifPresent(this::stripAssemblyFromChromosomes);
-        return one;
     }
 
 }
