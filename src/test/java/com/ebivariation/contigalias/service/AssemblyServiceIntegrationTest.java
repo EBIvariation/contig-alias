@@ -135,6 +135,13 @@ public class AssemblyServiceIntegrationTest {
             testAssemblyIdenticalToEntity(accession.get());
         }
 
+        @Test
+        void getAssemblyByRefseq() {
+            Optional<AssemblyEntity> accession = service.getAssemblyByRefseq(entity.getRefseq());
+            assertTrue(accession.isPresent());
+            testAssemblyIdenticalToEntity(accession.get());
+        }
+
         void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
             assertEquals(entity.getName(), assembly.getName());
             assertEquals(entity.getOrganism(), assembly.getOrganism());

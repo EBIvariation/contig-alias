@@ -62,6 +62,8 @@ public class ContigAliasControllerIntegrationTest {
                 .thenReturn(Optional.of(entity));
         when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
                 .thenReturn(Optional.of(entity));
+        when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
+                .thenReturn(Optional.of(entity));
     }
 
     @Test
@@ -75,6 +77,13 @@ public class ContigAliasControllerIntegrationTest {
     void getAssemblyByGenbank() throws Exception {
         ResultActions resultActions = this.mockMvc.perform(
                 get("/contig-alias/assemblies/genbank/{genbank}", entity.getGenbank()));
+        testAssemblyIdenticalToEntity(resultActions);
+    }
+
+    @Test
+    void getAssemblyByRefseq() throws Exception {
+        ResultActions resultActions = this.mockMvc.perform(
+                get("/contig-alias/assemblies/refseq/{refseq}", entity.getRefseq()));
         testAssemblyIdenticalToEntity(resultActions);
     }
 
@@ -92,6 +101,10 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void test404NotFound() throws Exception {
         this.mockMvc.perform(get("/contig-alias/assemblies/{accession}", "##INVALID##"))
+                    .andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/contig-alias/assemblies/genbank/{genbank}", entity.getRefseq()))
+                    .andExpect(status().isNotFound());
+        this.mockMvc.perform(get("/contig-alias/assemblies/refseq/{refseq}", entity.getGenbank()))
                     .andExpect(status().isNotFound());
     }
 

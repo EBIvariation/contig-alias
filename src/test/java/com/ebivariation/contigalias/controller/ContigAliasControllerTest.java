@@ -43,34 +43,36 @@ public class ContigAliasControllerTest {
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
         Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
                .thenReturn(Optional.of(entity));
+        Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getRefseq()))
+               .thenReturn(Optional.of(entity));
         Mockito.when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
+               .thenReturn(Optional.of(entity));
+        Mockito.when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
                .thenReturn(Optional.of(entity));
         controller = new ContigAliasController(mockAssemblyService, null);
     }
 
     @Test
     public void getAssemblyByAccession() {
-        ResponseEntity<Optional<AssemblyEntity>> assemblyByAccession = controller.getAssemblyByAccession(
-                entity.getGenbank());
-        assertEquals(assemblyByAccession.getStatusCode(), HttpStatus.OK);
-        assertTrue(assemblyByAccession.hasBody());
-        Optional<AssemblyEntity> body = assemblyByAccession.getBody();
-        assertNotNull(body);
-        assertTrue(body.isPresent());
-        testAssemblyIdenticalToEntity(body.get());
+        testAssemblyEntityResponse(controller.getAssemblyByAccession(entity.getGenbank()));
+        testAssemblyEntityResponse(controller.getAssemblyByAccession(entity.getRefseq()));
     }
 
     @Test
     public void getAssemblyByGenbank() {
-        ResponseEntity<AssemblyEntity> assemblyByGenbank = controller.getAssemblyByGenbank(entity.getGenbank());
-        assertEquals(assemblyByGenbank.getStatusCode(), HttpStatus.OK);
-        assertTrue(assemblyByGenbank.hasBody());
-        AssemblyEntity assembly = assemblyByGenbank.getBody();
-        assertNotNull(assembly);
-        testAssemblyIdenticalToEntity(assembly);
+        testAssemblyEntityResponse(controller.getAssemblyByGenbank(entity.getGenbank()));
     }
 
-    void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
+    @Test
+    public void getAssemblyByRefseq() {
+        testAssemblyEntityResponse(controller.getAssemblyByRefseq(entity.getRefseq()));
+    }
+
+    void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertTrue(response.hasBody());
+        AssemblyEntity assembly = response.getBody();
+        assertNotNull(assembly);
         assertEquals(entity.getName(), assembly.getName());
         assertEquals(entity.getOrganism(), assembly.getOrganism());
         assertEquals(entity.getGenbank(), assembly.getGenbank());

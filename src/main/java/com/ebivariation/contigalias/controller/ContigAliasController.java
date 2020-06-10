@@ -38,26 +38,28 @@ public class ContigAliasController {
     private final ChromosomeService chromosomeService;
 
     @Autowired
-    public ContigAliasController(AssemblyService assemblyService,
-                                 ChromosomeService chromosomeService) {
+    public ContigAliasController(AssemblyService assemblyService, ChromosomeService chromosomeService) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
     }
 
     @GetMapping(value = "assemblies/{accession}")
-    public ResponseEntity<Optional<AssemblyEntity>> getAssemblyByAccession(
-            @PathVariable String accession) {
+    public ResponseEntity<AssemblyEntity> getAssemblyByAccession(@PathVariable String accession) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
-        if (entity.isPresent()) {
-            return new ResponseEntity<>(entity, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(entity, HttpStatus.NOT_FOUND);
-        }
+        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping(value = "assemblies/genbank/{genbank}")
     public ResponseEntity<AssemblyEntity> getAssemblyByGenbank(@PathVariable String genbank) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
+        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "assemblies/refseq/{refseq}")
+    public ResponseEntity<AssemblyEntity> getAssemblyByRefseq(@PathVariable String refseq) {
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
