@@ -65,6 +65,12 @@ public class AssemblyService {
         return Optional.empty();
     }
 
+    public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
+        entity.ifPresent(this::stripAssemblyFromChromosomes);
+        return entity;
+    }
+
     public Optional<AssemblyEntity> fetchAndInsertAssembly(
             String accession) throws IOException, IllegalArgumentException {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);

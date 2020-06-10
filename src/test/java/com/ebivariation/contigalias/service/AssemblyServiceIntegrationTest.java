@@ -125,7 +125,17 @@ public class AssemblyServiceIntegrationTest {
         void getAssemblyByAccession() {
             Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
             assertTrue(accession.isPresent());
-            AssemblyEntity assembly = accession.get();
+            testAssemblyIdenticalToEntity(accession.get());
+        }
+
+        @Test
+        void getAssemblyByGenbank() {
+            Optional<AssemblyEntity> accession = service.getAssemblyByGenbank(entity.getGenbank());
+            assertTrue(accession.isPresent());
+            testAssemblyIdenticalToEntity(accession.get());
+        }
+
+        void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
             assertEquals(entity.getName(), assembly.getName());
             assertEquals(entity.getOrganism(), assembly.getOrganism());
             assertEquals(entity.getGenbank(), assembly.getGenbank());

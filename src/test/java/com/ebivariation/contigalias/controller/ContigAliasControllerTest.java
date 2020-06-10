@@ -43,7 +43,8 @@ public class ContigAliasControllerTest {
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
         Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
                .thenReturn(Optional.of(entity));
-
+        Mockito.when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
+               .thenReturn(Optional.of(entity));
         controller = new ContigAliasController(mockAssemblyService, null);
     }
 
@@ -56,14 +57,25 @@ public class ContigAliasControllerTest {
         Optional<AssemblyEntity> body = assemblyByAccession.getBody();
         assertNotNull(body);
         assertTrue(body.isPresent());
+        testAssemblyIdenticalToEntity(body.get());
+    }
 
-        AssemblyEntity assembly = body.get();
+    @Test
+    public void getAssemblyByGenbank() {
+        ResponseEntity<AssemblyEntity> assemblyByGenbank = controller.getAssemblyByGenbank(entity.getGenbank());
+        assertEquals(assemblyByGenbank.getStatusCode(), HttpStatus.OK);
+        assertTrue(assemblyByGenbank.hasBody());
+        AssemblyEntity assembly = assemblyByGenbank.getBody();
+        assertNotNull(assembly);
+        testAssemblyIdenticalToEntity(assembly);
+    }
+
+    void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
         assertEquals(entity.getName(), assembly.getName());
         assertEquals(entity.getOrganism(), assembly.getOrganism());
         assertEquals(entity.getGenbank(), assembly.getGenbank());
         assertEquals(entity.getRefseq(), assembly.getRefseq());
         assertEquals(entity.getTaxid(), assembly.getTaxid());
         assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
-
     }
 }

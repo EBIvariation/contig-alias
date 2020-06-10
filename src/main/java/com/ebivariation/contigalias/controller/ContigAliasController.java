@@ -55,4 +55,11 @@ public class ContigAliasController {
         }
     }
 
+    @GetMapping(value = "assemblies/genbank/{genbank}")
+    public ResponseEntity<AssemblyEntity> getAssemblyByGenbank(@PathVariable String genbank) {
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
+        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
 }
