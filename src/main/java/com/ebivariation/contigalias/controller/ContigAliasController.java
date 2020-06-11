@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequestMapping("contig-alias")
@@ -63,6 +64,13 @@ public class ContigAliasController {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "assemblies/taxid/{taxid}")
+    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid) {
+        Optional<List<AssemblyEntity>> entities = assemblyService.getAssembliesByTaxid(taxid);
+        return entities.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                       .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping(value = "chromosomes/genbank/{genbank}")

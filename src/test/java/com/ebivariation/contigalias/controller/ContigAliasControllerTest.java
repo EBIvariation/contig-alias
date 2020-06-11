@@ -29,6 +29,8 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +45,7 @@ public class ContigAliasControllerTest {
     @Nested
     class AssemblyServiceTests {
 
-        AssemblyEntity entity = AssemblyGenerator.generate();
+        private final AssemblyEntity entity = AssemblyGenerator.generate();
 
         @BeforeEach
         void setUp() {
@@ -87,6 +89,51 @@ public class ContigAliasControllerTest {
             assertEquals(entity.getRefseq(), assembly.getRefseq());
             assertEquals(entity.getTaxid(), assembly.getTaxid());
             assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        }
+
+    }
+
+    @Nested
+    class AssemblyServiceGetByTaxidTest {
+
+        private final int MAX_CONSECUTIVE_ENTITIES = 5;
+
+        private final long TAX_ID = 342043L;
+
+        private final List<AssemblyEntity> entities = new LinkedList<>();
+
+        @BeforeEach
+        void setup() {
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assemblyEntity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
+                entities.add(assemblyEntity);
+            }
+            AssemblyService mockAssemblyService = mock(AssemblyService.class);
+            Mockito.when(mockAssemblyService.getAssembliesByTaxid(TAX_ID))
+                   .thenReturn(Optional.of(entities));
+
+            controller = new ContigAliasController(mockAssemblyService, null);
+        }
+
+        @Test
+        void getAssembliesByTaxid() {
+            ResponseEntity<List<AssemblyEntity>> response = controller.getAssembliesByTaxid(TAX_ID);
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            List<AssemblyEntity> entityList = response.getBody();
+            assertNotNull(entityList);
+            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
+
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assembly = entityList.get(i);
+                AssemblyEntity entity = entities.get(i);
+                assertEquals(entity.getName(), assembly.getName());
+                assertEquals(entity.getOrganism(), assembly.getOrganism());
+                assertEquals(entity.getGenbank(), assembly.getGenbank());
+                assertEquals(entity.getRefseq(), assembly.getRefseq());
+                assertEquals(TAX_ID, assembly.getTaxid());
+                assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+            }
         }
 
     }
