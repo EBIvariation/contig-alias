@@ -17,6 +17,7 @@
 package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
 import com.ebivariation.contigalias.service.ChromosomeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,20 @@ public class ContigAliasController {
     public ResponseEntity<AssemblyEntity> getAssemblyByRefseq(@PathVariable String refseq) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "chromosomes/genbank/{genbank}")
+    public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank) {
+        Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByGenbank(genbank);
+        return entity.map(chromosomeEntity -> new ResponseEntity<>(chromosomeEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "chromosomes/refseq/{refseq}")
+    public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq) {
+        Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
+        return entity.map(chromosomeEntity -> new ResponseEntity<>(chromosomeEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 

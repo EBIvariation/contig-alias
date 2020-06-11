@@ -17,9 +17,13 @@
 package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.entitygenerator.AssemblyGenerator;
+import com.ebivariation.contigalias.entitygenerator.ChromosomeGenerator;
 import com.ebivariation.contigalias.service.AssemblyService;
+import com.ebivariation.contigalias.service.ChromosomeService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
@@ -34,50 +38,93 @@ import static org.mockito.Mockito.mock;
 
 public class ContigAliasControllerTest {
 
-    AssemblyEntity entity = AssemblyGenerator.generate();
-
     private ContigAliasController controller;
 
-    @BeforeEach
-    void setUp() {
-        AssemblyService mockAssemblyService = mock(AssemblyService.class);
-        Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
-               .thenReturn(Optional.of(entity));
-        Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getRefseq()))
-               .thenReturn(Optional.of(entity));
-        Mockito.when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
-               .thenReturn(Optional.of(entity));
-        Mockito.when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
-               .thenReturn(Optional.of(entity));
-        controller = new ContigAliasController(mockAssemblyService, null);
+    @Nested
+    class AssemblyServiceTests {
+
+        AssemblyEntity entity = AssemblyGenerator.generate();
+
+        @BeforeEach
+        void setUp() {
+            AssemblyService mockAssemblyService = mock(AssemblyService.class);
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
+                   .thenReturn(Optional.of(entity));
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(entity.getRefseq()))
+                   .thenReturn(Optional.of(entity));
+            Mockito.when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
+                   .thenReturn(Optional.of(entity));
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
+                   .thenReturn(Optional.of(entity));
+
+            controller = new ContigAliasController(mockAssemblyService, null);
+        }
+
+        @Test
+        public void getAssemblyByAccession() {
+            testAssemblyEntityResponse(controller.getAssemblyByAccession(entity.getGenbank()));
+            testAssemblyEntityResponse(controller.getAssemblyByAccession(entity.getRefseq()));
+        }
+
+        @Test
+        public void getAssemblyByGenbank() {
+            testAssemblyEntityResponse(controller.getAssemblyByGenbank(entity.getGenbank()));
+        }
+
+        @Test
+        public void getAssemblyByRefseq() {
+            testAssemblyEntityResponse(controller.getAssemblyByRefseq(entity.getRefseq()));
+        }
+
+        void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            AssemblyEntity assembly = response.getBody();
+            assertNotNull(assembly);
+            assertEquals(entity.getName(), assembly.getName());
+            assertEquals(entity.getOrganism(), assembly.getOrganism());
+            assertEquals(entity.getGenbank(), assembly.getGenbank());
+            assertEquals(entity.getRefseq(), assembly.getRefseq());
+            assertEquals(entity.getTaxid(), assembly.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        }
+
     }
 
-    @Test
-    public void getAssemblyByAccession() {
-        testAssemblyEntityResponse(controller.getAssemblyByAccession(entity.getGenbank()));
-        testAssemblyEntityResponse(controller.getAssemblyByAccession(entity.getRefseq()));
-    }
+    @Nested
+    class ChromosomeServiceTests {
 
-    @Test
-    public void getAssemblyByGenbank() {
-        testAssemblyEntityResponse(controller.getAssemblyByGenbank(entity.getGenbank()));
-    }
+        ChromosomeEntity entity = ChromosomeGenerator.generate();
 
-    @Test
-    public void getAssemblyByRefseq() {
-        testAssemblyEntityResponse(controller.getAssemblyByRefseq(entity.getRefseq()));
-    }
+        @BeforeEach
+        void setUp() {
+            ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
+            Mockito.when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank()))
+                   .thenReturn(Optional.of(entity));
+            Mockito.when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq()))
+                   .thenReturn(Optional.of(entity));
+            controller = new ContigAliasController(null, mockChromosomeService);
+        }
 
-    void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
-        assertTrue(response.hasBody());
-        AssemblyEntity assembly = response.getBody();
-        assertNotNull(assembly);
-        assertEquals(entity.getName(), assembly.getName());
-        assertEquals(entity.getOrganism(), assembly.getOrganism());
-        assertEquals(entity.getGenbank(), assembly.getGenbank());
-        assertEquals(entity.getRefseq(), assembly.getRefseq());
-        assertEquals(entity.getTaxid(), assembly.getTaxid());
-        assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        @Test
+        public void getChromosomeByGenbank() {
+            testChromosomeEntityResponse(controller.getChromosomeByGenbank(entity.getGenbank()));
+        }
+
+        @Test
+        public void getChromosomeByRefseq() {
+            testChromosomeEntityResponse(controller.getChromosomeByRefseq(entity.getRefseq()));
+        }
+
+        void testChromosomeEntityResponse(ResponseEntity<ChromosomeEntity> response) {
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            ChromosomeEntity chromosome = response.getBody();
+            assertNotNull(chromosome);
+            assertEquals(entity.getName(), chromosome.getName());
+            assertEquals(entity.getGenbank(), chromosome.getGenbank());
+            assertEquals(entity.getRefseq(), chromosome.getRefseq());
+        }
+
     }
 }
