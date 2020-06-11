@@ -22,6 +22,8 @@ import com.ebivariation.contigalias.repo.ChromosomeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class ChromosomeService {
 
@@ -32,11 +34,33 @@ public class ChromosomeService {
         this.repository = repository;
     }
 
+    public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
+        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByGenbank(genbank);
+        entity.ifPresent(this::stripChromosomeFromAssembly);
+        return entity;
+    }
+
+    public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
+        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseqAndRefseqIsNotNull(refseq);
+        entity.ifPresent(this::stripChromosomeFromAssembly);
+        return entity;
+    }
+
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
         AssemblyEntity assembly = chromosome.getAssembly();
         if (assembly != null) {
             assembly.setChromosomes(null);
         }
+    }
+
+    public void insertChromosome(ChromosomeEntity entity) {
+        // TODO check if entity already exists in db
+        repository.save(entity);
+    }
+
+    public void deleteChromosome(ChromosomeEntity entity) {
+        // TODO check if entity already exists in db
+        repository.delete(entity);
     }
 
 }
