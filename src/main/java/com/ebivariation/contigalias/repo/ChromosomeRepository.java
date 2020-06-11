@@ -27,5 +27,5 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     Optional<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank);
 
-    Optional<ChromosomeEntity> findChromosomeEntityByRefseqAndRefseqIsNotNull(String refseq);
+    Optional<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq);
 }

@@ -20,6 +20,8 @@ import com.ebivariation.contigalias.entities.AssemblyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -38,4 +40,7 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long> 
     Optional<AssemblyEntity> findAssemblyEntityByGenbank(String genbank);
 
     Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
+
+    Optional<List<AssemblyEntity>> findAssemblyEntitiesByTaxid(long taxid);
+
 }

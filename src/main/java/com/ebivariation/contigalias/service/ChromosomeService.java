@@ -41,7 +41,7 @@ public class ChromosomeService {
     }
 
     public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseqAndRefseqIsNotNull(refseq);
+        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseq(refseq);
         entity.ifPresent(this::stripChromosomeFromAssembly);
         return entity;
     }

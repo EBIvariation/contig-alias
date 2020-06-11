@@ -152,4 +152,43 @@ public class AssemblyServiceIntegrationTest {
         }
 
     }
+
+    @Nested
+    class NoSetupTeardown {
+
+        @Test
+        void getAssembliesByTaxid() {
+
+            int TEST_SIZE = 5;
+            long TAX_ID = 8493L;
+
+            AssemblyEntity[] entities = new AssemblyEntity[TEST_SIZE];
+
+            for (int i = 0; i < TEST_SIZE; i++) {
+                AssemblyEntity entity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
+                entities[i] = entity;
+                service.insertAssembly(entity);
+            }
+
+            Optional<List<AssemblyEntity>> assembliesByTaxid = service.getAssembliesByTaxid(TAX_ID);
+            assertTrue(assembliesByTaxid.isPresent());
+            List<AssemblyEntity> entityList = assembliesByTaxid.get();
+            assertEquals(TEST_SIZE, entityList.size());
+
+            for (int i = 0; i < TEST_SIZE; i++) {
+                AssemblyEntity assembly = entityList.get(i);
+                assertEquals(entities[i].getName(), assembly.getName());
+                assertEquals(entities[i].getOrganism(), assembly.getOrganism());
+                assertEquals(entities[i].getGenbank(), assembly.getGenbank());
+                assertEquals(entities[i].getRefseq(), assembly.getRefseq());
+                assertEquals(TAX_ID, assembly.getTaxid());
+                assertEquals(entities[i].isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+            }
+
+            for (AssemblyEntity entity : entities) {
+                service.deleteAssembly(entity);
+            }
+        }
+
+    }
 }

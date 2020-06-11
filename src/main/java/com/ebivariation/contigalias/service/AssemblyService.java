@@ -77,6 +77,12 @@ public class AssemblyService {
         return entity;
     }
 
+    public Optional<List<AssemblyEntity>> getAssembliesByTaxid(long taxid) {
+        Optional<List<AssemblyEntity>> entityList = repository.findAssemblyEntitiesByTaxid(taxid);
+        entityList.ifPresent(it -> it.forEach(this::stripAssemblyFromChromosomes));
+        return entityList;
+    }
+
     public Optional<AssemblyEntity> fetchAndInsertAssembly(
             String accession) throws IOException, IllegalArgumentException {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
@@ -203,9 +209,8 @@ public class AssemblyService {
         return CACHE_SIZE;
     }
 
-    public AssemblyService setCacheSize(int CACHE_SIZE) {
+    public void setCacheSize(int CACHE_SIZE) {
         this.CACHE_SIZE = CACHE_SIZE;
-        return this;
     }
 
 }
