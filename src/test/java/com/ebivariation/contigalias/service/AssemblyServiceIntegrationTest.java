@@ -109,7 +109,9 @@ public class AssemblyServiceIntegrationTest {
     @Nested
     class NoDataSource {
 
-        private final AssemblyEntity entity = AssemblyGenerator.generate();
+        private final int MAX_CONSECUTIVE_ENTITIES = 5;
+
+        private final AssemblyEntity entity = AssemblyGenerator.generate(MAX_CONSECUTIVE_ENTITIES + 1);
 
         @BeforeEach
         void setup() {
@@ -151,31 +153,25 @@ public class AssemblyServiceIntegrationTest {
             assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
         }
 
-    }
-
-    @Nested
-    class NoSetupTeardown {
-
         @Test
         void getAssembliesByTaxid() {
 
-            int TEST_SIZE = 5;
             long TAX_ID = 8493L;
 
-            AssemblyEntity[] entities = new AssemblyEntity[TEST_SIZE];
+            AssemblyEntity[] entities = new AssemblyEntity[MAX_CONSECUTIVE_ENTITIES];
 
-            for (int i = 0; i < TEST_SIZE; i++) {
-                AssemblyEntity entity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
-                entities[i] = entity;
-                service.insertAssembly(entity);
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assemblyEntity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
+                entities[i] = assemblyEntity;
+                service.insertAssembly(assemblyEntity);
             }
 
             Optional<List<AssemblyEntity>> assembliesByTaxid = service.getAssembliesByTaxid(TAX_ID);
             assertTrue(assembliesByTaxid.isPresent());
             List<AssemblyEntity> entityList = assembliesByTaxid.get();
-            assertEquals(TEST_SIZE, entityList.size());
+            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
 
-            for (int i = 0; i < TEST_SIZE; i++) {
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
                 AssemblyEntity assembly = entityList.get(i);
                 assertEquals(entities[i].getName(), assembly.getName());
                 assertEquals(entities[i].getOrganism(), assembly.getOrganism());
@@ -185,10 +181,11 @@ public class AssemblyServiceIntegrationTest {
                 assertEquals(entities[i].isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
             }
 
-            for (AssemblyEntity entity : entities) {
-                service.deleteAssembly(entity);
+            for (AssemblyEntity assemblyEntity : entities) {
+                service.deleteAssembly(assemblyEntity);
             }
         }
 
     }
+
 }
