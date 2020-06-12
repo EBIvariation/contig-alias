@@ -31,7 +31,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String REALM = "SEVEN_KINGDOMS";
+    private static final String REALM = "EBI-REALM";
 
     private static final String ROLE_ADMIN = "ADMIN";
 
@@ -60,7 +60,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new CustomBasicAuthenticationEntryPoint();
     }
 
-    /* To allow Pre-flight [OPTIONS] request from browser */
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");

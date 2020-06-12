@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WithMockUser(roles = "ADMIN")
 @WebMvcTest(AdminController.class)
 public class AdminControllerIntegrationTest {
 
@@ -58,9 +59,8 @@ public class AdminControllerIntegrationTest {
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get("/contig-alias-admin/assemblies/{accession}",
-                                                           entity.getGenbank());
-        this.mockMvc.perform(requestBuilder)
+        this.mockMvc.perform(get("/contig-alias-admin/assemblies/{accession}",
+                                 entity.getGenbank()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(entity.getName())))
