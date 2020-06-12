@@ -17,6 +17,7 @@
 package com.ebivariation.contigalias.controller.authentication;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,13 +36,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final String ROLE_ADMIN = "ADMIN";
 
-    private static final String USERNAME_ADMIN = "contig-admin";
+    @Value("${controller.auth.admin.username}")
+    private String USERNAME_ADMIN;
 
-    private static final String USERNAME_PASSWORD = "Souper$ecurE123";
+    @Value("${controller.auth.admin.password}")
+    private String PASSWORD_ADMIN;
 
     @Autowired
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser(USERNAME_ADMIN).password("{noop}" + USERNAME_PASSWORD).roles(ROLE_ADMIN);
+        auth.inMemoryAuthentication().withUser(USERNAME_ADMIN).password("{noop}" + PASSWORD_ADMIN).roles(ROLE_ADMIN);
     }
 
     @Override

@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "controller.auth.admin.username",
+      "type": "java.lang.String",
+      "description": "Username used for AdminController's security configuration."
+    },
+    {
+      "name": "controller.auth.admin.password",
+      "type": "java.lang.String",
+      "description": "Password used for AdminController's security configuration."
+    }
+  ]
+}
