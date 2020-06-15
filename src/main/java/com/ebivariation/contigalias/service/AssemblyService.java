@@ -77,9 +77,11 @@ public class AssemblyService {
         return entity;
     }
 
-    public Optional<List<AssemblyEntity>> getAssembliesByTaxid(long taxid) {
-        Optional<List<AssemblyEntity>> entityList = repository.findAssemblyEntitiesByTaxid(taxid);
-        entityList.ifPresent(it -> it.forEach(this::stripAssemblyFromChromosomes));
+    public List<AssemblyEntity> getAssembliesByTaxid(long taxid) {
+        List<AssemblyEntity> entityList = repository.findAssemblyEntitiesByTaxid(taxid);
+        if (!entityList.isEmpty()) {
+            entityList.forEach(this::stripAssemblyFromChromosomes);
+        }
         return entityList;
     }
 

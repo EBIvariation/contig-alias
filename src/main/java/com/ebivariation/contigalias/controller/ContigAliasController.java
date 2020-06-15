@@ -68,9 +68,12 @@ public class ContigAliasController {
 
     @GetMapping(value = "assemblies/taxid/{taxid}")
     public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid) {
-        Optional<List<AssemblyEntity>> entities = assemblyService.getAssembliesByTaxid(taxid);
-        return entities.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                       .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid);
+        if (entities != null && !entities.isEmpty()) {
+            return new ResponseEntity<>(entities, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(value = "chromosomes/genbank/{genbank}")

@@ -110,7 +110,7 @@ public class ContigAliasControllerTest {
             }
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
             Mockito.when(mockAssemblyService.getAssembliesByTaxid(TAX_ID))
-                   .thenReturn(Optional.of(entities));
+                   .thenReturn(entities);
 
             controller = new ContigAliasController(mockAssemblyService, null);
         }
