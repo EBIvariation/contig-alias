@@ -28,9 +28,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AssemblyGenerator {
 
+    private static final String PREFIX_NAME = "name";
+
     public static AssemblyEntity generate(long id) {
         return new AssemblyEntity()
-                .setName("name" + id)
+                .setName(PREFIX_NAME + id)
                 .setOrganism("organism" + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
@@ -39,8 +41,27 @@ public class AssemblyGenerator {
                 .setChromosomes(new LinkedList<>());
     }
 
+    public static AssemblyEntity generate() {
+        long id = new Random().nextLong();
+        return generate(id);
+    }
+
     @Test
     void generateTest() {
+        AssemblyEntity entity = generate();
+        int length = PREFIX_NAME.length();
+        String name = entity.getName();
+        assertTrue(name.length() > length);
+        String sId = name.substring(length);
+        assertTrue(name.endsWith(sId));
+        assertTrue(entity.getOrganism().endsWith(sId));
+        assertTrue(entity.getGenbank().endsWith(sId));
+        assertTrue(entity.getRefseq().endsWith(sId));
+        assertNotNull(entity.getChromosomes());
+    }
+
+    @Test
+    void generateWithSpecifiedIdTest() {
         long id = 983275;
         AssemblyEntity entity = generate(id);
         String sId = Long.toString(id);
@@ -51,5 +72,6 @@ public class AssemblyGenerator {
         assertTrue(entity.getRefseq().endsWith(sId));
         assertNotNull(entity.getChromosomes());
     }
+
 
 }

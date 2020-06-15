@@ -20,7 +20,12 @@ import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
 
+    Optional<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank);
+
+    Optional<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq);
 }

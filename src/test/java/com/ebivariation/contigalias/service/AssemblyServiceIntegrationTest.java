@@ -109,29 +109,82 @@ public class AssemblyServiceIntegrationTest {
     @Nested
     class NoDataSource {
 
+        private final int MAX_CONSECUTIVE_ENTITIES = 5;
+
+        private final AssemblyEntity entity = AssemblyGenerator.generate(MAX_CONSECUTIVE_ENTITIES + 1);
+
         @BeforeEach
         void setup() {
-            service.insertAssembly(entities[0]);
+            service.insertAssembly(entity);
         }
 
         @AfterEach
         void tearDown() {
-            service.deleteAssembly(entities[0]);
+            service.deleteAssembly(entity);
         }
 
         @Test
         void getAssemblyByAccession() {
-            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entities[0].getGenbank());
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
             assertTrue(accession.isPresent());
-            AssemblyEntity entity = accession.get();
-            assertEquals(entity.getName(), entities[0].getName());
-            assertEquals(entity.getOrganism(), entities[0].getOrganism());
-            assertEquals(entity.getGenbank(), entities[0].getGenbank());
-            assertEquals(entity.getRefseq(), entities[0].getRefseq());
-            assertEquals(entity.getTaxid(), entities[0].getTaxid());
-            assertEquals(entity.isGenbankRefseqIdentical(), entities[0].isGenbankRefseqIdentical());
+            testAssemblyIdenticalToEntity(accession.get());
+        }
 
+        @Test
+        void getAssemblyByGenbank() {
+            Optional<AssemblyEntity> accession = service.getAssemblyByGenbank(entity.getGenbank());
+            assertTrue(accession.isPresent());
+            testAssemblyIdenticalToEntity(accession.get());
+        }
+
+        @Test
+        void getAssemblyByRefseq() {
+            Optional<AssemblyEntity> accession = service.getAssemblyByRefseq(entity.getRefseq());
+            assertTrue(accession.isPresent());
+            testAssemblyIdenticalToEntity(accession.get());
+        }
+
+        void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
+            assertEquals(entity.getName(), assembly.getName());
+            assertEquals(entity.getOrganism(), assembly.getOrganism());
+            assertEquals(entity.getGenbank(), assembly.getGenbank());
+            assertEquals(entity.getRefseq(), assembly.getRefseq());
+            assertEquals(entity.getTaxid(), assembly.getTaxid());
+            assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        }
+
+        @Test
+        void getAssembliesByTaxid() {
+
+            long TAX_ID = 8493L;
+
+            AssemblyEntity[] entities = new AssemblyEntity[MAX_CONSECUTIVE_ENTITIES];
+
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assemblyEntity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
+                entities[i] = assemblyEntity;
+                service.insertAssembly(assemblyEntity);
+            }
+
+            List<AssemblyEntity> entityList = service.getAssembliesByTaxid(TAX_ID);
+            assertNotNull(entityList);
+            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
+
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assembly = entityList.get(i);
+                assertEquals(entities[i].getName(), assembly.getName());
+                assertEquals(entities[i].getOrganism(), assembly.getOrganism());
+                assertEquals(entities[i].getGenbank(), assembly.getGenbank());
+                assertEquals(entities[i].getRefseq(), assembly.getRefseq());
+                assertEquals(TAX_ID, assembly.getTaxid());
+                assertEquals(entities[i].isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+            }
+
+            for (AssemblyEntity assemblyEntity : entities) {
+                service.deleteAssembly(assemblyEntity);
+            }
         }
 
     }
+
 }
