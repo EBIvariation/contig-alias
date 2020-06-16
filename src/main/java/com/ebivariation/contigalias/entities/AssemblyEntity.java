@@ -45,13 +45,13 @@ public class AssemblyEntity {
     @ApiModelProperty(value = "The organism of the assembly.")
     private String organism;
 
-    @ApiModelProperty(value = "Assembly's taxonomic ID")
+    @ApiModelProperty(value = "Assembly's taxonomic ID.")
     private Long taxid;
 
-    @ApiModelProperty(value = "Assembly's Genbank accession")
+    @ApiModelProperty(value = "Assembly's Genbank accession.")
     private String genbank;
 
-    @ApiModelProperty(value = "Assembly's Refseq accession")
+    @ApiModelProperty(value = "Assembly's Refseq accession.")
     private String refseq;
 
     @ApiModelProperty(value = "Are assembly's Genbank and Refseq accessions identical")
