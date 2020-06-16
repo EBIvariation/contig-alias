@@ -44,7 +44,7 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get or fetch an assembly using it's Genbank or Refseq accession.")
-    @GetMapping(value = "assemblies/{accession}")
+    @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<Optional<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable String accession) throws IOException {
         Optional<AssemblyEntity> entity;
@@ -60,13 +60,15 @@ public class AdminController {
         }
     }
 
-    @ApiOperation(value = "Fetch an assembly from remote server using it's Genbank or Refseq accession and insert into local database.")
+    @ApiOperation(value = "Fetch an assembly from remote server using it's Genbank or Refseq accession and insert " +
+            "into local database.")
     @PutMapping(value = "assemblies/{accession}")
     public void fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
         service.fetchAndInsertAssembly(accession);
     }
 
-    @ApiOperation(value = "Fetch assemblies from remote server using their Genbank or Refseq accessions and insert into local database.")
+    @ApiOperation(value = "Fetch assemblies from remote server using their Genbank or Refseq accessions and insert " +
+            "into local database.")
     @PutMapping(value = "assemblies")
     public void fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
         accessions.ifPresentOrElse((list -> {
