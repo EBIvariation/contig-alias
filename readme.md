@@ -17,8 +17,8 @@ Copy this text, replace the user and password and put it all in your ~/.m2/setti
                 <password>your_password</password>
             </properties>
         </profile>
-    <profiles>
-<settings>
+    </profiles>
+</settings>
 ```
 
 Once that's done, you can trigger the variable replacement with the `-P` option in maven. Example: `mvn clean install -Pcontig-alias`.
