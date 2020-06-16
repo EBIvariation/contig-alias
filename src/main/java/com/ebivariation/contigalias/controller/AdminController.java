@@ -18,6 +18,7 @@ package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,6 +43,7 @@ public class AdminController {
         this.service = service;
     }
 
+    @ApiOperation(value = "Get or fetch an assembly using it's Genbank or Refseq accession.")
     @GetMapping(value = "assemblies/{accession}")
     public ResponseEntity<Optional<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable String accession) throws IOException {
@@ -58,11 +60,13 @@ public class AdminController {
         }
     }
 
+    @ApiOperation(value = "Fetch an assembly from remote server using it's Genbank or Refseq accession and insert into local database.")
     @PutMapping(value = "assemblies/{accession}")
     public void fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
         service.fetchAndInsertAssembly(accession);
     }
 
+    @ApiOperation(value = "Fetch assemblies from remote server using their Genbank or Refseq accessions and insert into local database.")
     @PutMapping(value = "assemblies")
     public void fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
         accessions.ifPresentOrElse((list -> {
@@ -76,6 +80,7 @@ public class AdminController {
         }));
     }
 
+    @ApiOperation(value = "Delete an assembly from local database using it's Genbank or Refseq accession.")
     @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(@PathVariable String accession) {
         service.deleteAssembly(accession);
