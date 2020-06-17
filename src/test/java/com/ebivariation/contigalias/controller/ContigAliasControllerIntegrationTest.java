@@ -79,21 +79,21 @@ public class ContigAliasControllerIntegrationTest {
         @Test
         void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/assemblies/{accession}", entity.getGenbank()));
+                    get("/contig-alias/v1/assemblies/{accession}", entity.getGenbank()));
             testAssemblyIdenticalToEntity(resultActions);
         }
 
         @Test
         void getAssemblyByGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/assemblies/genbank/{genbank}", entity.getGenbank()));
+                    get("/contig-alias/v1/assemblies/genbank/{genbank}", entity.getGenbank()));
             testAssemblyIdenticalToEntity(resultActions);
         }
 
         @Test
         void getAssemblyByRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/assemblies/refseq/{refseq}", entity.getRefseq()));
+                    get("/contig-alias/v1/assemblies/refseq/{refseq}", entity.getRefseq()));
             testAssemblyIdenticalToEntity(resultActions);
         }
 
@@ -110,11 +110,11 @@ public class ContigAliasControllerIntegrationTest {
 
         @Test
         void test404NotFound() throws Exception {
-            mockMvc.perform(get("/contig-alias/assemblies/{accession}", "##INVALID##"))
+            mockMvc.perform(get("/contig-alias/v1/assemblies/{accession}", "##INVALID##"))
                    .andExpect(status().isNotFound());
-            mockMvc.perform(get("/contig-alias/assemblies/genbank/{genbank}", entity.getRefseq()))
+            mockMvc.perform(get("/contig-alias/v1/assemblies/genbank/{genbank}", entity.getRefseq()))
                    .andExpect(status().isNotFound());
-            mockMvc.perform(get("/contig-alias/assemblies/refseq/{refseq}", entity.getGenbank()))
+            mockMvc.perform(get("/contig-alias/v1/assemblies/refseq/{refseq}", entity.getGenbank()))
                    .andExpect(status().isNotFound());
         }
     }
@@ -135,14 +135,14 @@ public class ContigAliasControllerIntegrationTest {
         @Test
         void getChromosomeByGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/chromosomes/genbank/{genbank}", entity.getGenbank()));
+                    get("/contig-alias/v1/chromosomes/genbank/{genbank}", entity.getGenbank()));
             testChromosomeIdenticalToEntity(resultActions);
         }
 
         @Test
         void getChromosomeByRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/chromosomes/refseq/{refseq}", entity.getRefseq()));
+                    get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getRefseq()));
             testChromosomeIdenticalToEntity(resultActions);
         }
 
@@ -156,9 +156,9 @@ public class ContigAliasControllerIntegrationTest {
 
         @Test
         void test404NotFound() throws Exception {
-            mockMvc.perform(get("/contig-alias/chromosomes/genbank/{genbank}", entity.getRefseq()))
+            mockMvc.perform(get("/contig-alias/v1/chromosomes/genbank/{genbank}", entity.getRefseq()))
                    .andExpect(status().isNotFound());
-            mockMvc.perform(get("/contig-alias/chromosomes/refseq/{refseq}", entity.getGenbank()))
+            mockMvc.perform(get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getGenbank()))
                    .andExpect(status().isNotFound());
         }
 

@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Random;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
@@ -63,8 +62,7 @@ public class AdminControllerIntegrationTest {
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/assemblies/{accession}",
-                                 entity.getGenbank()))
+        this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(entity.getName())))
@@ -77,7 +75,7 @@ public class AdminControllerIntegrationTest {
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/assemblies/{accession}", entity.getRefseq()))
+        this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(entity.getName())))
@@ -90,7 +88,7 @@ public class AdminControllerIntegrationTest {
 
     @Test
     public void test404NotFound() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/assemblies/{accession}", "##INVALID##"))
+        this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", "##INVALID##"))
                     .andExpect(status().isNotFound());
     }
 }
