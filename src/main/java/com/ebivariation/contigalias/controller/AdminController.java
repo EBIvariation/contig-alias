@@ -43,7 +43,7 @@ public class AdminController {
         this.service = service;
     }
 
-    @ApiOperation(value = "Get or fetch an assembly using it's Genbank or Refseq accession.")
+    @ApiOperation(value = "Get or fetch an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<Optional<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable String accession) throws IOException {
@@ -60,7 +60,7 @@ public class AdminController {
         }
     }
 
-    @ApiOperation(value = "Fetch an assembly from remote server using it's Genbank or Refseq accession and insert " +
+    @ApiOperation(value = "Fetch an assembly from remote server using its Genbank or Refseq accession and insert " +
             "into local database.")
     @PutMapping(value = "assemblies/{accession}")
     public void fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
@@ -82,7 +82,7 @@ public class AdminController {
         }));
     }
 
-    @ApiOperation(value = "Delete an assembly from local database using it's Genbank or Refseq accession.")
+    @ApiOperation(value = "Delete an assembly from local database using its Genbank or Refseq accession.")
     @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(@PathVariable String accession) {
         service.deleteAssembly(accession);
