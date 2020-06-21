@@ -81,10 +81,6 @@ public class ContigAliasController {
              @RequestParam(required = false) Integer page,
              @RequestParam(required = false) Integer size) {
         Pageable pageable = PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
-//        Pageable pageable;
-//        if (page != null) {
-//            pageable = PageRequest.of(page, size != null ? size : 5);
-//        } else pageable = Pageable.unpaged();
         List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, pageable);
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
