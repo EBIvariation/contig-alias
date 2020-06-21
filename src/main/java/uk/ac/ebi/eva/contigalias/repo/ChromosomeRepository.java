@@ -16,17 +16,19 @@
 
 package uk.ac.ebi.eva.contigalias.repo;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
-import java.util.Optional;
-
 @Repository
-public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
+public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long>,
+        JpaSpecificationExecutor<ChromosomeEntity> {
 
-    Optional<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank);
+    Slice<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank, Pageable pageRequest);
 
-    Optional<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq);
+    Slice<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq, Pageable pageRequest);
 }

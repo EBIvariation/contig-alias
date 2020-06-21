@@ -17,6 +17,9 @@
 package uk.ac.ebi.eva.contigalias.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -36,15 +39,29 @@ public class ChromosomeService {
     }
 
     public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByGenbank(genbank);
-        entity.ifPresent(this::stripChromosomeFromAssembly);
-        return entity;
+        return getChromosomeByGenbank(genbank, PageRequest.of(0, 1));
+    }
+
+    public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank, Pageable request) {
+        Slice<ChromosomeEntity> slice = repository.findChromosomeEntityByGenbank(genbank, request);
+        return getOptionalFromSlice(slice);
     }
 
     public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseq(refseq);
-        entity.ifPresent(this::stripChromosomeFromAssembly);
-        return entity;
+        return getChromosomeByRefseq(refseq, PageRequest.of(0, 1));
+    }
+
+    public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq, Pageable request) {
+        Slice<ChromosomeEntity> slice = repository.findChromosomeEntityByRefseq(refseq, request);
+        return getOptionalFromSlice(slice);
+    }
+
+    private Optional<ChromosomeEntity> getOptionalFromSlice(Slice<ChromosomeEntity> slice) {
+        if (slice.getNumberOfElements() > 0) {
+            ChromosomeEntity chromosomeEntity = slice.getContent().get(0);
+            stripChromosomeFromAssembly(chromosomeEntity);
+            return Optional.of(chromosomeEntity);
+        } else return Optional.empty();
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
