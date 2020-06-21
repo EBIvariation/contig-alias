@@ -28,7 +28,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long>,
         JpaSpecificationExecutor<ChromosomeEntity> {
 
-    Slice<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank, Pageable pageRequest);
+    Slice<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank, Pageable pageable);
 
-    Slice<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq, Pageable pageRequest);
+    Slice<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq, Pageable pageable);
 }

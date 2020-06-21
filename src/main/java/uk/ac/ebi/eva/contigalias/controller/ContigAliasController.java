@@ -18,11 +18,14 @@ package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -73,8 +76,16 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid) {
-        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid);
+    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid
+            (@PathVariable long taxid,
+             @RequestParam(required = false) Integer page,
+             @RequestParam(required = false) Integer size) {
+        Pageable pageable = PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
+//        Pageable pageable;
+//        if (page != null) {
+//            pageable = PageRequest.of(page, size != null ? size : 5);
+//        } else pageable = Pageable.unpaged();
+        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, pageable);
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         } else {

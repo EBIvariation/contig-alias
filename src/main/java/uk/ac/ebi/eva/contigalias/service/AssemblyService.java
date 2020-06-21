@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.datasource.AssemblyDataSource;
@@ -78,12 +80,13 @@ public class AssemblyService {
         return entity;
     }
 
-    public List<AssemblyEntity> getAssembliesByTaxid(long taxid) {
-        List<AssemblyEntity> entityList = repository.findAssemblyEntitiesByTaxid(taxid);
-        if (!entityList.isEmpty()) {
-            entityList.forEach(this::stripAssemblyFromChromosomes);
-        }
-        return entityList;
+    public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable pageable) {
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByTaxid(taxid, pageable);
+        if (slice.getNumberOfElements() > 0) {
+            List<AssemblyEntity> content = slice.getContent();
+            content.forEach(this::stripAssemblyFromChromosomes);
+            return content;
+        } else return new LinkedList<>();
     }
 
     public Optional<AssemblyEntity> fetchAndInsertAssembly(
