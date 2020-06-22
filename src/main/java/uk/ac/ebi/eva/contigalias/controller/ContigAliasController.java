@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.contigalias.controller;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +47,10 @@ public class ContigAliasController {
     public ContigAliasController(AssemblyService assemblyService, ChromosomeService chromosomeService) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
+    }
+
+    public static PageRequest createPageRequest(Integer page, Integer size) {
+        return PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
@@ -80,8 +83,7 @@ public class ContigAliasController {
             (@PathVariable long taxid,
              @RequestParam(required = false) Integer page,
              @RequestParam(required = false) Integer size) {
-        Pageable pageable = PageRequest.of(page == null ? 0 : page, size == null ? 10 : size);
-        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, pageable);
+        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, createPageRequest(page, size));
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         } else {
