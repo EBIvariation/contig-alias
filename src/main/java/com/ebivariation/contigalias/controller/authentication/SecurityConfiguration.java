@@ -32,7 +32,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private static final String REALM = "EBI-REALM";
+    public static final String REALM = "EBI-REALM";
 
     private static final String ROLE_ADMIN = "ADMIN";
 

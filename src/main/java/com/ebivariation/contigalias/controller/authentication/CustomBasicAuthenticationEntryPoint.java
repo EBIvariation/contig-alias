@@ -39,7 +39,7 @@ public class CustomBasicAuthenticationEntryPoint extends BasicAuthenticationEntr
 
     @Override
     public void afterPropertiesSet() {
-        setRealmName("MY_TEST_REALM");
+        setRealmName(SecurityConfiguration.REALM);
         super.afterPropertiesSet();
     }
 }
