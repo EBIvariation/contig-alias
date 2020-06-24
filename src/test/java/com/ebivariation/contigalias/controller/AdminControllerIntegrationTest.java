@@ -19,11 +19,15 @@ package com.ebivariation.contigalias.controller;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entitygenerator.AssemblyGenerator;
 import com.ebivariation.contigalias.service.AssemblyService;
+import com.ebivariation.contigalias.test.TestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.annotation.Immutable;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
@@ -36,7 +40,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WithMockUser(roles = "ADMIN")
 @WebMvcTest(AdminController.class)
+@Import(TestConfiguration.class)
 public class AdminControllerIntegrationTest {
 
     private final AssemblyEntity entity = AssemblyGenerator.generate();
@@ -57,7 +63,8 @@ public class AdminControllerIntegrationTest {
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/assemblies/{accession}", entity.getGenbank()))
+        this.mockMvc.perform(get("/contig-alias-admin/assemblies/{accession}",
+                                 entity.getGenbank()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(entity.getName())))
