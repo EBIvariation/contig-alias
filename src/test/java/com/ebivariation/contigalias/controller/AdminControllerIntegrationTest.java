@@ -19,11 +19,14 @@ package com.ebivariation.contigalias.controller;
 import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entitygenerator.AssemblyGenerator;
 import com.ebivariation.contigalias.service.AssemblyService;
+import com.ebivariation.contigalias.test.TestConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.annotation.Immutable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -39,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WithMockUser(roles = "ADMIN")
 @WebMvcTest(AdminController.class)
+@Import(TestConfiguration.class)
 public class AdminControllerIntegrationTest {
 
     private final AssemblyEntity entity = AssemblyGenerator.generate();

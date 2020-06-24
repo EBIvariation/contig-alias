@@ -18,7 +18,6 @@ package com.ebivariation.contigalias.controller.authentication;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -42,6 +41,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Value("${controller.auth.admin.password}")
     private String PASSWORD_ADMIN;
 
+    private CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
+
+    @Autowired
+    public SecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint) {
+        this.customBasicAuthenticationEntryPoint = customBasicAuthenticationEntryPoint;
+    }
+
     @Autowired
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().withUser(USERNAME_ADMIN).password("{noop}" + PASSWORD_ADMIN).roles(ROLE_ADMIN);
@@ -54,17 +60,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/contig-alias/**").permitAll()
             .antMatchers("/contig-alias-admin/**").hasRole(ROLE_ADMIN)
             .and().httpBasic().realmName(REALM)
-            .authenticationEntryPoint(getBasicAuthEntryPoint())
+            .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    }
-
-    @Bean
-    public CustomBasicAuthenticationEntryPoint getBasicAuthEntryPoint() {
-        return new CustomBasicAuthenticationEntryPoint();
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
     }
 }
