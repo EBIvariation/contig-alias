@@ -64,17 +64,17 @@ public class AdminControllerIntegrationTest {
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
         ResultActions request = this.mockMvc.perform(
                 get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()));
-        setResultActions(request);
+        assertAssemblyIdenticalToEntity(request);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws Exception {
         ResultActions request = this.mockMvc.perform(
                 get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()));
-        setResultActions(request);
+        assertAssemblyIdenticalToEntity(request);
     }
 
-    private void setResultActions(ResultActions request) throws Exception {
+    private void assertAssemblyIdenticalToEntity(ResultActions request) throws Exception {
         request.andExpect(status().isOk())
                .andExpect(jsonPath("$.id").doesNotExist())
                .andExpect(jsonPath("$.name", is(entity.getName())))

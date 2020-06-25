@@ -80,24 +80,24 @@ public class ContigAliasControllerIntegrationTest {
         void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/{accession}", entity.getGenbank()));
-            testAssemblyIdenticalToEntity(resultActions);
+            assertAssemblyIdenticalToEntity(resultActions);
         }
 
         @Test
         void getAssemblyByGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/genbank/{genbank}", entity.getGenbank()));
-            testAssemblyIdenticalToEntity(resultActions);
+            assertAssemblyIdenticalToEntity(resultActions);
         }
 
         @Test
         void getAssemblyByRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/refseq/{refseq}", entity.getRefseq()));
-            testAssemblyIdenticalToEntity(resultActions);
+            assertAssemblyIdenticalToEntity(resultActions);
         }
 
-        void testAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
+        void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
                    .andExpect(jsonPath("$.id").doesNotExist())
                    .andExpect(jsonPath("$.name", is(entity.getName())))
@@ -136,17 +136,17 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomeByGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/chromosomes/genbank/{genbank}", entity.getGenbank()));
-            testChromosomeIdenticalToEntity(resultActions);
+            assertChromosomeIdenticalToEntity(resultActions);
         }
 
         @Test
         void getChromosomeByRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getRefseq()));
-            testChromosomeIdenticalToEntity(resultActions);
+            assertChromosomeIdenticalToEntity(resultActions);
         }
 
-        void testChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
+        void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
                    .andExpect(jsonPath("$.id").doesNotExist())
                    .andExpect(jsonPath("$.name", is(entity.getName())))
