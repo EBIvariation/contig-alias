@@ -20,6 +20,7 @@ import com.ebivariation.contigalias.entities.AssemblyEntity;
 import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import com.ebivariation.contigalias.service.AssemblyService;
 import com.ebivariation.contigalias.service.ChromosomeService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,28 +46,32 @@ public class ContigAliasController {
         this.chromosomeService = chromosomeService;
     }
 
-    @GetMapping(value = "assemblies/{accession}")
+    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
+    @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<AssemblyEntity> getAssemblyByAccession(@PathVariable String accession) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping(value = "assemblies/genbank/{genbank}")
+    @ApiOperation(value = "Get an assembly using its Genbank accession.")
+    @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<AssemblyEntity> getAssemblyByGenbank(@PathVariable String genbank) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping(value = "assemblies/refseq/{refseq}")
+    @ApiOperation(value = "Get an assembly using its Refseq accession.")
+    @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<AssemblyEntity> getAssemblyByRefseq(@PathVariable String refseq) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping(value = "assemblies/taxid/{taxid}")
+    @ApiOperation(value = "Get an assembly using its Taxonomic ID.")
+    @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid) {
         List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid);
         if (entities != null && !entities.isEmpty()) {
@@ -76,14 +81,16 @@ public class ContigAliasController {
         }
     }
 
-    @GetMapping(value = "chromosomes/genbank/{genbank}")
+    @ApiOperation(value = "Get an chromosome using its Genbank accession.")
+    @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank) {
         Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByGenbank(genbank);
         return entity.map(chromosomeEntity -> new ResponseEntity<>(chromosomeEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping(value = "chromosomes/refseq/{refseq}")
+    @ApiOperation(value = "Get an chromosome using its Refseq accession.")
+    @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq) {
         Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
         return entity.map(chromosomeEntity -> new ResponseEntity<>(chromosomeEntity, HttpStatus.OK))
