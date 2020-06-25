@@ -33,7 +33,7 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         NCBIBrowser ncbiBrowser = new NCBIBrowser();
         ncbiBrowser.connect();
         Optional<String> directory = ncbiBrowser.getGenomeReportDirectory(accession);
-        if (directory.isEmpty()) {
+        if (!directory.isPresent()) {
             return Optional.empty();
         }
         AssemblyEntity assemblyEntity;

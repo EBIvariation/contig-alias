@@ -13,9 +13,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>contig-alias</name>
     <description>Service to provide synonyms of chromosome/contig identifiers </description>
+    <packaging>war</packaging>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>8</java.version>
     </properties>
 
     <dependencies>
