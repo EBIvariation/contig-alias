@@ -16,6 +16,8 @@
 
 package com.ebivariation.contigalias.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.CascadeType;
@@ -32,6 +34,7 @@ import javax.persistence.Table;
 @Table(name = "chromosome")
 public class ChromosomeEntity {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -47,6 +50,7 @@ public class ChromosomeEntity {
     @ApiModelProperty(value = "Refseq's Genbank accession.")
     private String refseq;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this chromosome belongs to.")
     @ManyToOne(cascade = CascadeType.ALL)
     private AssemblyEntity assembly;

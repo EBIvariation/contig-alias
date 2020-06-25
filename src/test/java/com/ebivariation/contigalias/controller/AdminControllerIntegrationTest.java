@@ -26,9 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.annotation.Immutable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -62,28 +62,27 @@ public class AdminControllerIntegrationTest {
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").isNotEmpty())
-                    .andExpect(jsonPath("$.name", is(entity.getName())))
-                    .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
-                    .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
-                    .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                    .andExpect(jsonPath("$.refseq", is(entity.getRefseq())))
-                    .andExpect(jsonPath("$.genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+        ResultActions request = this.mockMvc.perform(
+                get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()));
+        assertAssemblyIdenticalToEntity(request);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").isNotEmpty())
-                    .andExpect(jsonPath("$.name", is(entity.getName())))
-                    .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
-                    .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
-                    .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                    .andExpect(jsonPath("$.refseq", is(entity.getRefseq())))
-                    .andExpect(jsonPath("$.genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+        ResultActions request = this.mockMvc.perform(
+                get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()));
+        assertAssemblyIdenticalToEntity(request);
+    }
+
+    private void assertAssemblyIdenticalToEntity(ResultActions request) throws Exception {
+        request.andExpect(status().isOk())
+               .andExpect(jsonPath("$.id").doesNotExist())
+               .andExpect(jsonPath("$.name", is(entity.getName())))
+               .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
+               .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
+               .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
+               .andExpect(jsonPath("$.refseq", is(entity.getRefseq())))
+               .andExpect(jsonPath("$.genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
     }
 
     @Test

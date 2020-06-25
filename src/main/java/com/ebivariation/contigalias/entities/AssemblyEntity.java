@@ -16,6 +16,8 @@
 
 package com.ebivariation.contigalias.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.CascadeType;
@@ -33,6 +35,7 @@ import java.util.List;
 @Table(name = "assembly")
 public class AssemblyEntity {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -57,6 +60,7 @@ public class AssemblyEntity {
     @ApiModelProperty(value = "Are assembly's Genbank and Refseq accessions identical")
     private boolean isGenbankRefseqIdentical;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
