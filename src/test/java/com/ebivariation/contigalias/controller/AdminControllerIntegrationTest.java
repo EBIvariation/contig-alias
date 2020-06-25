@@ -64,7 +64,6 @@ public class AdminControllerIntegrationTest {
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
         this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(entity.getName())))
                     .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
                     .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
@@ -77,7 +76,6 @@ public class AdminControllerIntegrationTest {
     public void getAssemblyOrFetchByAccessionGCF() throws Exception {
         this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.name", is(entity.getName())))
                     .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
                     .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))

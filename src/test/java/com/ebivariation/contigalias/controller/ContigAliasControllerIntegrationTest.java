@@ -99,7 +99,6 @@ public class ContigAliasControllerIntegrationTest {
 
         void testAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").isNotEmpty())
                    .andExpect(jsonPath("$.name", is(entity.getName())))
                    .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
                    .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
@@ -148,7 +147,6 @@ public class ContigAliasControllerIntegrationTest {
 
         void testChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").isNotEmpty())
                    .andExpect(jsonPath("$.name", is(entity.getName())))
                    .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
                    .andExpect(jsonPath("$.refseq", is(entity.getRefseq())));
