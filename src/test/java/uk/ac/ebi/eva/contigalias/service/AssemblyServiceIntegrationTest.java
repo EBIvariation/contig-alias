@@ -167,7 +167,7 @@ public class AssemblyServiceIntegrationTest {
                 service.insertAssembly(assemblyEntity);
             }
 
-            List<AssemblyEntity> entityList = service.getAssembliesByTaxid(TAX_ID, null);
+            List<AssemblyEntity> entityList = service.getAssembliesByTaxid(TAX_ID, Optional.empty(), Optional.empty());
             assertNotNull(entityList);
             assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
 

@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +55,10 @@ public class AssemblyService {
         this.dataSource = dataSource;
     }
 
+    public static PageRequest createPageRequest(Optional<Integer> page, Optional<Integer> size) {
+        return PageRequest.of(page.orElse(0), size.orElse(10));
+    }
+
     public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
         Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
         if (assembly.isPresent()) {
@@ -80,8 +84,9 @@ public class AssemblyService {
         return entity;
     }
 
-    public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable pageable) {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByTaxid(taxid, pageable);
+    public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Optional<Integer> page, Optional<Integer> size) {
+        PageRequest request = createPageRequest(page, size);
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByTaxid(taxid, request);
         if (slice.getNumberOfElements() > 0) {
             List<AssemblyEntity> content = slice.getContent();
             content.forEach(this::stripAssemblyFromChromosomes);
