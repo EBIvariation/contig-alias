@@ -32,6 +32,7 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
@@ -47,6 +48,10 @@ public class AdminControllerIntegrationTest {
 
     private final AssemblyEntity entity = AssemblyGenerator.generate();
 
+    private final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
+
+    private final Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -55,10 +60,12 @@ public class AdminControllerIntegrationTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getGenbank()))
-                .thenReturn(Optional.of(entity));
-        when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getRefseq()))
-                .thenReturn(Optional.of(entity));
+        when(mockAssemblyService
+                     .getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                .thenReturn(List.of(entity));
+        when(mockAssemblyService
+                     .getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                .thenReturn(List.of(entity));
     }
 
     @Test
@@ -77,13 +84,14 @@ public class AdminControllerIntegrationTest {
 
     private void assertAssemblyIdenticalToEntity(ResultActions request) throws Exception {
         request.andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").doesNotExist())
-               .andExpect(jsonPath("$.name", is(entity.getName())))
-               .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
-               .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
-               .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-               .andExpect(jsonPath("$.refseq", is(entity.getRefseq())))
-               .andExpect(jsonPath("$.genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+               .andExpect(jsonPath("$[0]").exists())
+               .andExpect(jsonPath("$[0].id").doesNotExist())
+               .andExpect(jsonPath("$[0].name", is(entity.getName())))
+               .andExpect(jsonPath("$[0].organism", is(entity.getOrganism())))
+               .andExpect(jsonPath("$[0].taxid").value(entity.getTaxid()))
+               .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
+               .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())))
+               .andExpect(jsonPath("$[0].genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
     }
 
     @Test

@@ -25,12 +25,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,19 +48,16 @@ public class AdminController {
 
     @ApiOperation(value = "Get or fetch an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<Optional<AssemblyEntity>> getAssemblyOrFetchByAccession(
-            @PathVariable String accession) throws IOException {
-        Optional<AssemblyEntity> entity;
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
+            @PathVariable String accession, @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size) throws IOException {
+        List<AssemblyEntity> entities;
         try {
-            entity = service.getAssemblyOrFetchByAccession(accession);
+            entities = service.getAssemblyOrFetchByAccession(accession, page, size);
         } catch (IllegalArgumentException e) {
-            entity = Optional.empty();
+            entities = new LinkedList<>();
         }
-        if (entity.isPresent()) {
-            return new ResponseEntity<>(entity, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(entity, HttpStatus.NOT_FOUND);
-        }
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Fetch an assembly from remote server using its Genbank or Refseq accession and insert " +
@@ -90,4 +89,11 @@ public class AdminController {
         service.deleteAssembly(accession);
     }
 
+    private <T> ResponseEntity<List<T>> createAppropriateResponseEntity(List<T> entities) {
+        if (entities != null && !entities.isEmpty()) {
+            return new ResponseEntity<>(entities, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

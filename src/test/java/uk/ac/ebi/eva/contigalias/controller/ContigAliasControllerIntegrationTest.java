@@ -34,11 +34,13 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,6 +53,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ContigAliasController.class)
 @Import(TestConfiguration.class)
 public class ContigAliasControllerIntegrationTest {
+
+    private final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
+
+    private final Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,8 +75,9 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
-                    .thenReturn(Optional.of(entity));
+            when(mockAssemblyService
+                         .getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                    .thenReturn(List.of(entity));
             when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
                     .thenReturn(Optional.of(entity));
             when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
@@ -100,13 +107,15 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(entity.getName())))
-                   .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
-                   .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
-                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())))
-                   .andExpect(jsonPath("$.genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+                   .andDo(print())
+                   .andExpect(jsonPath("$[0]").exists())
+                   .andExpect(jsonPath("$[0].id").doesNotExist())
+                   .andExpect(jsonPath("$[0].name", is(entity.getName())))
+                   .andExpect(jsonPath("$[0].organism", is(entity.getOrganism())))
+                   .andExpect(jsonPath("$[0].taxid").value(entity.getTaxid()))
+                   .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())))
+                   .andExpect(jsonPath("$[0].genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
         }
 
         @Test
@@ -149,10 +158,12 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(entity.getName())))
-                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())));
+                   .andDo(print())
+                   .andExpect(jsonPath("$[0]").exists())
+                   .andExpect(jsonPath("$[0].id").doesNotExist())
+                   .andExpect(jsonPath("$[0].name", is(entity.getName())))
+                   .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())));
         }
 
         @Test

@@ -50,10 +50,11 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<AssemblyEntity> getAssemblyByAccession(@PathVariable String accession) {
-        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
+                                                                       @RequestParam Optional<Integer> page,
+                                                                       @RequestParam Optional<Integer> size) {
+        List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession, page, size);
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank accession.")
@@ -79,11 +80,7 @@ public class ContigAliasController {
              @RequestParam Optional<Integer> page,
              @RequestParam Optional<Integer> size) {
         List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, page, size);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get an chromosome using its Genbank accession.")
@@ -102,4 +99,11 @@ public class ContigAliasController {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    private <T> ResponseEntity<List<T>> createAppropriateResponseEntity(List<T> entities) {
+        if (entities != null && !entities.isEmpty()) {
+            return new ResponseEntity<>(entities, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

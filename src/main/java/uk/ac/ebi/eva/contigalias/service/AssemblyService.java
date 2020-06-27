@@ -59,17 +59,21 @@ public class AssemblyService {
         return PageRequest.of(page.orElse(0), size.orElse(10));
     }
 
-    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
-        Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
-        if (assembly.isPresent()) {
-            return assembly;
+    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession, Optional<Integer> page,
+                                                              Optional<Integer> size) throws IOException {
+        List<AssemblyEntity> entities = getAssemblyByAccession(accession, page, size);
+        if (!entities.isEmpty()) {
+            return entities;
         }
         Optional<AssemblyEntity> fetchAssembly = fetchAndInsertAssembly(accession);
-        if (fetchAssembly.isPresent()) {
-            stripAssemblyFromChromosomes(fetchAssembly.get());
-            return fetchAssembly;
-        }
-        return Optional.empty();
+
+        List<AssemblyEntity> list = new LinkedList<>();
+
+        fetchAssembly.ifPresent(it -> {
+            stripAssemblyFromChromosomes(it);
+            list.add(it);
+        });
+        return list;
     }
 
     public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
@@ -87,28 +91,35 @@ public class AssemblyService {
     public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Optional<Integer> page, Optional<Integer> size) {
         PageRequest request = createPageRequest(page, size);
         Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByTaxid(taxid, request);
-        if (slice.getNumberOfElements() > 0) {
-            List<AssemblyEntity> content = slice.getContent();
-            content.forEach(this::stripAssemblyFromChromosomes);
-            return content;
-        } else return new LinkedList<>();
+        return convertSliceToList(slice);
     }
 
     public Optional<AssemblyEntity> fetchAndInsertAssembly(
             String accession) throws IOException, IllegalArgumentException {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
-        if (entity.isPresent()) {
-            throw duplicateAssemblyInsertionException(accession, entity.get());
+        PageRequest request = createPageRequest(Optional.of(0), Optional.of(1));
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, request);
+        List<AssemblyEntity> entities = convertSliceToList(slice);
+        if (!entities.isEmpty()) {
+            throw duplicateAssemblyInsertionException(accession, entities.get(0));
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
         return fetchAssembly;
     }
 
-    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
-        Optional<AssemblyEntity> assembly = repository.findAssemblyEntityByAccession(accession);
-        assembly.ifPresent(this::stripAssemblyFromChromosomes);
-        return assembly;
+    public List<AssemblyEntity> getAssemblyByAccession(String accession, Optional<Integer> page,
+                                                       Optional<Integer> size) {
+        PageRequest request = createPageRequest(page, size);
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, request);
+        return convertSliceToList(slice);
+    }
+
+    public List<AssemblyEntity> convertSliceToList(Slice<AssemblyEntity> slice) {
+        if (slice.getNumberOfElements() > 0) {
+            List<AssemblyEntity> content = slice.getContent();
+            content.forEach(this::stripAssemblyFromChromosomes);
+            return content;
+        } else return new LinkedList<>();
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
@@ -124,7 +135,7 @@ public class AssemblyService {
         setCacheSizeLimit();
 
         if (isEntityPresent(entity)) {
-            throw duplicateAssemblyInsertionException((String) null, entity);
+            throw duplicateAssemblyInsertionException(null, entity);
         } else {
             repository.save(entity);
         }
@@ -148,23 +159,18 @@ public class AssemblyService {
         }
     }
 
-    public void deleteAssembly(AssemblyEntity entity) {
-        if (isEntityPresent(entity)) {
-            repository.delete(entity);
-        }
-    }
-
     public boolean isEntityPresent(AssemblyEntity entity) {
         String genbank = entity.getGenbank();
         String refseq = entity.getRefseq();
         if (genbank == null && refseq == null) {
             return false;
         }
-        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
+        Slice<AssemblyEntity> existingAssembly = repository.findAssemblyEntitiesByGenbankOrRefseq(
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
                 genbank == null ? "##########" : genbank,
-                refseq == null ? "##########" : refseq);
-        return existingAssembly.isPresent();
+                refseq == null ? "##########" : refseq,
+                createPageRequest(Optional.of(0), Optional.of(1)));
+        return existingAssembly.getNumberOfElements() > 0;
     }
 
     public void fetchAndInsertAssembly(List<String> accessions) {
@@ -178,8 +184,17 @@ public class AssemblyService {
     }
 
     public void deleteAssembly(String accession) {
-        Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
-        assembly.ifPresent(repository::delete);
+        List<AssemblyEntity> assemblies = getAssemblyByAccession(accession, Optional.of(0),
+                                                                 Optional.of(Integer.MAX_VALUE));
+        if (!assemblies.isEmpty()) {
+            assemblies.forEach(this::deleteAssembly);
+        }
+    }
+
+    public void deleteAssembly(AssemblyEntity entity) {
+        if (isEntityPresent(entity)) {
+            repository.delete(entity);
+        }
     }
 
     private IllegalArgumentException duplicateAssemblyInsertionException(String accession, AssemblyEntity present) {
@@ -189,23 +204,6 @@ public class AssemblyService {
             exception.append("Assembly trying to insert:");
             exception.append("\t");
             exception.append(accession);
-        }
-        if (present != null) {
-            exception.append("\n");
-            exception.append("Assembly already present");
-            exception.append("\t");
-            exception.append(present.toString());
-        }
-        return new IllegalArgumentException(exception.toString());
-    }
-
-    private IllegalArgumentException duplicateAssemblyInsertionException(AssemblyEntity given, AssemblyEntity present) {
-        StringBuilder exception = new StringBuilder("A similar assembly already exists!");
-        if (given != null) {
-            exception.append("\n");
-            exception.append("Assembly trying to insert:");
-            exception.append("\t");
-            exception.append(given.toString());
         }
         if (present != null) {
             exception.append("\n");
