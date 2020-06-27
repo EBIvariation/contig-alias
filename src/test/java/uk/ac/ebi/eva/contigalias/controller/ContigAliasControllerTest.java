@@ -103,6 +103,10 @@ public class ContigAliasControllerTest {
 
         private final List<AssemblyEntity> entities = new LinkedList<>();
 
+        private final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
+
+        private final Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
+
         @BeforeEach
         void setup() {
             for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
@@ -111,7 +115,7 @@ public class ContigAliasControllerTest {
             }
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
             Mockito.when(mockAssemblyService
-                                 .getAssembliesByTaxid(TAX_ID, null, null))
+                                 .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
                    .thenReturn(entities);
 
             controller = new ContigAliasController(mockAssemblyService, null);
@@ -120,7 +124,7 @@ public class ContigAliasControllerTest {
         @Test
         void getAssembliesByTaxid() {
             ResponseEntity<List<AssemblyEntity>> response
-                    = controller.getAssembliesByTaxid(TAX_ID, Optional.empty(), Optional.empty());
+                    = controller.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
             assertEquals(response.getStatusCode(), HttpStatus.OK);
             assertTrue(response.hasBody());
             List<AssemblyEntity> entityList = response.getBody();
