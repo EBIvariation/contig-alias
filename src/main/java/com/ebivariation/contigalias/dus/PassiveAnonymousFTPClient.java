@@ -37,6 +37,7 @@ public class PassiveAnonymousFTPClient extends FTPClient {
     public void connect(String address, int port) throws IOException {
 
         try {
+            logger.debug("Attempting to connect to {}:{}.", address, port);
             super.connect(address, port);
             // After connection attempt, you should check the reply code to verify
             // success.
