@@ -53,8 +53,8 @@ package-development:
     variables:
         ENVIRONMENT_NAME: development
         MAVEN_PROFILE: development
-#    only:
-#        - master
+    only:
+        - master
 
 package-production:
     extends: .package
@@ -96,8 +96,8 @@ deploy-tomcat-development:
         TOMCAT_HOST: $TOMCAT_DEVELOPMENT_HOST
     dependencies:
         - package-development
-#    only:
-#        - master
+    only:
+        - master
 
 deploy-tomcat-production:
     extends: .deploy-tomcat
