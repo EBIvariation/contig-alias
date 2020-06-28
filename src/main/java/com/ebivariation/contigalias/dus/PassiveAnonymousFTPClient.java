@@ -59,10 +59,18 @@ public class PassiveAnonymousFTPClient extends FTPClient {
             logger.debug("FTP connection status: {}", status);
             logger.info("Connected successfully to {}", address);
         } catch (Exception e) {
-            logger.error("Could not connect to FTP server '{}'. FTP status was: {}. Reply code: {}. Reply string: {}",
-                         address, super.getStatus(), super.getReply(), super.getReplyString());
+            logger.error("Could not connect to FTP server '{}'. {}.", address, getStatusString());
             this.disconnect();
             throw e;
+        }
+    }
+
+    private String getStatusString() {
+        try {
+            return String.format("FTP status was: %s. Reply code: %s. Reply string: %s", super.getStatus(),
+                                 super.getReply(), super.getReplyString());
+        } catch (Exception e) {
+            return "Unable to get status information";
         }
     }
 
