@@ -4,7 +4,7 @@ stages:
     - deploy
 
 variables:
-    WS_ARTIFACT_PATH: contig-alias/target/contig-alias-$ENVIRONMENT_NAME.war
+    WS_ARTIFACT_PATH: target/contig-alias-$ENVIRONMENT_NAME.war
     MAVEN_SETTINGS: maven-settings.xml
     URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
     MEDIA_TYPE: application/vnd.github.raw
