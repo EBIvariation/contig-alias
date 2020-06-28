@@ -32,8 +32,8 @@ test:
         - apk add --update curl
         - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > $MAVEN_SETTINGS
     script:
-        - mvn package --settings $MAVEN_SETTINGS -P $MAVEN_PROFILE -DskipTests -Dtimestamp=$DATETIME
-        - cp contig-alias/target/contig-alias*.war $WS_ARTIFACT_PATH
+        - mvn package --settings $MAVEN_SETTINGS -P $MAVEN_PROFILE -DskipTests
+        - cp target/contig-alias*.war.original $WS_ARTIFACT_PATH
     after_script:
         - rm $MAVEN_SETTINGS
     artifacts:
