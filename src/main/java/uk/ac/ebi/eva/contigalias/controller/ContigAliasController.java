@@ -51,35 +51,37 @@ public class ContigAliasController extends BaseController {
     @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
-                                                                       @RequestParam Optional<Integer> page,
-                                                                       @RequestParam Optional<Integer> size) {
-        List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession, page, size);
+                                                                       @RequestParam(required = false) Integer page,
+                                                                       @RequestParam(required = false) Integer size) {
+        List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession,
+                                                                               createPageRequest(page, size));
         return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank accession.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
-    public ResponseEntity<AssemblyEntity> getAssemblyByGenbank(@PathVariable String genbank) {
-        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(@PathVariable String genbank,
+                                                                     @RequestParam(required = false) Integer page,
+                                                                     @RequestParam(required = false) Integer size) {
+        List<AssemblyEntity> entities = assemblyService.getAssemblyByGenbank(genbank, createPageRequest(page, size));
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get an assembly using its Refseq accession.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<AssemblyEntity> getAssemblyByRefseq(@PathVariable String refseq) {
-        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(@PathVariable String refseq,
+                                                                    @RequestParam(required = false) Integer page,
+                                                                    @RequestParam(required = false) Integer size) {
+        List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq, createPageRequest(page, size));
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid
-            (@PathVariable long taxid,
-             @RequestParam Optional<Integer> page,
-             @RequestParam Optional<Integer> size) {
-        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, page, size);
+    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid,
+                                                                     @RequestParam(required = false) Integer page,
+                                                                     @RequestParam(required = false) Integer size) {
+        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, createPageRequest(page, size));
         return createAppropriateResponseEntity(entities);
     }
 
