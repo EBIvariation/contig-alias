@@ -37,6 +37,7 @@ import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -74,14 +75,15 @@ public class ContigAliasControllerIntegrationTest {
 
 
         @BeforeEach
-        void setUp(){
+        void setUp() {
+            List<AssemblyEntity> entityAsList = List.of(this.entity);
             when(mockAssemblyService
-                         .getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
-                    .thenReturn(List.of(entity));
-            when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
-                    .thenReturn(Optional.of(entity));
-            when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
-                    .thenReturn(Optional.of(entity));
+                         .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityAsList);
+            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityAsList);
+            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityAsList);
         }
 
         @Test

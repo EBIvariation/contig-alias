@@ -34,16 +34,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
+import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class ContigAliasControllerTest {
-
-    private final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
-
-    private final Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
 
     private ContigAliasController controller;
 
@@ -55,16 +54,17 @@ public class ContigAliasControllerTest {
         @BeforeEach
         void setUp() {
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
+            List<AssemblyEntity> entityAsList = List.of(this.entity);
             Mockito.when(mockAssemblyService
-                                 .getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
-                   .thenReturn(List.of(entity));
+                                 .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(entityAsList);
             Mockito.when(mockAssemblyService
-                                 .getAssemblyByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
-                   .thenReturn(List.of(entity));
-            Mockito.when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
-                   .thenReturn(Optional.of(entity));
-            Mockito.when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
-                   .thenReturn(Optional.of(entity));
+                                 .getAssemblyByAccession(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(entityAsList);
+            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(entityAsList);
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(entityAsList);
 
             controller = new ContigAliasController(mockAssemblyService, null);
         }
@@ -77,16 +77,17 @@ public class ContigAliasControllerTest {
                     controller.getAssemblyByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
         }
 
-        // TODO Test after returning list
-//        @Test
-//        public void getAssemblyByGenbank() {
-//            testAssemblyEntityResponse(controller.getAssemblyByGenbank(entity.getGenbank()));
-//        }
-//
-//        @Test
-//        public void getAssemblyByRefseq() {
-//            testAssemblyEntityResponse(controller.getAssemblyByRefseq(entity.getRefseq()));
-//        }
+        @Test
+        public void getAssemblyByGenbank() {
+            testAssemblyEntityResponse(
+                    controller.getAssemblyByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
+
+        @Test
+        public void getAssemblyByRefseq() {
+            testAssemblyEntityResponse(
+                    controller.getAssemblyByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
         void testAssemblyEntityResponse(ResponseEntity<List<AssemblyEntity>> response) {
             assertEquals(response.getStatusCode(), HttpStatus.OK);
@@ -123,7 +124,7 @@ public class ContigAliasControllerTest {
             }
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
             Mockito.when(mockAssemblyService
-                                 .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                                 .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST))
                    .thenReturn(entities);
 
             controller = new ContigAliasController(mockAssemblyService, null);

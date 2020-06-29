@@ -17,7 +17,6 @@
 package com.ebivariation.contigalias.controller;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -29,9 +28,14 @@ public class BaseController {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
 
-    public static final Pageable DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(null, null);
+    public static final PageRequest DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER,
+                                                                                            DEFAULT_PAGE_SIZE);
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
+
+        if (page == DEFAULT_PAGE_NUMBER && size == DEFAULT_PAGE_SIZE) {
+            return DEFAULT_PAGE_REQUEST;
+        }
         return PageRequest.of(page != null ? page : DEFAULT_PAGE_NUMBER, size != null ? size : DEFAULT_PAGE_SIZE);
     }
 
