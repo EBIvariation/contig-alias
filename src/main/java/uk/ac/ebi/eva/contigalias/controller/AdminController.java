@@ -17,7 +17,6 @@
 package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +37,7 @@ import java.util.Optional;
 
 @RequestMapping("contig-alias-admin")
 @RestController
-public class AdminController {
+public class AdminController extends BaseController {
 
     private final AssemblyService service;
 
@@ -49,11 +48,11 @@ public class AdminController {
     @ApiOperation(value = "Get or fetch an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
-            @PathVariable String accession, @RequestParam Optional<Integer> page,
-            @RequestParam Optional<Integer> size) throws IOException {
+            @PathVariable String accession, @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) throws IOException {
         List<AssemblyEntity> entities;
         try {
-            entities = service.getAssemblyOrFetchByAccession(accession, page, size);
+            entities = service.getAssemblyOrFetchByAccession(accession, createPageRequest(page, size));
         } catch (IllegalArgumentException e) {
             entities = new LinkedList<>();
         }
@@ -89,11 +88,4 @@ public class AdminController {
         service.deleteAssembly(accession);
     }
 
-    private <T> ResponseEntity<List<T>> createAppropriateResponseEntity(List<T> entities) {
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 }

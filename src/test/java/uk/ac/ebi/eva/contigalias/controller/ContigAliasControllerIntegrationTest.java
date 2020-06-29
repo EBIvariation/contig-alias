@@ -74,7 +74,7 @@ public class ContigAliasControllerIntegrationTest {
 
 
         @BeforeEach
-        void setUp() {
+        void setUp(){
             when(mockAssemblyService
                          .getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
                     .thenReturn(List.of(entity));

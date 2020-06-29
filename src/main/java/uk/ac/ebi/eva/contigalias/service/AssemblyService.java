@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,10 @@ import java.util.concurrent.Executors;
 @Service
 public class AssemblyService {
 
+    public static final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
+
+    public static Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
+
     private final AssemblyRepository repository;
 
     private final AssemblyDataSource dataSource;
@@ -55,17 +60,13 @@ public class AssemblyService {
         this.dataSource = dataSource;
     }
 
-    public static PageRequest createPageRequest(Optional<Integer> page, Optional<Integer> size) {
-        return PageRequest.of(page.orElse(0), size.orElse(10));
-    }
-
-    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession, Optional<Integer> page,
-                                                              Optional<Integer> size) throws IOException {
-        List<AssemblyEntity> entities = getAssemblyByAccession(accession, page, size);
+    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession,
+                                                              Pageable request) throws IOException {
+        List<AssemblyEntity> entities = getAssemblyByAccession(accession, request);
         if (!entities.isEmpty()) {
             return entities;
         }
-        Optional<AssemblyEntity> fetchAssembly = fetchAndInsertAssembly(accession);
+        Optional<AssemblyEntity> fetchAssembly = fetchAndInsertAssembly(accession, request);
 
         List<AssemblyEntity> list = new LinkedList<>();
 
@@ -88,15 +89,13 @@ public class AssemblyService {
         return entity;
     }
 
-    public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Optional<Integer> page, Optional<Integer> size) {
-        PageRequest request = createPageRequest(page, size);
+    public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
         Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByTaxid(taxid, request);
         return convertSliceToList(slice);
     }
 
-    public Optional<AssemblyEntity> fetchAndInsertAssembly(
-            String accession) throws IOException, IllegalArgumentException {
-        PageRequest request = createPageRequest(Optional.of(0), Optional.of(1));
+    public void fetchAndInsertAssembly(String accession, Pageable request)
+            throws IOException, IllegalArgumentException {
         Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, request);
         List<AssemblyEntity> entities = convertSliceToList(slice);
         if (!entities.isEmpty()) {
@@ -104,12 +103,9 @@ public class AssemblyService {
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
-        return fetchAssembly;
     }
 
-    public List<AssemblyEntity> getAssemblyByAccession(String accession, Optional<Integer> page,
-                                                       Optional<Integer> size) {
-        PageRequest request = createPageRequest(page, size);
+    public List<AssemblyEntity> getAssemblyByAccession(String accession, Pageable request) {
         Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, request);
         return convertSliceToList(slice);
     }
@@ -169,14 +165,14 @@ public class AssemblyService {
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
                 genbank == null ? "##########" : genbank,
                 refseq == null ? "##########" : refseq,
-                createPageRequest(Optional.of(0), Optional.of(1)));
+                PageRequest.of(0, 1));
         return existingAssembly.getNumberOfElements() > 0;
     }
 
     public void fetchAndInsertAssembly(List<String> accessions) {
         accessions.forEach(it -> executor.submit(() -> {
             try {
-                this.fetchAndInsertAssembly(it);
+                this.fetchAndInsertAssembly(it, PageRequest.of(0,0));
             } catch (IOException e) {
                 logger.error("IOException while fetching and inserting " + it, e);
             }
@@ -184,8 +180,7 @@ public class AssemblyService {
     }
 
     public void deleteAssembly(String accession) {
-        List<AssemblyEntity> assemblies = getAssemblyByAccession(accession, Optional.of(0),
-                                                                 Optional.of(Integer.MAX_VALUE));
+        List<AssemblyEntity> assemblies = getAssemblyByAccession(accession, Pageable.unpaged());
         if (!assemblies.isEmpty()) {
             assemblies.forEach(this::deleteAssembly);
         }

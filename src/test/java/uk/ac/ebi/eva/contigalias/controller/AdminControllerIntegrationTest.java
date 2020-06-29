@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ebivariation.contigalias.service.AssemblyService.DEFAULT_PAGE_NUMBER;
+import static com.ebivariation.contigalias.service.AssemblyService.DEFAULT_PAGE_SIZE;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,10 +49,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdminControllerIntegrationTest {
 
     private final AssemblyEntity entity = AssemblyGenerator.generate();
-
-    private final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
-
-    private final Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
 
     @Autowired
     private MockMvc mockMvc;

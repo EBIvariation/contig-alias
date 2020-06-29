@@ -36,7 +36,7 @@ import java.util.Optional;
 
 @RequestMapping("contig-alias")
 @RestController
-public class ContigAliasController {
+public class ContigAliasController extends BaseController {
 
     private final AssemblyService assemblyService;
 
@@ -99,11 +99,4 @@ public class ContigAliasController {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    private <T> ResponseEntity<List<T>> createAppropriateResponseEntity(List<T> entities) {
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 }
