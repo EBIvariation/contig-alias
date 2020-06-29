@@ -33,6 +33,7 @@ public class BaseController {
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
 
+        // Even though this is redundant it is required for some integration tests to pass.
         if (page == DEFAULT_PAGE_NUMBER && size == DEFAULT_PAGE_SIZE) {
             return DEFAULT_PAGE_REQUEST;
         }
