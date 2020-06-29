@@ -40,10 +40,6 @@ import java.util.concurrent.Executors;
 @Service
 public class AssemblyService {
 
-    public static final Optional<Integer> DEFAULT_PAGE_NUMBER = Optional.of(0);
-
-    public static Optional<Integer> DEFAULT_PAGE_SIZE = Optional.of(10);
-
     private final AssemblyRepository repository;
 
     private final AssemblyDataSource dataSource;
@@ -60,33 +56,28 @@ public class AssemblyService {
         this.dataSource = dataSource;
     }
 
-    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession,
-                                                              Pageable request) throws IOException {
+    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession, Pageable request) throws IOException {
+
         List<AssemblyEntity> entities = getAssemblyByAccession(accession, request);
         if (!entities.isEmpty()) {
             return entities;
         }
-        Optional<AssemblyEntity> fetchAssembly = fetchAndInsertAssembly(accession, request);
+        fetchAndInsertAssembly(accession, request);
 
-        List<AssemblyEntity> list = new LinkedList<>();
-
-        fetchAssembly.ifPresent(it -> {
-            stripAssemblyFromChromosomes(it);
-            list.add(it);
-        });
-        return list;
+        entities = getAssemblyByAccession(accession, request);
+        if (!entities.isEmpty()) {
+            return entities;
+        } else return new LinkedList<>();
     }
 
-    public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
-        entity.ifPresent(this::stripAssemblyFromChromosomes);
-        return entity;
+    public List<AssemblyEntity> getAssemblyByGenbank(String genbank, Pageable request) {
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntityByGenbank(genbank, request);
+        return convertSliceToList(slice);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByRefseq(refseq);
-        entity.ifPresent(this::stripAssemblyFromChromosomes);
-        return entity;
+    public List<AssemblyEntity> getAssemblyByRefseq(String refseq, Pageable request) {
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntityByRefseq(refseq, request);
+        return convertSliceToList(slice);
     }
 
     public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
@@ -172,7 +163,7 @@ public class AssemblyService {
     public void fetchAndInsertAssembly(List<String> accessions) {
         accessions.forEach(it -> executor.submit(() -> {
             try {
-                this.fetchAndInsertAssembly(it, PageRequest.of(0,0));
+                this.fetchAndInsertAssembly(it, PageRequest.of(0, 0));
             } catch (IOException e) {
                 logger.error("IOException while fetching and inserting " + it, e);
             }

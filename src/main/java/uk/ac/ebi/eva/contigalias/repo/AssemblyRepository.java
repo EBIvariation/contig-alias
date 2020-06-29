@@ -40,9 +40,9 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
 
     Optional<AssemblyEntity> findTopByIdNotNullOrderById();
 
-    Optional<AssemblyEntity> findAssemblyEntityByGenbank(String genbank);
+    Slice<AssemblyEntity> findAssemblyEntityByGenbank(String genbank, Pageable request);
 
-    Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
+    Slice<AssemblyEntity> findAssemblyEntityByRefseq(String refseq, Pageable request);
 
     Slice<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
