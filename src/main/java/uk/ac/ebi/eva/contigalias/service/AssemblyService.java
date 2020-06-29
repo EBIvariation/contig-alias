@@ -62,7 +62,7 @@ public class AssemblyService {
         if (!entities.isEmpty()) {
             return entities;
         }
-        fetchAndInsertAssembly(accession, request);
+        fetchAndInsertAssembly(accession);
 
         entities = getAssemblyByAccession(accession, request);
         if (!entities.isEmpty()) {
@@ -85,12 +85,12 @@ public class AssemblyService {
         return convertSliceToList(slice);
     }
 
-    public void fetchAndInsertAssembly(String accession, Pageable request)
+    public void fetchAndInsertAssembly(String accession)
             throws IOException, IllegalArgumentException {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, request);
-        List<AssemblyEntity> entities = convertSliceToList(slice);
-        if (!entities.isEmpty()) {
-            throw duplicateAssemblyInsertionException(accession, entities.get(0));
+        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, PageRequest.of(0, 1));
+        if (slice.getNumberOfElements() > 0) {
+            AssemblyEntity entity = convertSliceToList(slice).get(0);
+            throw duplicateAssemblyInsertionException(accession, entity);
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
@@ -163,7 +163,7 @@ public class AssemblyService {
     public void fetchAndInsertAssembly(List<String> accessions) {
         accessions.forEach(it -> executor.submit(() -> {
             try {
-                this.fetchAndInsertAssembly(it, PageRequest.of(0, 0));
+                this.fetchAndInsertAssembly(it);
             } catch (IOException e) {
                 logger.error("IOException while fetching and inserting " + it, e);
             }
