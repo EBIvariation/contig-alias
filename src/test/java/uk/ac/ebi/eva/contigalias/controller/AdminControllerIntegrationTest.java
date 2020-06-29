@@ -33,10 +33,8 @@ import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
-import static com.ebivariation.contigalias.service.AssemblyService.DEFAULT_PAGE_NUMBER;
-import static com.ebivariation.contigalias.service.AssemblyService.DEFAULT_PAGE_SIZE;
+import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -59,10 +57,10 @@ public class AdminControllerIntegrationTest {
     @BeforeEach
     void setUp() throws IOException {
         when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                     .getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(List.of(entity));
         when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                     .getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(List.of(entity));
     }
 

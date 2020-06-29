@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 
 import uk.ac.ebi.eva.contigalias.datasource.AssemblyDataSource;
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,8 +48,6 @@ public class AssemblyServiceIntegrationTest {
     private static final int TEST_ENTITIES_NUMBERS = 11;
 
     private final AssemblyEntity[] entities = new AssemblyEntity[TEST_ENTITIES_NUMBERS];
-
-    private final Pageable DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(null, null);
 
     @Autowired
     AssemblyRepository repository;
