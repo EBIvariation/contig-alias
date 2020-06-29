@@ -33,11 +33,21 @@ public class BaseController {
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
 
-        // Even though this is redundant it is required for some integration tests to pass.
-        if (page == DEFAULT_PAGE_NUMBER && size == DEFAULT_PAGE_SIZE) {
-            return DEFAULT_PAGE_REQUEST;
+        int pagex = DEFAULT_PAGE_NUMBER, sizex = DEFAULT_PAGE_SIZE;
+
+        if (page != null) {
+            pagex = page;
         }
-        return PageRequest.of(page != null ? page : DEFAULT_PAGE_NUMBER, size != null ? size : DEFAULT_PAGE_SIZE);
+        if (size != null) {
+            sizex = size;
+        }
+
+        // Even though this is redundant it is required for some integration tests to pass.
+        if (pagex == DEFAULT_PAGE_NUMBER && sizex == DEFAULT_PAGE_SIZE) {
+            return DEFAULT_PAGE_REQUEST;
+        } else {
+            return PageRequest.of(pagex, sizex);
+        }
     }
 
     public static <T> ResponseEntity<List<T>> createAppropriateResponseEntity(List<T> entities) {
