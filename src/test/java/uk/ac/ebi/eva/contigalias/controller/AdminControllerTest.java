@@ -46,10 +46,10 @@ public class AdminControllerTest {
     @BeforeEach
     void setup() throws IOException {
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
-        Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+        Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getGenbank()))
                .thenReturn(List.of(entity));
         Mockito.when(mockAssemblyService
-                             .getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                             .getAssemblyOrFetchByAccession(entity.getRefseq()))
                .thenReturn(List.of(entity));
         controller = new AdminController(mockAssemblyService);
     }

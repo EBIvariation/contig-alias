@@ -53,9 +53,10 @@ public class ContigAliasController extends BaseController {
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
                                                                        @RequestParam(required = false) Integer page,
                                                                        @RequestParam(required = false) Integer size) {
-        List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession,
-                                                                               createPageRequest(page, size));
-        return createAppropriateResponseEntity(entities);
+        if (paramsValidForSingleResponseQuery(page, size)) {
+            List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession);
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_ASSEMBLY_REQUEST;
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank accession.")
@@ -63,8 +64,10 @@ public class ContigAliasController extends BaseController {
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(@PathVariable String genbank,
                                                                      @RequestParam(required = false) Integer page,
                                                                      @RequestParam(required = false) Integer size) {
-        List<AssemblyEntity> entities = assemblyService.getAssemblyByGenbank(genbank, createPageRequest(page, size));
-        return createAppropriateResponseEntity(entities);
+        if (paramsValidForSingleResponseQuery(page, size)) {
+            List<AssemblyEntity> entities = assemblyService.getAssemblyByGenbank(genbank);
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_ASSEMBLY_REQUEST;
     }
 
     @ApiOperation(value = "Get an assembly using its Refseq accession.")
@@ -72,8 +75,10 @@ public class ContigAliasController extends BaseController {
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(@PathVariable String refseq,
                                                                     @RequestParam(required = false) Integer page,
                                                                     @RequestParam(required = false) Integer size) {
-        List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq, createPageRequest(page, size));
-        return createAppropriateResponseEntity(entities);
+        if (paramsValidForSingleResponseQuery(page, size)) {
+            List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq);
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_ASSEMBLY_REQUEST;
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.")

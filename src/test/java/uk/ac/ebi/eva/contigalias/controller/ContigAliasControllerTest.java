@@ -56,14 +56,14 @@ public class ContigAliasControllerTest {
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
             List<AssemblyEntity> entityAsList = List.of(this.entity);
             Mockito.when(mockAssemblyService
-                                 .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                                 .getAssemblyByAccession(this.entity.getGenbank()))
                    .thenReturn(entityAsList);
             Mockito.when(mockAssemblyService
-                                 .getAssemblyByAccession(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                                 .getAssemblyByAccession(this.entity.getRefseq()))
                    .thenReturn(entityAsList);
-            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
                    .thenReturn(entityAsList);
-            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
                    .thenReturn(entityAsList);
 
             controller = new ContigAliasController(mockAssemblyService, null);

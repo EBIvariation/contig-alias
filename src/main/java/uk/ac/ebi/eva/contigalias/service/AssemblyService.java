@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -56,28 +55,28 @@ public class AssemblyService {
         this.dataSource = dataSource;
     }
 
-    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession, Pageable request) throws IOException {
+    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
 
-        List<AssemblyEntity> entities = getAssemblyByAccession(accession, request);
+        List<AssemblyEntity> entities = getAssemblyByAccession(accession);
         if (!entities.isEmpty()) {
             return entities;
         }
         fetchAndInsertAssembly(accession);
 
-        entities = getAssemblyByAccession(accession, request);
+        entities = getAssemblyByAccession(accession);
         if (!entities.isEmpty()) {
             return entities;
         } else return new LinkedList<>();
     }
 
-    public List<AssemblyEntity> getAssemblyByGenbank(String genbank, Pageable request) {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntityByGenbank(genbank, request);
-        return convertSliceToList(slice);
+    public List<AssemblyEntity> getAssemblyByGenbank(String genbank) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
+        return convertOptionalToList(entity);
     }
 
-    public List<AssemblyEntity> getAssemblyByRefseq(String refseq, Pageable request) {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntityByRefseq(refseq, request);
-        return convertSliceToList(slice);
+    public List<AssemblyEntity> getAssemblyByRefseq(String refseq) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByRefseq(refseq);
+        return convertOptionalToList(entity);
     }
 
     public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
@@ -87,18 +86,17 @@ public class AssemblyService {
 
     public void fetchAndInsertAssembly(String accession)
             throws IOException, IllegalArgumentException {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, PageRequest.of(0, 1));
-        if (slice.getNumberOfElements() > 0) {
-            AssemblyEntity entity = convertSliceToList(slice).get(0);
-            throw duplicateAssemblyInsertionException(accession, entity);
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
+        if (entity.isPresent()) {
+            throw duplicateAssemblyInsertionException(accession, entity.get());
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
     }
 
-    public List<AssemblyEntity> getAssemblyByAccession(String accession, Pageable request) {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByAccession(accession, request);
-        return convertSliceToList(slice);
+    public List<AssemblyEntity> getAssemblyByAccession(String accession) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
+        return convertOptionalToList(entity);
     }
 
     public List<AssemblyEntity> convertSliceToList(Slice<AssemblyEntity> slice) {
@@ -106,7 +104,19 @@ public class AssemblyService {
             List<AssemblyEntity> content = slice.getContent();
             content.forEach(this::stripAssemblyFromChromosomes);
             return content;
-        } else return new LinkedList<>();
+        } else {
+            return new LinkedList<>();
+        }
+    }
+
+    public List<AssemblyEntity> convertOptionalToList(Optional<AssemblyEntity> optional) {
+        if (optional.isPresent()) {
+            AssemblyEntity entity = optional.get();
+            stripAssemblyFromChromosomes(entity);
+            return List.of(entity);
+        } else {
+            return new LinkedList<>();
+        }
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
@@ -152,12 +162,11 @@ public class AssemblyService {
         if (genbank == null && refseq == null) {
             return false;
         }
-        Slice<AssemblyEntity> existingAssembly = repository.findAssemblyEntitiesByGenbankOrRefseq(
+        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
                 genbank == null ? "##########" : genbank,
-                refseq == null ? "##########" : refseq,
-                PageRequest.of(0, 1));
-        return existingAssembly.getNumberOfElements() > 0;
+                refseq == null ? "##########" : refseq);
+        return existingAssembly.isPresent();
     }
 
     public void fetchAndInsertAssembly(List<String> accessions) {
@@ -171,7 +180,7 @@ public class AssemblyService {
     }
 
     public void deleteAssembly(String accession) {
-        List<AssemblyEntity> assemblies = getAssemblyByAccession(accession, Pageable.unpaged());
+        List<AssemblyEntity> assemblies = getAssemblyByAccession(accession);
         if (!assemblies.isEmpty()) {
             assemblies.forEach(this::deleteAssembly);
         }

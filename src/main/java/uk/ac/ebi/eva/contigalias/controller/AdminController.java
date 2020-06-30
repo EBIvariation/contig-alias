@@ -52,7 +52,7 @@ public class AdminController extends BaseController {
             @RequestParam(required = false) Integer size) throws IOException {
         List<AssemblyEntity> entities;
         try {
-            entities = service.getAssemblyOrFetchByAccession(accession, createPageRequest(page, size));
+            entities = service.getAssemblyOrFetchByAccession(accession);
         } catch (IllegalArgumentException e) {
             entities = new LinkedList<>();
         }

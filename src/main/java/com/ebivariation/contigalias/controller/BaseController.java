@@ -16,6 +16,7 @@
 
 package com.ebivariation.contigalias.controller;
 
+import com.ebivariation.contigalias.entities.AssemblyEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,9 @@ public class BaseController {
 
     public static final PageRequest DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER,
                                                                                             DEFAULT_PAGE_SIZE);
+
+    public static final ResponseEntity<List<AssemblyEntity>> BAD_ASSEMBLY_REQUEST
+            = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
 
@@ -58,4 +62,7 @@ public class BaseController {
         }
     }
 
+    public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {
+        return (page == null || page == 0) && (size == null || size > 1);
+    }
 }

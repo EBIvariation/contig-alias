@@ -73,11 +73,11 @@ public class ContigAliasControllerIntegrationTest {
         void setUp() {
             List<AssemblyEntity> entityAsList = List.of(this.entity);
             when(mockAssemblyService
-                         .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                         .getAssemblyByAccession(this.entity.getGenbank()))
                     .thenReturn(entityAsList);
-            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
                     .thenReturn(entityAsList);
-            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
                     .thenReturn(entityAsList);
         }
 

@@ -57,10 +57,10 @@ public class AdminControllerIntegrationTest {
     @BeforeEach
     void setUp() throws IOException {
         when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                     .getAssemblyOrFetchByAccession(entity.getGenbank()))
                 .thenReturn(List.of(entity));
         when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                     .getAssemblyOrFetchByAccession(entity.getRefseq()))
                 .thenReturn(List.of(entity));
     }
 
