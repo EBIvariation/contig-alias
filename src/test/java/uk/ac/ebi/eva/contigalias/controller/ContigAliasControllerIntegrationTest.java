@@ -41,7 +41,6 @@ import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAG
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -105,7 +104,6 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andDo(print())
                    .andExpect(jsonPath("$[0]").exists())
                    .andExpect(jsonPath("$[0].id").doesNotExist())
                    .andExpect(jsonPath("$[0].name", is(entity.getName())))
@@ -156,7 +154,6 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andDo(print())
                    .andExpect(jsonPath("$.id").doesNotExist())
                    .andExpect(jsonPath("$.name", is(entity.getName())))
                    .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
