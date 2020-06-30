@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Repository
@@ -46,4 +47,9 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
 
     Slice<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
+    @Transactional
+    void deleteAssemblyEntityByGenbank(String genbank);
+
+    @Transactional
+    void deleteAssemblyEntityByRefseq(String refseq);
 }

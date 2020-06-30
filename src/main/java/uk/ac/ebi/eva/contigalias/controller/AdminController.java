@@ -85,7 +85,7 @@ public class AdminController extends BaseController {
     @ApiOperation(value = "Delete an assembly from local database using its Genbank or Refseq accession.")
     @DeleteMapping(value = "v1/assemblies/{accession}")
     public void deleteAssemblyByAccession(@PathVariable String accession) {
-        service.deleteAssembly(accession);
+        service.deleteAssemblyByAccession(accession);
     }
 
 }

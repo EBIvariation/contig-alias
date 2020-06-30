@@ -129,7 +129,7 @@ public class AssemblyServiceIntegrationTest {
 
         @AfterEach
         void tearDown() {
-            service.deleteAssembly(entity);
+            service.deleteAssemblyByRefseq(entity.getRefseq());
         }
 
         @Test
@@ -189,7 +189,7 @@ public class AssemblyServiceIntegrationTest {
             }
 
             for (AssemblyEntity assemblyEntity : entities) {
-                service.deleteAssembly(assemblyEntity);
+                service.deleteAssemblyByGenbank(assemblyEntity.getGenbank());
             }
         }
 

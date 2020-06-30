@@ -179,17 +179,21 @@ public class AssemblyService {
         }));
     }
 
-    public void deleteAssembly(String accession) {
+    public void deleteAssemblyByGenbank(String genbank) {
+        repository.deleteAssemblyEntityByGenbank(genbank);
+    }
+    public void deleteAssemblyByRefseq(String refseq) {
+        repository.deleteAssemblyEntityByRefseq(refseq);
+    }
+
+    public void deleteAssemblyByAccession(String accession) {
         List<AssemblyEntity> assemblies = getAssemblyByAccession(accession);
         if (!assemblies.isEmpty()) {
             assemblies.forEach(this::deleteAssembly);
         }
     }
-
     public void deleteAssembly(AssemblyEntity entity) {
-        if (isEntityPresent(entity)) {
-            repository.delete(entity);
-        }
+        repository.delete(entity);
     }
 
     private IllegalArgumentException duplicateAssemblyInsertionException(String accession, AssemblyEntity present) {
