@@ -17,6 +17,7 @@ test:
         - mvn test
     environment:
         name: test-env
+# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
 #    only:
 #        - master
 #        - tags
@@ -45,6 +46,7 @@ package-internal:
     variables:
         ENVIRONMENT_NAME: internal
         MAVEN_PROFILE: internal
+# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
 #    only:
 #        - master
 
@@ -84,6 +86,7 @@ deploy-tomcat-internal:
         TOMCAT_HOST: $TOMCAT_INTERNAL_HOST
     dependencies:
         - package-internal
+# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
 #    only:
 #        - master
 
@@ -101,7 +104,7 @@ deploy-tomcat-development:
 
 deploy-tomcat-production:
     extends: .deploy-tomcat
-#    when: manual
+    when: manual
     variables:
         ENVIRONMENT_NAME: production
         TOMCAT_USER: $TOMCAT_PRODUCTION_USER
@@ -114,7 +117,7 @@ deploy-tomcat-production:
 
 deploy-tomcat-production-fallback:
     extends: .deploy-tomcat
-#    when: manual
+    when: manual
     variables:
         ENVIRONMENT_NAME: production
         TOMCAT_USER: $TOMCAT_PRODUCTION_FALLBACK_USER
