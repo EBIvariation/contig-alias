@@ -1,0 +1,129 @@
+stages:
+    - test
+    - package
+    - deploy
+
+variables:
+    WS_ARTIFACT_PATH: target/contig-alias-$ENVIRONMENT_NAME.war
+    MAVEN_SETTINGS: maven-settings.xml
+    URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
+    MEDIA_TYPE: application/vnd.github.raw
+
+test:
+    stage: test
+    image: maven:3.6.1-jdk-8-alpine
+    script:
+        # Gitlab exposes services under their own hostnames. So test host should be "mongo" instead of "localhost".
+        - mvn test
+    environment:
+        name: test-env
+# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
+#    only:
+#        - master
+#        - tags
+
+# Not executed, parent job definition for package
+.package:
+    stage: package
+    image: maven:3.6.1-jdk-8-alpine
+    environment:
+        name: $ENVIRONMENT_NAME
+    before_script:
+        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
+        - apk add --update curl
+        - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > $MAVEN_SETTINGS
+    script:
+        - mvn package --settings $MAVEN_SETTINGS -P $MAVEN_PROFILE -DskipTests
+        - cp target/contig-alias*.war.original $WS_ARTIFACT_PATH
+    after_script:
+        - rm $MAVEN_SETTINGS
+    artifacts:
+        paths:
+            - $WS_ARTIFACT_PATH
+
+package-internal:
+    extends: .package
+    variables:
+        ENVIRONMENT_NAME: internal
+        MAVEN_PROFILE: internal
+# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
+#    only:
+#        - master
+
+package-development:
+    extends: .package
+    variables:
+        ENVIRONMENT_NAME: development
+        MAVEN_PROFILE: development
+    only:
+        - master
+
+package-production:
+    extends: .package
+    variables:
+        ENVIRONMENT_NAME: production
+        MAVEN_PROFILE: production
+    only:
+        - tags
+
+# Not executed, parent job definition for deployments
+.deploy-tomcat:
+    stage: deploy
+    image: alpine:3.9.5
+    environment:
+        name: $ENVIRONMENT_NAME
+    script:
+        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
+        - apk add --update curl
+        - curl -u $TOMCAT_USER:$TOMCAT_PASSWORD -T "$WS_ARTIFACT_PATH" "http://$TOMCAT_HOST/manager/text/deploy?update=true&path=/eva/webservices/contig-alias&version=$DATETIME" | grep "OK - Deployed application"
+
+deploy-tomcat-internal:
+    extends: .deploy-tomcat
+    variables:
+        ENVIRONMENT_NAME: internal
+        TOMCAT_USER: $TOMCAT_INTERNAL_USER
+        TOMCAT_PASSWORD: $TOMCAT_INTERNAL_PASSWORD
+        TOMCAT_HOST: $TOMCAT_INTERNAL_HOST
+    dependencies:
+        - package-internal
+# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
+#    only:
+#        - master
+
+deploy-tomcat-development:
+    extends: .deploy-tomcat
+    variables:
+        ENVIRONMENT_NAME: development
+        TOMCAT_USER: $TOMCAT_DEVELOPMENT_USER
+        TOMCAT_PASSWORD: $TOMCAT_DEVELOPMENT_PASSWORD
+        TOMCAT_HOST: $TOMCAT_DEVELOPMENT_HOST
+    dependencies:
+        - package-development
+    only:
+        - master
+
+deploy-tomcat-production:
+    extends: .deploy-tomcat
+    when: manual
+    variables:
+        ENVIRONMENT_NAME: production
+        TOMCAT_USER: $TOMCAT_PRODUCTION_USER
+        TOMCAT_PASSWORD: $TOMCAT_PRODUCTION_PASSWORD
+        TOMCAT_HOST: $TOMCAT_PRODUCTION_HOST
+    dependencies:
+        - package-production
+    only:
+        - tags
+
+deploy-tomcat-production-fallback:
+    extends: .deploy-tomcat
+    when: manual
+    variables:
+        ENVIRONMENT_NAME: production
+        TOMCAT_USER: $TOMCAT_PRODUCTION_FALLBACK_USER
+        TOMCAT_PASSWORD: $TOMCAT_PRODUCTION_FALLBACK_PASSWORD
+        TOMCAT_HOST: $TOMCAT_PRODUCTION_FALLBACK_HOST
+    dependencies:
+        - package-production
+    only:
+        - tags

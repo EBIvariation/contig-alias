@@ -13,8 +13,8 @@ Copy this text, replace the user and password and put it all in your ~/.m2/setti
         <profile>
             <id>contig-alias</id>
             <properties>
-                <user>your_user</user>
-                <password>your_password</password>
+                <contig-alias.admin-user>your_user</contig-alias.admin-user>
+                <contig-alias.admin-password>your_password</contig-alias.admin-password>
             </properties>
         </profile>
     </profiles>

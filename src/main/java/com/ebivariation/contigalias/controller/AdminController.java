@@ -71,15 +71,16 @@ public class AdminController {
             "into local database.")
     @PutMapping(value = "v1/assemblies")
     public void fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
-        accessions.ifPresentOrElse((list -> {
+        if (accessions.isPresent()) {
+            List<String> list = accessions.get();
             if (list.size() > 0) {
                 service.fetchAndInsertAssembly(list);
             } else {
                 throw new IllegalArgumentException("List of accessions can not be empty!");
             }
-        }), (() -> {
+        } else {
             throw new IllegalArgumentException("List of accessions must be provided!");
-        }));
+        }
     }
 
     @ApiOperation(value = "Delete an assembly from local database using its Genbank or Refseq accession.")
