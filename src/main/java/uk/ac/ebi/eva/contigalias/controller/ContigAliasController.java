@@ -92,10 +92,13 @@ public class ContigAliasController extends BaseController {
 
     @ApiOperation(value = "Get an chromosome using its Genbank accession.")
     @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
-    public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank) {
-        Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByGenbank(genbank);
-        return entity.map(chromosomeEntity -> new ResponseEntity<>(chromosomeEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<List<ChromosomeEntity>> getChromosomeByGenbank(@PathVariable String genbank,
+                                                                         @RequestParam(required = false) Integer page,
+                                                                         @RequestParam(required = false) Integer size) {
+        if (paramsValidForSingleResponseQuery(page, size)) {
+            List<ChromosomeEntity> entities = chromosomeService.getChromosomeByGenbank(genbank);
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_CHROMOSOME_REQUEST;
     }
 
     @ApiOperation(value = "Get an chromosome using its Refseq accession.")

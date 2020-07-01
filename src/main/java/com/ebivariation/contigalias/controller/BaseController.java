@@ -17,6 +17,7 @@
 package com.ebivariation.contigalias.controller;
 
 import com.ebivariation.contigalias.entities.AssemblyEntity;
+import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,9 @@ public class BaseController {
                                                                                             DEFAULT_PAGE_SIZE);
 
     public static final ResponseEntity<List<AssemblyEntity>> BAD_ASSEMBLY_REQUEST
+            = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+    public static final ResponseEntity<List<ChromosomeEntity>> BAD_CHROMOSOME_REQUEST
             = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     public static PageRequest createPageRequest(Integer page, Integer size) {

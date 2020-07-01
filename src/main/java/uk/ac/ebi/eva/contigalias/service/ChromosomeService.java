@@ -23,6 +23,8 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,16 +37,25 @@ public class ChromosomeService {
         this.repository = repository;
     }
 
-    public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
+    public List<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
         Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByGenbank(genbank);
-        entity.ifPresent(this::stripChromosomeFromAssembly);
-        return entity;
+        return convertOptionalToList(entity);
     }
 
     public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
         Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseq(refseq);
         entity.ifPresent(this::stripChromosomeFromAssembly);
         return entity;
+    }
+
+    public List<ChromosomeEntity> convertOptionalToList(Optional<ChromosomeEntity> optional) {
+        if (optional.isPresent()) {
+            ChromosomeEntity entity = optional.get();
+            stripChromosomeFromAssembly(entity);
+            return List.of(entity);
+        } else {
+            return new LinkedList<>();
+        }
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
