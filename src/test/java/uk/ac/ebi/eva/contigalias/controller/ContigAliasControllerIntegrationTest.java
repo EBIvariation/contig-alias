@@ -35,9 +35,7 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.util.List;
-import java.util.Optional;
 
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -132,10 +130,11 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank()))
-                    .thenReturn(List.of(entity));
-            when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq()))
-                    .thenReturn(Optional.of(entity));
+            List<ChromosomeEntity> entityAsList = List.of(this.entity);
+            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
+                    .thenReturn(entityAsList);
+            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
+                    .thenReturn(entityAsList);
         }
 
         @Test
@@ -145,13 +144,12 @@ public class ContigAliasControllerIntegrationTest {
             assertChromosomeIdenticalToEntity(resultActions);
         }
 
-        // TODO
-//        @Test
-//        void getChromosomeByRefseq() throws Exception {
-//            ResultActions resultActions = mockMvc.perform(
-//                    get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getRefseq()));
-//            assertChromosomeIdenticalToEntity(resultActions);
-//        }
+        @Test
+        void getChromosomeByRefseq() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getRefseq()));
+            assertChromosomeIdenticalToEntity(resultActions);
+        }
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())

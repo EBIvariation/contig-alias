@@ -32,7 +32,6 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
@@ -162,10 +161,11 @@ public class ContigAliasControllerTest {
         @BeforeEach
         void setUp() {
             ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
-            Mockito.when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank()))
-                   .thenReturn(List.of(entity));
-            Mockito.when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq()))
-                   .thenReturn(Optional.of(entity));
+            List<ChromosomeEntity> entityAsList = List.of(this.entity);
+            Mockito.when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
+                   .thenReturn(entityAsList);
+            Mockito.when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
+                   .thenReturn(entityAsList);
             controller = new ContigAliasController(null, mockChromosomeService);
         }
 
@@ -175,20 +175,11 @@ public class ContigAliasControllerTest {
                     controller.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
         }
 
-//        @Test
-//        public void getChromosomeByRefseq() {
-//            testChromosomeEntityResponse(controller.getChromosomeByRefseq(entity.getRefseq()));
-//        }
-//
-//        void testChromosomeEntityResponse(ResponseEntity<ChromosomeEntity> response) {
-//            assertEquals(response.getStatusCode(), HttpStatus.OK);
-//            assertTrue(response.hasBody());
-//            ChromosomeEntity chromosome = response.getBody();
-//            assertNotNull(chromosome);
-//            assertEquals(entity.getName(), chromosome.getName());
-//            assertEquals(entity.getGenbank(), chromosome.getGenbank());
-//            assertEquals(entity.getRefseq(), chromosome.getRefseq());
-//        }
+        @Test
+        public void getChromosomeByRefseq() {
+            testChromosomeEntityResponse(
+                    controller.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
         void testChromosomeEntityResponse(ResponseEntity<List<ChromosomeEntity>> response) {
             assertEquals(response.getStatusCode(), HttpStatus.OK);

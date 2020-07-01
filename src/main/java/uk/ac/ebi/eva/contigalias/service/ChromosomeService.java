@@ -42,10 +42,9 @@ public class ChromosomeService {
         return convertOptionalToList(entity);
     }
 
-    public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
+    public List<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
         Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseq(refseq);
-        entity.ifPresent(this::stripChromosomeFromAssembly);
-        return entity;
+        return convertOptionalToList(entity);
     }
 
     public List<ChromosomeEntity> convertOptionalToList(Optional<ChromosomeEntity> optional) {

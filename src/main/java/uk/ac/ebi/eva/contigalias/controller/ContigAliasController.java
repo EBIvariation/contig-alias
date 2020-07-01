@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +31,6 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequestMapping("contig-alias")
 @RestController
@@ -103,10 +101,13 @@ public class ContigAliasController extends BaseController {
 
     @ApiOperation(value = "Get an chromosome using its Refseq accession.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq) {
-        Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
-        return entity.map(chromosomeEntity -> new ResponseEntity<>(chromosomeEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<List<ChromosomeEntity>> getChromosomeByRefseq(@PathVariable String refseq,
+                                                                        @RequestParam(required = false) Integer page,
+                                                                        @RequestParam(required = false) Integer size) {
+        if (paramsValidForSingleResponseQuery(page, size)) {
+            List<ChromosomeEntity> entities = chromosomeService.getChromosomeByRefseq(refseq);
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_CHROMOSOME_REQUEST;
     }
 
 }

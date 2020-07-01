@@ -26,7 +26,6 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,9 +57,8 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByRefseq() {
-        Optional<ChromosomeEntity> accession = service.getChromosomeByRefseq(entity.getRefseq());
-        assertTrue(accession.isPresent());
-        testChromosomeIdenticalToEntity(accession.get());
+        List<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
+        testChromosomeList(chromosomes);
     }
 
     void testChromosomeList(List<ChromosomeEntity> chromosomes) {
