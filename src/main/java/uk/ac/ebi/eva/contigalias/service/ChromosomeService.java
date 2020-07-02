@@ -23,6 +23,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public class ChromosomeService {
         if (optional.isPresent()) {
             ChromosomeEntity entity = optional.get();
             stripChromosomeFromAssembly(entity);
-            return List.of(entity);
+            return Collections.singletonList(entity);
         } else {
             return new LinkedList<>();
         }

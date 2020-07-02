@@ -32,9 +32,9 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,12 +56,13 @@ public class AdminControllerIntegrationTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
         when(mockAssemblyService
                      .getAssemblyOrFetchByAccession(entity.getGenbank()))
-                .thenReturn(List.of(entity));
+                .thenReturn(entityAsList);
         when(mockAssemblyService
                      .getAssemblyOrFetchByAccession(entity.getRefseq()))
-                .thenReturn(List.of(entity));
+                .thenReturn(entityAsList);
     }
 
     @Test

@@ -30,6 +30,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -113,7 +114,7 @@ public class AssemblyService {
         if (optional.isPresent()) {
             AssemblyEntity entity = optional.get();
             stripAssemblyFromChromosomes(entity);
-            return List.of(entity);
+            return Collections.singletonList(entity);
         } else {
             return new LinkedList<>();
         }
@@ -182,6 +183,7 @@ public class AssemblyService {
     public void deleteAssemblyByGenbank(String genbank) {
         repository.deleteAssemblyEntityByGenbank(genbank);
     }
+
     public void deleteAssemblyByRefseq(String refseq) {
         repository.deleteAssemblyEntityByRefseq(refseq);
     }
@@ -192,6 +194,7 @@ public class AssemblyService {
             assemblies.forEach(this::deleteAssembly);
         }
     }
+
     public void deleteAssembly(AssemblyEntity entity) {
         repository.delete(entity);
     }

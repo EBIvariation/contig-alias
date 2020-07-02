@@ -30,16 +30,17 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 public class ContigAliasControllerTest {
 
@@ -53,7 +54,7 @@ public class ContigAliasControllerTest {
         @BeforeEach
         void setUp() {
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
-            List<AssemblyEntity> entityAsList = List.of(this.entity);
+            List<AssemblyEntity> entityAsList = Collections.singletonList(this.entity);
             Mockito.when(mockAssemblyService
                                  .getAssemblyByAccession(this.entity.getGenbank()))
                    .thenReturn(entityAsList);
@@ -161,7 +162,7 @@ public class ContigAliasControllerTest {
         @BeforeEach
         void setUp() {
             ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
-            List<ChromosomeEntity> entityAsList = List.of(this.entity);
+            List<ChromosomeEntity> entityAsList = Collections.singletonList(this.entity);
             Mockito.when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
                    .thenReturn(entityAsList);
             Mockito.when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))

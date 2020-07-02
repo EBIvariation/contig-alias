@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

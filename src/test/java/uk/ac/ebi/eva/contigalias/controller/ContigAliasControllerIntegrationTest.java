@@ -34,6 +34,7 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -69,7 +70,7 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            List<AssemblyEntity> entityAsList = List.of(this.entity);
+            List<AssemblyEntity> entityAsList = Collections.singletonList(this.entity);
             when(mockAssemblyService
                          .getAssemblyByAccession(this.entity.getGenbank()))
                     .thenReturn(entityAsList);
@@ -130,7 +131,7 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            List<ChromosomeEntity> entityAsList = List.of(this.entity);
+            List<ChromosomeEntity> entityAsList = Collections.singletonList(this.entity);
             when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
                     .thenReturn(entityAsList);
             when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))

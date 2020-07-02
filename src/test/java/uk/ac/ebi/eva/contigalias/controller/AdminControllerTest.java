@@ -27,15 +27,15 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
-import static com.ebivariation.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 public class AdminControllerTest {
 
@@ -46,11 +46,12 @@ public class AdminControllerTest {
     @BeforeEach
     void setup() throws IOException {
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
+        List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
         Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getGenbank()))
-               .thenReturn(List.of(entity));
+               .thenReturn(entityAsList);
         Mockito.when(mockAssemblyService
                              .getAssemblyOrFetchByAccession(entity.getRefseq()))
-               .thenReturn(List.of(entity));
+               .thenReturn(entityAsList);
         controller = new AdminController(mockAssemblyService);
     }
 

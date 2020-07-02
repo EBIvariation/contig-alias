@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.ebivariation.contigalias.controller;
+package uk.ac.ebi.eva.contigalias.controller;
 
-import com.ebivariation.contigalias.entities.AssemblyEntity;
-import com.ebivariation.contigalias.entities.ChromosomeEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.util.List;
 
