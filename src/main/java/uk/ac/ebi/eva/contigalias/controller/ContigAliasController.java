@@ -58,8 +58,8 @@ public class ContigAliasController {
         this.aliasService = aliasService;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.",
-            notes = "Given an accession this endpoint will return an assembly that matches that accession." +
+    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession. ",
+            notes = "Given an assembly's accession this endpoint will return an assembly that matches that accession." +
                     "The accession can be either a genbank or refseq accession and the software will automatically " +
                     "fetch a result from the database for any assembly having the accession as it's " +
                     "genbank or refseq accession. " +
@@ -76,7 +76,8 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank accession.",
-            notes = "Given a genbank accession this endpoint will return an assembly that matches that accession." +
+            notes = "Given an assembly's genbank accession this endpoint will return an assembly that matches that " +
+                    "accession. " +
                     "This endpoint will either return an empty list when no result is found or at most " +
                     "a list containing a single result.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
@@ -90,7 +91,8 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an assembly using its Refseq accession.",
-            notes = "Given a refseq accession this endpoint will return an assembly that matches that accession." +
+            notes = "Given an assembly's refseq accession this endpoint will return an assembly that matches that " +
+                    "accession. " +
                     "This endpoint will either return an empty list when no result is found or at most " +
                     "a list containing a single result.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
@@ -104,7 +106,8 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
-            notes = "Given a Taxonomic ID this endpoint will return all assemblies that match the given Taxonomic ID." +
+            notes = "Given an assembly's Taxonomic ID this endpoint will return all assemblies that match the given " +
+                    "Taxonomic ID. " +
                     "This endpoint will either return an empty list when no result is found or any number of " +
                     "assemblies.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
@@ -131,7 +134,10 @@ public class ContigAliasController {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @ApiOperation(value = "Get an chromosome using its Genbank accession.")
+    @ApiOperation(value = "Get an chromosome using its Genbank accession.",
+            notes = "Given a chromosome's genbank accession this endpoint will return a chromosome that matches that " +
+                    "accession. This endpoint will either return an empty list when no result is found or at most " +
+                    "a list containing a single result.")
     @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank,
                                                                          @RequestParam(required = false) Integer pageNumber,
@@ -142,7 +148,10 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an chromosome using its Refseq accession.")
+    @ApiOperation(value = "Get an chromosome using its Refseq accession.",
+            notes = "Given a chromosome's refseq accession this endpoint will return a chromosome that matches that " +
+                    "accession. This endpoint will either return an empty list when no result is found or at most " +
+                    "a list containing a single result.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq,
                                                                         @RequestParam(required = false) Integer pageNumber,
