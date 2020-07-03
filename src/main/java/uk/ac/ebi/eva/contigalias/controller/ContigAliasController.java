@@ -75,7 +75,10 @@ public class ContigAliasController {
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank accession.")
+    @ApiOperation(value = "Get an assembly using its Genbank accession.",
+            notes = "Given a genbank accession this endpoint will return an assembly that matches that accession." +
+                    "This endpoint will either return an empty list when no result is found or at most " +
+                    "a list containing a single result.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(@PathVariable String genbank,
                                                                      @RequestParam(required = false) Integer pageNumber,
@@ -86,7 +89,10 @@ public class ContigAliasController {
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Refseq accession.")
+    @ApiOperation(value = "Get an assembly using its Refseq accession.",
+            notes = "Given a refseq accession this endpoint will return an assembly that matches that accession." +
+                    "This endpoint will either return an empty list when no result is found or at most " +
+                    "a list containing a single result.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(@PathVariable String refseq,
                                                                     @RequestParam(required = false) Integer pageNumber,
@@ -97,7 +103,10 @@ public class ContigAliasController {
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Taxonomic ID.")
+    @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
+            notes = "Given a Taxonomic ID this endpoint will return all assemblies that match the given Taxonomic ID." +
+                    "This endpoint will either return an empty list when no result is found or any number of " +
+                    "assemblies.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid,
                                                                      @RequestParam(required = false) Integer pageNumber,
