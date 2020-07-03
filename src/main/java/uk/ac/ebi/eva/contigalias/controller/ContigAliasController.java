@@ -58,7 +58,13 @@ public class ContigAliasController {
         this.aliasService = aliasService;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
+    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.",
+            notes = "Given an accession this endpoint will return an assembly that matches that accession." +
+                    "The accession can be either a genbank or refseq accession and the software will automatically " +
+                    "fetch a result from the database for any assembly having the accession as it's " +
+                    "genbank or refseq accession. " +
+                    "This endpoint will either return an empty list when no result is found or at most " +
+                    "a list containing a single result.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
                                                                        @RequestParam(required = false) Integer pageNumber,
