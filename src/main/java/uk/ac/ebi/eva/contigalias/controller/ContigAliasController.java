@@ -60,7 +60,7 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession. ",
             notes = "Given an assembly's accession this endpoint will return an assembly that matches that accession." +
-                    "The accession can be either a genbank or refseq accession and the software will automatically " +
+                    "The accession can be either a genbank or refseq accession and the endpoint will automatically " +
                     "fetch a result from the database for any assembly having the accession as it's " +
                     "genbank or refseq accession. " +
                     "This endpoint will either return an empty list when no result is found or at most " +
