@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.service.AliasService;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
@@ -46,10 +47,14 @@ public class ContigAliasController {
 
     private final ChromosomeService chromosomeService;
 
+    private final AliasService aliasService;
+
     @Autowired
-    public ContigAliasController(AssemblyService assemblyService, ChromosomeService chromosomeService) {
+    public ContigAliasController(AssemblyService assemblyService, ChromosomeService chromosomeService,
+                                 AliasService aliasService) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
+        this.aliasService = aliasService;
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
@@ -114,6 +119,20 @@ public class ContigAliasController {
             List<ChromosomeEntity> entities = chromosomeService.getChromosomeByRefseq(refseq);
             return createAppropriateResponseEntity(entities);
         } else return BAD_CHROMOSOME_REQUEST;
+    }
+
+    @GetMapping(value = "assemblies/chromosome/{genbank}")
+    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank(@PathVariable String genbank) {
+        Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeGenbank(genbank);
+        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping(value = "assemblies/chromosome/{refseq}")
+    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
+        Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeRefseq(refseq);
+        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 }

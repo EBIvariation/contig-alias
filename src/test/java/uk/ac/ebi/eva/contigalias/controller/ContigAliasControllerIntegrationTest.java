@@ -30,6 +30,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
+import uk.ac.ebi.eva.contigalias.service.AliasService;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
@@ -61,6 +62,9 @@ public class ContigAliasControllerIntegrationTest {
 
     @MockBean
     private ChromosomeService mockChromosomeService;
+
+    @MockBean
+    private AliasService mockAliasService;
 
     @Nested
     class AssemblyServiceTests {

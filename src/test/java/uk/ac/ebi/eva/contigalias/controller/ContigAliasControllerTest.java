@@ -66,7 +66,7 @@ public class ContigAliasControllerTest {
             Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
                    .thenReturn(entityAsList);
 
-            controller = new ContigAliasController(mockAssemblyService, null);
+            controller = new ContigAliasController(mockAssemblyService, null, null);
         }
 
         @Test
@@ -127,7 +127,7 @@ public class ContigAliasControllerTest {
                                  .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST))
                    .thenReturn(entities);
 
-            controller = new ContigAliasController(mockAssemblyService, null);
+            controller = new ContigAliasController(mockAssemblyService, null, null);
         }
 
         @Test
@@ -167,7 +167,7 @@ public class ContigAliasControllerTest {
                    .thenReturn(entityAsList);
             Mockito.when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
                    .thenReturn(entityAsList);
-            controller = new ContigAliasController(null, mockChromosomeService);
+            controller = new ContigAliasController(null, mockChromosomeService, null);
         }
 
         @Test
