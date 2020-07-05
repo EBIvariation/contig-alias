@@ -17,12 +17,14 @@
 package uk.ac.ebi.eva.contigalias.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.util.Optional;
 
+@Service
 public class AliasService {
 
     private final AssemblyService assemblyService;
