@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -41,6 +42,8 @@ public class AliasServiceIntegrationTest {
 
     private final List<ChromosomeEntity> chromosomeEntities = new LinkedList<>();
 
+    private final int CHROMOSOME_LIST_SIZE = 5;
+
     @Autowired
     private AliasService service;
 
@@ -49,7 +52,7 @@ public class AliasServiceIntegrationTest {
 
     @BeforeEach
     void setup() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
             chromosomeEntities.add(ChromosomeGenerator.generate(i, assemblyEntity));
         }
         assemblyService.insertAssembly(assemblyEntity);
@@ -79,6 +82,16 @@ public class AliasServiceIntegrationTest {
         }
     }
 
+    @Test
+    void getChromosomesByAssemblyGenbank() {
+        List<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank());
+        assertNotNull(chromosomes);
+        assertEquals(CHROMOSOME_LIST_SIZE, chromosomes.size());
+        for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
+            testChromosomeEntityEquals(chromosomeEntities.get(i), chromosomes.get(i));
+        }
+    }
+
     void testAssemblyIdenticalToEntity(Optional<AssemblyEntity> optional) {
         assertTrue(optional.isPresent());
         AssemblyEntity assembly = optional.get();
@@ -88,6 +101,12 @@ public class AliasServiceIntegrationTest {
         assertEquals(assemblyEntity.getRefseq(), assembly.getRefseq());
         assertEquals(assemblyEntity.getTaxid(), assembly.getTaxid());
         assertEquals(assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+    }
+
+    void testChromosomeEntityEquals(ChromosomeEntity expected, ChromosomeEntity actual) {
+        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getGenbank(), actual.getGenbank());
+        assertEquals(expected.getRefseq(), actual.getRefseq());
     }
 
 }

@@ -22,19 +22,16 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AliasService {
 
-    private final AssemblyService assemblyService;
-
     private final ChromosomeService chromosomeService;
 
     @Autowired
-    public AliasService(AssemblyService assemblyService,
-                        ChromosomeService chromosomeService) {
-        this.assemblyService = assemblyService;
+    public AliasService(ChromosomeService chromosomeService) {
         this.chromosomeService = chromosomeService;
     }
 
@@ -46,6 +43,10 @@ public class AliasService {
     public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String chrRefseq) {
         Optional<ChromosomeEntity> chromosomeByGenbank = chromosomeService.getChromosomeByRefseq(chrRefseq);
         return chromosomeByGenbank.map(ChromosomeEntity::getAssembly);
+    }
+
+    public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank) {
+        return chromosomeService.getChromosomesByAssemblyGenbank(asmGenbank);
     }
 
 }
