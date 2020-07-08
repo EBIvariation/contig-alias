@@ -202,23 +202,29 @@ public class ContigAliasControllerTest {
     @Nested
     class AliasServiceTests {
 
-        private final AssemblyEntity entity = AssemblyGenerator.generate();
+        private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
 
         private final List<ChromosomeEntity> chromosomeEntities = new LinkedList<>();
+
+        private final int CHROMOSOME_LIST_SIZE = 5;
 
         @BeforeEach
         void setup() {
             AliasService mockAliasService = mock(AliasService.class);
-            for (int i = 0; i < 5; i++) {
-                ChromosomeEntity generate = ChromosomeGenerator.generate(i, entity);
+            for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
+                ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
-                Optional<AssemblyEntity> entityOptional = Optional.of(this.entity);
+                Optional<AssemblyEntity> entityOptional = Optional.of(this.assemblyEntity);
                 Mockito.when(mockAliasService.getAssemblyByChromosomeGenbank(generate.getGenbank()))
                        .thenReturn(entityOptional);
                 Mockito.when(mockAliasService.getAssemblyByChromosomeRefseq(generate.getRefseq()))
                        .thenReturn(entityOptional);
-                controller = new ContigAliasController(null, null, mockAliasService);
             }
+            Mockito.when(mockAliasService.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
+                   .thenReturn(chromosomeEntities);
+            Mockito.when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
+                   .thenReturn(chromosomeEntities);
+            controller = new ContigAliasController(null, null, mockAliasService);
         }
 
         @AfterEach
@@ -242,17 +248,40 @@ public class ContigAliasControllerTest {
             }
         }
 
+        @Test
+        void getChromosomesByAssemblyGenbank() {
+            ResponseEntity<List<ChromosomeEntity>> chromosomes = controller.getChromosomesByAssemblyGenbank(
+                    assemblyEntity.getGenbank());
+            testChromosomeEntityResponses(chromosomes);
+        }
+
+        @Test
+        void getChromosomesByAssemblyRefseq() {
+            ResponseEntity<List<ChromosomeEntity>> chromosomes = controller.getChromosomesByAssemblyRefseq(
+                    assemblyEntity.getRefseq());
+            testChromosomeEntityResponses(chromosomes);
+        }
+
         void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
             assertEquals(response.getStatusCode(), HttpStatus.OK);
             assertTrue(response.hasBody());
             AssemblyEntity assembly = response.getBody();
             assertNotNull(assembly);
-            assertEquals(entity.getName(), assembly.getName());
-            assertEquals(entity.getOrganism(), assembly.getOrganism());
-            assertEquals(entity.getGenbank(), assembly.getGenbank());
-            assertEquals(entity.getRefseq(), assembly.getRefseq());
-            assertEquals(entity.getTaxid(), assembly.getTaxid());
-            assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+            assertEquals(assemblyEntity.getName(), assembly.getName());
+            assertEquals(assemblyEntity.getOrganism(), assembly.getOrganism());
+            assertEquals(assemblyEntity.getGenbank(), assembly.getGenbank());
+            assertEquals(assemblyEntity.getRefseq(), assembly.getRefseq());
+            assertEquals(assemblyEntity.getTaxid(), assembly.getTaxid());
+            assertEquals(assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        }
+
+        void testChromosomeEntityResponses(ResponseEntity<List<ChromosomeEntity>> response) {
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            List<ChromosomeEntity> entities = response.getBody();
+            assertNotNull(entities);
+            assertEquals(chromosomeEntities.size(), entities.size());
+            assertTrue(chromosomeEntities.containsAll(entities));
         }
 
     }

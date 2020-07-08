@@ -140,7 +140,7 @@ public class ContigAliasController {
     @ApiOperation(value = "Get chromosomes using the genbank accession of it's parent assembly.")
     @GetMapping(value = "v1/chromosomes/assembly/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyGenbank(@PathVariable String genbank) {
-        List<ChromosomeEntity> entities = chromosomeService.getChromosomesByAssemblyGenbank(genbank);
+        List<ChromosomeEntity> entities = aliasService.getChromosomesByAssemblyGenbank(genbank);
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         } else {
@@ -151,7 +151,7 @@ public class ContigAliasController {
     @ApiOperation(value = "Get chromosomes using the refseq accession of it's parent assembly.")
     @GetMapping(value = "v1/chromosomes/assembly/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyRefseq(@PathVariable String refseq) {
-        List<ChromosomeEntity> entities = chromosomeService.getChromosomesByAssemblyRefseq(refseq);
+        List<ChromosomeEntity> entities = aliasService.getChromosomesByAssemblyRefseq(refseq);
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         } else {
