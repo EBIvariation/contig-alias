@@ -32,4 +32,6 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     Optional<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq);
 
     List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank);
+
+    List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
 }

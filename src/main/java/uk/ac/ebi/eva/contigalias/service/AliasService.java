@@ -49,4 +49,8 @@ public class AliasService {
         return chromosomeService.getChromosomesByAssemblyGenbank(asmGenbank);
     }
 
+    public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq) {
+        return chromosomeService.getChromosomesByAssemblyRefseq(asmRefseq);
+    }
+
 }

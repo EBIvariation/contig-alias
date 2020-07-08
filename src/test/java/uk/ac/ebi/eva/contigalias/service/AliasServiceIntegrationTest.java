@@ -92,6 +92,16 @@ public class AliasServiceIntegrationTest {
         }
     }
 
+    @Test
+    void getChromosomesByAssemblyRefseq() {
+        List<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq());
+        assertNotNull(chromosomes);
+        assertEquals(CHROMOSOME_LIST_SIZE, chromosomes.size());
+        for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
+            testChromosomeEntityEquals(chromosomeEntities.get(i), chromosomes.get(i));
+        }
+    }
+
     void testAssemblyIdenticalToEntity(Optional<AssemblyEntity> optional) {
         assertTrue(optional.isPresent());
         AssemblyEntity assembly = optional.get();

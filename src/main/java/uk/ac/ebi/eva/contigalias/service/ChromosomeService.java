@@ -58,6 +58,15 @@ public class ChromosomeService {
         return chromosomes;
     }
 
+    public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq) {
+        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Refseq(asmRefseq);
+        if (chromosomes == null) {
+            return Collections.emptyList();
+        }
+        chromosomes.forEach(this::stripChromosomeFromAssembly);
+        return chromosomes;
+    }
+
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
         AssemblyEntity assembly = chromosome.getAssembly();
         if (assembly != null) {
