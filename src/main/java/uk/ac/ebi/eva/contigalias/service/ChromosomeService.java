@@ -54,7 +54,7 @@ public class ChromosomeService {
         if (chromosomes == null) {
             return Collections.emptyList();
         }
-        chromosomes.forEach(this::stripChromosomeFromAssembly);
+        chromosomes.forEach(this::stripAssemblyFromChromosome);
         return chromosomes;
     }
 
@@ -63,7 +63,7 @@ public class ChromosomeService {
         if (chromosomes == null) {
             return Collections.emptyList();
         }
-        chromosomes.forEach(this::stripChromosomeFromAssembly);
+        chromosomes.forEach(this::stripAssemblyFromChromosome);
         return chromosomes;
     }
 
@@ -72,6 +72,10 @@ public class ChromosomeService {
         if (assembly != null) {
             assembly.setChromosomes(null);
         }
+    }
+
+    private void stripAssemblyFromChromosome(ChromosomeEntity chromosome) {
+        chromosome.setAssembly(null);
     }
 
     public void insertChromosome(ChromosomeEntity entity) {
