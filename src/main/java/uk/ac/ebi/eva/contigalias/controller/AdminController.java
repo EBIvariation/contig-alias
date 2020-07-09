@@ -35,9 +35,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
+
 @RequestMapping("contig-alias-admin")
 @RestController
-public class AdminController extends BaseController {
+public class AdminController {
 
     private final AssemblyService service;
 

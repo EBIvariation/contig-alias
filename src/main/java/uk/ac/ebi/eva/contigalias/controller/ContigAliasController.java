@@ -32,9 +32,15 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
 import java.util.List;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_ASSEMBLY_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_CHROMOSOME_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
+
 @RequestMapping("contig-alias")
 @RestController
-public class ContigAliasController extends BaseController {
+public class ContigAliasController {
 
     private final AssemblyService assemblyService;
 
