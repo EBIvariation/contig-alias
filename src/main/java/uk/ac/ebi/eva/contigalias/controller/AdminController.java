@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -58,7 +59,7 @@ public class AdminController {
                     "This endpoint will either return a single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
-            @PathVariable String accession,
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false) Integer pageNumber,
             @RequestParam(required = false) Integer pageSize) throws IOException {
         List<AssemblyEntity> entities;
@@ -80,7 +81,8 @@ public class AdminController {
                     "will look for it at a remote source (NCBI by default). If desired assembly is found at remote " +
                     "source, it will fetch and add it to the local database. This endpoint does not return any data.")
     @PutMapping(value = "v1/assemblies/{accession}")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
         try {
             service.fetchAndInsertAssembly(accession);
         } catch (IllegalArgumentException e) {
@@ -101,7 +103,9 @@ public class AdminController {
                     " endpoint does not return any data and processes elements in the given list in an asynchronous " +
                     "parallel manner.")
     @PutMapping(value = "v1/assemblies")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@RequestBody @ApiParam(value =
+            "A JSON array of Genbank or Refseq assembly accessions. Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\"," +
+                    "\"GCA_000001405.12\"]") Optional<List<String>> accessions) {
         if (accessions.isPresent()) {
             List<String> list = accessions.get();
             if (list.size() > 0) {
@@ -122,7 +126,8 @@ public class AdminController {
                     "assembly also deletes all chromosomes that are associated with that assembly. This endpoint does" +
                     " not return any data.")
     @DeleteMapping(value = "v1/assemblies/{accession}")
-    public void deleteAssemblyByAccession(@PathVariable String accession) {
+    public void deleteAssemblyByAccession(
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession) {
         service.deleteAssemblyByAccession(accession);
     }
 

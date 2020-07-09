@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,9 +66,10 @@ public class ContigAliasController {
                     "genbank or refseq accession. " +
                     "This endpoint will either return a single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
-                                                                       @RequestParam(required = false) Integer pageNumber,
-                                                                       @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession);
             return createAppropriateResponseEntity(entities);
@@ -79,9 +81,10 @@ public class ContigAliasController {
                     "accession. " +
                     "This endpoint will either return a single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(@PathVariable String genbank,
-                                                                     @RequestParam(required = false) Integer pageNumber,
-                                                                     @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(
+            @PathVariable @ApiParam(value = "Genbank assembly accession. Eg: GCA_000001405.10") String genbank,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByGenbank(genbank);
             return createAppropriateResponseEntity(entities);
@@ -93,9 +96,10 @@ public class ContigAliasController {
                     "accession. " +
                     "This endpoint will either return a single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(@PathVariable String refseq,
-                                                                    @RequestParam(required = false) Integer pageNumber,
-                                                                    @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(
+            @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String refseq,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq);
             return createAppropriateResponseEntity(entities);
@@ -108,10 +112,13 @@ public class ContigAliasController {
                     "This endpoint will either return a list containing one or more assemblies or an HTTP Response " +
                     "with error code 404.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid,
-                                                                     @RequestParam(required = false) Integer pageNumber,
-                                                                     @RequestParam(required = false) Integer pageSize) {
-        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, createPageRequest(pageNumber, pageSize));
+    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(
+            @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) {
+
+        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid,
+                                                                             createPageRequest(pageNumber, pageSize));
         return createAppropriateResponseEntity(entities);
     }
 
@@ -136,9 +143,10 @@ public class ContigAliasController {
                     "accession. " +
                     "This endpoint will either return a single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
-    public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank,
-                                                                         @RequestParam(required = false) Integer pageNumber,
-                                                                         @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(
+            @PathVariable @ApiParam(value = "Genbank chromosome accession. Eg: CM000663.2") String genbank,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             Optional<ChromosomeEntity> entities = chromosomeService.getChromosomeByGenbank(genbank);
             return createAppropriateResponseEntity(entities);
@@ -150,9 +158,10 @@ public class ContigAliasController {
                     "accession. " +
                     "This endpoint will either return a single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq,
-                                                                        @RequestParam(required = false) Integer pageNumber,
-                                                                        @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(
+            @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
             return createAppropriateResponseEntity(entity);
@@ -179,6 +188,7 @@ public class ContigAliasController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
     }
 
 }
