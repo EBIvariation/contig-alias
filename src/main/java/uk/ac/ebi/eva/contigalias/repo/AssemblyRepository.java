@@ -16,8 +16,8 @@
 
 package uk.ac.ebi.eva.contigalias.repo;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -45,7 +45,7 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
 
     Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
 
-    Slice<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
+    Page<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
     @Transactional
     void deleteAssemblyEntityByGenbank(String genbank);

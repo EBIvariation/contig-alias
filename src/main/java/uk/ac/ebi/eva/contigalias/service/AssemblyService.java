@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.datasource.AssemblyDataSource;
@@ -80,9 +80,10 @@ public class AssemblyService {
         return convertOptionalToList(entity);
     }
 
-    public List<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
-        Slice<AssemblyEntity> slice = repository.findAssemblyEntitiesByTaxid(taxid, request);
-        return convertSliceToList(slice);
+    public Page<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
+        Page<AssemblyEntity> page = repository.findAssemblyEntitiesByTaxid(taxid, request);
+        page.forEach(this::stripAssemblyFromChromosomes);
+        return page;
     }
 
     public void fetchAndInsertAssembly(String accession)
@@ -98,16 +99,6 @@ public class AssemblyService {
     public List<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
         return convertOptionalToList(entity);
-    }
-
-    public List<AssemblyEntity> convertSliceToList(Slice<AssemblyEntity> slice) {
-        if (slice.getNumberOfElements() > 0) {
-            List<AssemblyEntity> content = slice.getContent();
-            content.forEach(this::stripAssemblyFromChromosomes);
-            return content;
-        } else {
-            return new LinkedList<>();
-        }
     }
 
     public List<AssemblyEntity> convertOptionalToList(Optional<AssemblyEntity> optional) {

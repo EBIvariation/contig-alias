@@ -16,10 +16,16 @@
 
 package uk.ac.ebi.eva.contigalias.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,4 +86,22 @@ public class BaseController {
     public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {
         return (page == null || page == 0) && (size == null || size > 1);
     }
+
+    public static <T> ResponseEntity getNoContentPagedModelResponse(Page<T> page, int pageNumber, int pageSize) {
+        return new ResponseEntity(new PagedModel<T>(Collections.EMPTY_LIST, new PagedModel.PageMetadata
+                (pageSize, Math.max(pageNumber, 0), 0)), HttpStatus.NO_CONTENT);
+    }
+
+    public static PagedModel.PageMetadata buildPageMetadata(long totalNumberOfResults, int pageNumber, int pageSize)
+            throws IllegalArgumentException {
+        long totalPages = pageSize == 0L ? 0L : (long) Math.ceil((double) totalNumberOfResults / (double) pageSize);
+
+        if (pageNumber < 0 || pageNumber >= totalPages) {
+            throw new IllegalArgumentException("For the given page size, there are " + totalPages + " page(s), so " +
+                                                       "the correct page range is from 0 to " + (totalPages - 1) + " " +
+                                                       "(both included).");
+        }
+        return new PagedModel.PageMetadata(pageSize, pageNumber, totalNumberOfResults, totalPages);
+    }
+
 }

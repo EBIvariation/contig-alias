@@ -19,6 +19,9 @@ package uk.ac.ebi.eva.contigalias.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,11 +39,15 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.buildPageMetadata;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.getNoContentPagedModelResponse;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
 @RequestMapping("contig-alias")
@@ -117,9 +124,15 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        List<AssemblyEntity> entities =
-                assemblyService.getAssembliesByTaxid(taxid, createPageRequest(pageNumber, pageSize));
-        return createAppropriateResponseEntity(entities);
+        Page<AssemblyEntity> page = assemblyService.getAssembliesByTaxid(taxid,
+                                                                         createPageRequest(pageNumber, pageSize));
+        long totalElements = page.getTotalElements();
+        if (totalElements == 0) {
+            return getNoContentPagedModelResponse(page, pageNumber, pageSize);
+        } else {
+            PagedModel.PageMetadata pageMetadata = buildPageMetadata(totalElements, pageNumber, pageSize);
+            return new ResponseEntity(buildPagedResources(page.getContent(), taxid, pageMetadata), HttpStatus.OK);
+        }
     }
 
     @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +
@@ -193,6 +206,33 @@ public class ContigAliasController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    private <T> PagedModel<T> buildPagedResources(List<T> entities, long taxid, PagedModel.PageMetadata pageMetadata) {
+
+        PagedModel<T> pagedResources = new PagedModel<>(entities, pageMetadata);
+
+        int pageNumber = (int) pageMetadata.getNumber();
+        int pageSize = (int) pageMetadata.getSize();
+
+        if (pageNumber > 0) {
+            pagedResources.add(createPaginationLink(taxid, pageNumber - 1, pageSize, "prev"));
+
+            pagedResources.add(createPaginationLink(taxid, 0, pageSize, "first"));
+        }
+
+        if (pageNumber < (pageMetadata.getTotalPages() - 1)) {
+            pagedResources.add(createPaginationLink(taxid, pageNumber + 1, pageSize, "next"));
+
+            pagedResources.add(createPaginationLink(taxid, (int) pageMetadata.getTotalPages() - 1,
+                                                    pageSize, "last"));
+        }
+        return pagedResources;
+    }
+
+    private Link createPaginationLink(long taxid, int pageNumber, int pageSize, String linkName) {
+        return new Link(linkTo(methodOn(ContigAliasController.class).getAssembliesByTaxid(taxid, pageNumber, pageSize))
+                                .toUriComponentsBuilder().toUriString(), linkName);
     }
 
 }
