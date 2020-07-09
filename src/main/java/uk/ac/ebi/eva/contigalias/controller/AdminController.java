@@ -17,7 +17,6 @@
 package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,14 +24,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 
 @RequestMapping("contig-alias-admin")
 @RestController
@@ -46,19 +49,16 @@ public class AdminController {
 
     @ApiOperation(value = "Get or fetch an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<Optional<AssemblyEntity>> getAssemblyOrFetchByAccession(
-            @PathVariable String accession) throws IOException {
-        Optional<AssemblyEntity> entity;
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
+            @PathVariable String accession, @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) throws IOException {
+        List<AssemblyEntity> entities;
         try {
-            entity = service.getAssemblyOrFetchByAccession(accession);
+            entities = service.getAssemblyOrFetchByAccession(accession);
         } catch (IllegalArgumentException e) {
-            entity = Optional.empty();
+            entities = new LinkedList<>();
         }
-        if (entity.isPresent()) {
-            return new ResponseEntity<>(entity, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(entity, HttpStatus.NOT_FOUND);
-        }
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Fetch an assembly from remote server using its Genbank or Refseq accession and insert " +
@@ -87,7 +87,7 @@ public class AdminController {
     @ApiOperation(value = "Delete an assembly from local database using its Genbank or Refseq accession.")
     @DeleteMapping(value = "v1/assemblies/{accession}")
     public void deleteAssemblyByAccession(@PathVariable String accession) {
-        service.deleteAssembly(accession);
+        service.deleteAssemblyByAccession(accession);
     }
 
 }

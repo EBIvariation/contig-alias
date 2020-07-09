@@ -25,9 +25,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -50,16 +51,20 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByGenbank() {
-        Optional<ChromosomeEntity> accession = service.getChromosomeByGenbank(entity.getGenbank());
-        assertTrue(accession.isPresent());
-        testChromosomeIdenticalToEntity(accession.get());
+        List<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank());
+        testChromosomeList(chromosomes);
     }
 
     @Test
     void getChromosomeByRefseq() {
-        Optional<ChromosomeEntity> accession = service.getChromosomeByRefseq(entity.getRefseq());
-        assertTrue(accession.isPresent());
-        testChromosomeIdenticalToEntity(accession.get());
+        List<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
+        testChromosomeList(chromosomes);
+    }
+
+    void testChromosomeList(List<ChromosomeEntity> chromosomes) {
+        assertNotNull(chromosomes);
+        assertTrue(chromosomes.size() > 0);
+        chromosomes.forEach(this::testChromosomeIdenticalToEntity);
     }
 
     void testChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {

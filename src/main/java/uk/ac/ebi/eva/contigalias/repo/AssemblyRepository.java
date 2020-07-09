@@ -16,16 +16,20 @@
 
 package uk.ac.ebi.eva.contigalias.repo;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
-import java.util.List;
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long> {
+public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
+        JpaSpecificationExecutor<AssemblyEntity> {
 
     default Optional<AssemblyEntity> findAssemblyEntityByAccession(String accession) {
         return this.findAssemblyEntityByGenbankOrRefseq(accession, accession);
@@ -41,6 +45,11 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long> 
 
     Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
 
-    List<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid);
+    Slice<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
+    @Transactional
+    void deleteAssemblyEntityByGenbank(String genbank);
+
+    @Transactional
+    void deleteAssemblyEntityByRefseq(String refseq);
 }

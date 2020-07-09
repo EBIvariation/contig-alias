@@ -34,7 +34,8 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
@@ -69,12 +70,14 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            when(mockAssemblyService.getAssemblyByAccession(entity.getGenbank()))
-                    .thenReturn(Optional.of(entity));
-            when(mockAssemblyService.getAssemblyByGenbank(entity.getGenbank()))
-                    .thenReturn(Optional.of(entity));
-            when(mockAssemblyService.getAssemblyByRefseq(entity.getRefseq()))
-                    .thenReturn(Optional.of(entity));
+            List<AssemblyEntity> entityAsList = Collections.singletonList(this.entity);
+            when(mockAssemblyService
+                         .getAssemblyByAccession(this.entity.getGenbank()))
+                    .thenReturn(entityAsList);
+            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
+                    .thenReturn(entityAsList);
+            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
+                    .thenReturn(entityAsList);
         }
 
         @Test
@@ -100,13 +103,14 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(entity.getName())))
-                   .andExpect(jsonPath("$.organism", is(entity.getOrganism())))
-                   .andExpect(jsonPath("$.taxid").value(entity.getTaxid()))
-                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())))
-                   .andExpect(jsonPath("$.genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+                   .andExpect(jsonPath("$[0]").exists())
+                   .andExpect(jsonPath("$[0].id").doesNotExist())
+                   .andExpect(jsonPath("$[0].name", is(entity.getName())))
+                   .andExpect(jsonPath("$[0].organism", is(entity.getOrganism())))
+                   .andExpect(jsonPath("$[0].taxid").value(entity.getTaxid()))
+                   .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())))
+                   .andExpect(jsonPath("$[0].genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
         }
 
         @Test
@@ -127,10 +131,11 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank()))
-                    .thenReturn(Optional.of(entity));
-            when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq()))
-                    .thenReturn(Optional.of(entity));
+            List<ChromosomeEntity> entityAsList = Collections.singletonList(this.entity);
+            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
+                    .thenReturn(entityAsList);
+            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
+                    .thenReturn(entityAsList);
         }
 
         @Test
@@ -149,10 +154,11 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(entity.getName())))
-                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())));
+                   .andExpect(jsonPath("$[0]").exists())
+                   .andExpect(jsonPath("$[0].id").doesNotExist())
+                   .andExpect(jsonPath("$[0].name", is(entity.getName())))
+                   .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())));
         }
 
         @Test

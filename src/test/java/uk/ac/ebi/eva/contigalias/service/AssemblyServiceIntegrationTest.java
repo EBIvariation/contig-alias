@@ -35,8 +35,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -70,9 +70,10 @@ public class AssemblyServiceIntegrationTest {
 
     @Test
     void getAssemblyOrFetchByAccession() throws IOException {
-        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession(entities[0].getGenbank());
-        assertTrue(entity.isPresent());
-        service.deleteAssembly(entity.get());
+        List<AssemblyEntity> entities = service.getAssemblyOrFetchByAccession(this.entities[0].getGenbank());
+        assertNotNull(entities);
+        assertTrue(entities.size() > 0);
+        entities.forEach(service::deleteAssembly);
     }
 
     @Test
@@ -82,29 +83,36 @@ public class AssemblyServiceIntegrationTest {
 
         String targetGenbank = entities[0].getGenbank();
         service.fetchAndInsertAssembly(targetGenbank);
-        Optional<AssemblyEntity> assembly = service.getAssemblyByAccession(targetGenbank);
-        assertTrue(assembly.isPresent());
-        List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
+        List<AssemblyEntity> assemblyEntities = service.getAssemblyByAccession(targetGenbank);
+        List<ChromosomeEntity> chromosomes = getFirstFromList(assemblyEntities).getChromosomes();
         assertNotNull(chromosomes);
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
             service.fetchAndInsertAssembly(genbank);
-            Optional<AssemblyEntity> entity = service.getAssemblyByAccession(genbank);
-            assertTrue(entity.isPresent());
+            List<AssemblyEntity> entity = service.getAssemblyByAccession(genbank);
+            assertNotNull(entity);
+            assertEquals(1, entity.size());
         }
 
-        Optional<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
-        assertFalse(targetGenbankEntity.isPresent());
+        List<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
+        assertTrue(targetGenbankEntity == null || targetGenbankEntity.isEmpty());
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
-            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
-            assertTrue(accession.isPresent());
-            service.deleteAssembly(accession.get());
+            List<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
+            assertNotNull(accession);
+            assertTrue(accession.size() > 0);
+            accession.forEach(service::deleteAssembly);
         }
 
         service.setCacheSize(cacheSize);
+    }
+
+    private AssemblyEntity getFirstFromList(List<AssemblyEntity> list) {
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
+        return list.get(0);
     }
 
     @Nested
@@ -121,28 +129,27 @@ public class AssemblyServiceIntegrationTest {
 
         @AfterEach
         void tearDown() {
-            service.deleteAssembly(entity);
+            service.deleteAssemblyByRefseq(entity.getRefseq());
         }
 
         @Test
         void getAssemblyByAccession() {
-            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
-            assertTrue(accession.isPresent());
-            testAssemblyIdenticalToEntity(accession.get());
+            List<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
+            assertNotNull(accession);
+            assertTrue(accession.size() > 0);
+            accession.forEach(this::testAssemblyIdenticalToEntity);
         }
 
         @Test
         void getAssemblyByGenbank() {
-            Optional<AssemblyEntity> accession = service.getAssemblyByGenbank(entity.getGenbank());
-            assertTrue(accession.isPresent());
-            testAssemblyIdenticalToEntity(accession.get());
+            List<AssemblyEntity> entities = service.getAssemblyByGenbank(entity.getGenbank());
+            testAssemblyIdenticalToEntity(getFirstFromList(entities));
         }
 
         @Test
         void getAssemblyByRefseq() {
-            Optional<AssemblyEntity> accession = service.getAssemblyByRefseq(entity.getRefseq());
-            assertTrue(accession.isPresent());
-            testAssemblyIdenticalToEntity(accession.get());
+            List<AssemblyEntity> entities = service.getAssemblyByRefseq(entity.getRefseq());
+            testAssemblyIdenticalToEntity(getFirstFromList(entities));
         }
 
         void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
@@ -167,7 +174,7 @@ public class AssemblyServiceIntegrationTest {
                 service.insertAssembly(assemblyEntity);
             }
 
-            List<AssemblyEntity> entityList = service.getAssembliesByTaxid(TAX_ID);
+            List<AssemblyEntity> entityList = service.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST);
             assertNotNull(entityList);
             assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
 
@@ -182,7 +189,7 @@ public class AssemblyServiceIntegrationTest {
             }
 
             for (AssemblyEntity assemblyEntity : entities) {
-                service.deleteAssembly(assemblyEntity);
+                service.deleteAssemblyByGenbank(assemblyEntity.getGenbank());
             }
         }
 
