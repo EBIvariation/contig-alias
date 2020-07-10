@@ -160,11 +160,10 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$[0]").exists())
-                   .andExpect(jsonPath("$[0].id").doesNotExist())
-                   .andExpect(jsonPath("$[0].name", is(entity.getName())))
-                   .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())));
+                   .andExpect(jsonPath("$.id").doesNotExist())
+                   .andExpect(jsonPath("$.name", is(entity.getName())))
+                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())));
         }
 
         @Test
