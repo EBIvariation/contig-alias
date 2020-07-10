@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +56,7 @@ public class AdminController {
         try {
             entities = service.getAssemblyOrFetchByAccession(accession);
         } catch (IllegalArgumentException e) {
-            entities = new LinkedList<>();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return createAppropriateResponseEntity(entities);
     }
@@ -64,24 +64,30 @@ public class AdminController {
     @ApiOperation(value = "Fetch an assembly from remote server using its Genbank or Refseq accession and insert " +
             "into local database.")
     @PutMapping(value = "v1/assemblies/{accession}")
-    public void fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
-        service.fetchAndInsertAssembly(accession);
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@PathVariable String accession) throws IOException {
+        try {
+            service.fetchAndInsertAssembly(accession);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiOperation(value = "Fetch assemblies from remote server using their Genbank or Refseq accessions and insert " +
             "into local database.")
     @PutMapping(value = "v1/assemblies")
-    public void fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@RequestBody Optional<List<String>> accessions) {
         if (accessions.isPresent()) {
             List<String> list = accessions.get();
             if (list.size() > 0) {
                 service.fetchAndInsertAssembly(list);
             } else {
-                throw new IllegalArgumentException("List of accessions can not be empty!");
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         } else {
-            throw new IllegalArgumentException("List of accessions must be provided!");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete an assembly from local database using its Genbank or Refseq accession.")
