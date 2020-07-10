@@ -20,6 +20,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -44,10 +46,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.buildPageMetadata;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.getNoContentPagedModelResponse;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
 @RequestMapping("contig-alias")
@@ -60,12 +60,15 @@ public class ContigAliasController {
 
     private final AliasService aliasService;
 
+    private PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
+
     @Autowired
     public ContigAliasController(AssemblyService assemblyService, ChromosomeService chromosomeService,
-                                 AliasService aliasService) {
+                                 AliasService aliasService, PagedResourcesAssembler<AssemblyEntity> assemblyAssembler) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
         this.aliasService = aliasService;
+        this.assemblyAssembler = assemblyAssembler;
     }
 
     @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
@@ -120,19 +123,14 @@ public class ContigAliasController {
                     "Taxonomic ID. This endpoint will either return a list containing one or more assemblies or an " +
                     "HTTP status code of 404.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByTaxid(
             @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         Page<AssemblyEntity> page = assemblyService.getAssembliesByTaxid(taxid,
                                                                          createPageRequest(pageNumber, pageSize));
-        long totalElements = page.getTotalElements();
-        if (totalElements == 0) {
-            return getNoContentPagedModelResponse(page, pageNumber, pageSize);
-        } else {
-            PagedModel.PageMetadata pageMetadata = buildPageMetadata(totalElements, pageNumber, pageSize);
-            return new ResponseEntity(buildPagedResources(page.getContent(), taxid, pageMetadata), HttpStatus.OK);
-        }
+        PagedModel<EntityModel<AssemblyEntity>> entityModels = assemblyAssembler.toModel(page);
+        return new ResponseEntity<>(entityModels, page.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
     }
 
     @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +

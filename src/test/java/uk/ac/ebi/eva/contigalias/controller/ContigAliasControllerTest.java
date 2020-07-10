@@ -21,6 +21,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -40,9 +43,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 public class ContigAliasControllerTest {
@@ -68,8 +71,15 @@ public class ContigAliasControllerTest {
                    .thenReturn(entityAsList);
             Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
                    .thenReturn(entityAsList);
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
+                   .thenReturn(entityAsList);
 
-            controller = new ContigAliasController(mockAssemblyService, null, null);
+            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+            controller = new ContigAliasController(mockAssemblyService, null,null, assembler);
         }
 
         @Test
@@ -131,7 +141,11 @@ public class ContigAliasControllerTest {
 //                                 .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST))
 //                   .thenReturn(entities);
 
-            controller = new ContigAliasController(mockAssemblyService, null, null);
+            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.wrap(entities, null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+            controller = new ContigAliasController(mockAssemblyService, null,null, assembler);
         }
 
         // TODO test for hateoas response
@@ -172,7 +186,12 @@ public class ContigAliasControllerTest {
                    .thenReturn(entityAsOptional);
             Mockito.when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
                    .thenReturn(entityAsOptional);
-            controller = new ContigAliasController(null, mockChromosomeService, null);
+            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(new AssemblyEntity())), null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+            controller = new ContigAliasController(null, mockChromosomeService,null, assembler);
         }
 
         @Test
@@ -238,7 +257,7 @@ public class ContigAliasControllerTest {
                    .thenReturn(chromosomeEntities);
             Mockito.when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                    .thenReturn(chromosomeEntities);
-            controller = new ContigAliasController(null, null, mockAliasService);
+            controller = new ContigAliasController(null, null, mockAliasService, null);
         }
 
         @AfterEach

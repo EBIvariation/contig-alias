@@ -87,9 +87,12 @@ public class BaseController {
         return (page == null || page == 0) && (size == null || size > 1);
     }
 
-    public static <T> ResponseEntity getNoContentPagedModelResponse(Page<T> page, int pageNumber, int pageSize) {
-        return new ResponseEntity(new PagedModel<T>(Collections.EMPTY_LIST, new PagedModel.PageMetadata
-                (pageSize, Math.max(pageNumber, 0), 0)), HttpStatus.NO_CONTENT);
+    public static <T> ResponseEntity<PagedModel<T>> getNoContentPagedModelResponse(Page<T> page, int pageNumber, int pageSize) {
+        return new ResponseEntity<>(new PagedModel<>(Collections.emptyList(),
+                                                      new PagedModel.PageMetadata(pageSize,
+                                                                                  Math.max(pageNumber, 0),
+                                                                                  0)),
+                                    HttpStatus.NO_CONTENT);
     }
 
     public static PagedModel.PageMetadata buildPageMetadata(long totalNumberOfResults, int pageNumber, int pageSize)
