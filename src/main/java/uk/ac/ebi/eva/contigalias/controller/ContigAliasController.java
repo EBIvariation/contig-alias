@@ -79,10 +79,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an assembly using its Genbank accession.",
-            notes = "Given an assembly's genbank accession this endpoint will return an assembly that matches" +
-                    " that " +
-                    "accession. " +
-                    "This endpoint will either return a single result or an HTTP Response with error code 404.")
+            notes = "Given an assembly's genbank accession this endpoint will return an assembly that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP " +
+                    "Response with error code 404.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(
             @PathVariable @ApiParam(value = "Genbank assembly accession. Eg: GCA_000001405.10") String genbank,
@@ -95,11 +94,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an assembly using its Refseq accession.",
-            notes = "Given an assembly's refseq accession this endpoint will return an assembly that " +
-                    "matches that " +
-                    "accession. " +
-                    "This endpoint will either return a single result or an HTTP Response with error " +
-                    "code 404.")
+            notes = "Given an assembly's refseq accession this endpoint will return an assembly that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP " +
+                    "Response with error code 404.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(
             @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String
@@ -113,12 +110,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
-            notes = "Given an assembly's Taxonomic ID this endpoint will return all " +
-                    "assemblies that match the given " +
-                    "Taxonomic ID. " +
-                    "This endpoint will either return a list containing one or more " +
-                    "assemblies or an HTTP Response " +
-                    "with error code 404.")
+            notes = "Given an assembly's Taxonomic ID this endpoint will return all assemblies that match the given " +
+                    "Taxonomic ID. This endpoint will either return a list containing one or more assemblies or an " +
+                    "HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(
             @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
@@ -154,11 +148,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an chromosome using its Genbank accession.",
-            notes = "Given a chromosome's genbank accession this endpoint will return a " +
-                    "chromosome that matches that " +
-                    "accession. " +
-                    "This endpoint will either return a single result or an HTTP Response" +
-                    " with error code 404.")
+            notes = "Given a chromosome's genbank accession this endpoint will return a chromosome that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP " +
+                    "Response with error code 404.")
     @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(
             @PathVariable @ApiParam(value = "Genbank chromosome accession. Eg: CM000663" +
@@ -174,10 +166,8 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get an chromosome using its Refseq accession.",
-            notes = "Given a chromosome's refseq accession this endpoint will " +
-                    "return a chromosome that matches that " +
-                    "accession. " +
-                    "This endpoint will either return a single result or an HTTP " +
+            notes = "Given a chromosome's refseq accession this endpoint will return a chromosome that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP " +
                     "Response with error code 404.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(

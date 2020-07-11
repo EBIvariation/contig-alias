@@ -58,8 +58,8 @@ public class AdminController {
                     " accession. This endpoint will first look for the assembly in local database and return the " +
                     "result. If local search fails, it search for the target assembly at a remote source (NCBI by " +
                     "default). If desired assembly is found at remote source, it will fetch and add it to the local " +
-                    "database and also return the result to you." +
-                    "This endpoint will either return a single result or an HTTP Response with error code 404.")
+                    "database and also return the result to you. This endpoint will either return a list containing a" +
+                    " single result or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
