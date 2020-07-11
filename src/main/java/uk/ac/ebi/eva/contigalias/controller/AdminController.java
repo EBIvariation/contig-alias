@@ -34,7 +34,6 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_SIZE;
@@ -105,19 +104,13 @@ public class AdminController {
                     " endpoint does not return any data and processes elements in the given list in an asynchronous " +
                     "parallel manner.")
     @PutMapping(value = "v1/assemblies")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@RequestBody @ApiParam(value =
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(@RequestBody(required = false) @ApiParam(value =
             "A JSON array of Genbank or Refseq assembly accessions. Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\"," +
-                    "\"GCA_000001405.12\"]") Optional<List<String>> accessions) {
-        if (accessions.isPresent()) {
-            List<String> list = accessions.get();
-            if (list.size() > 0) {
-                service.fetchAndInsertAssembly(list);
-            } else {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        } else {
+                    "\"GCA_000001405.12\"]") List<String> accessions) {
+        if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        service.fetchAndInsertAssembly(accessions);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
