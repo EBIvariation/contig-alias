@@ -37,7 +37,9 @@ import java.util.List;
 
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_SIZE;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
 @RequestMapping("contig-alias-admin")
 @RestController
@@ -63,13 +65,15 @@ public class AdminController {
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false) @ApiParam(value = API_PARAM_VALUE_PAGE_NUMBER) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = API_PARAM_VALUE_PAGE_SIZE) Integer pageSize) throws IOException {
-        List<AssemblyEntity> entities;
-        try {
-            entities = service.getAssemblyOrFetchByAccession(accession);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        return createAppropriateResponseEntity(entities);
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            List<AssemblyEntity> entities;
+            try {
+                entities = service.getAssemblyOrFetchByAccession(accession);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_REQUEST;
     }
 
     @ApiOperation(value = "Fetch an assembly from remote server using its Genbank or Refseq accession and insert " +
