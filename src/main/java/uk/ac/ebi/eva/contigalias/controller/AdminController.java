@@ -36,6 +36,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_SIZE;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 
 @RequestMapping("contig-alias-admin")
@@ -60,8 +62,8 @@ public class AdminController {
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
-            @RequestParam(required = false) Integer pageNumber,
-            @RequestParam(required = false) Integer pageSize) throws IOException {
+            @RequestParam(required = false) @ApiParam(value = API_PARAM_VALUE_PAGE_NUMBER) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = API_PARAM_VALUE_PAGE_SIZE) Integer pageSize) throws IOException {
         List<AssemblyEntity> entities;
         try {
             entities = service.getAssemblyOrFetchByAccession(accession);
