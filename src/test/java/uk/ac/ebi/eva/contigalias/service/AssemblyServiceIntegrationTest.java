@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -35,12 +36,13 @@ import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
@@ -139,63 +141,67 @@ public class AssemblyServiceIntegrationTest {
             List<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
             assertNotNull(accession);
             assertTrue(accession.size() > 0);
-            accession.forEach(this::testAssemblyIdenticalToEntity);
+            accession.forEach(this::assertAssemblyEntityIdenticalToEntity);
         }
 
         @Test
         void getAssemblyByGenbank() {
             List<AssemblyEntity> entities = service.getAssemblyByGenbank(entity.getGenbank());
-            testAssemblyIdenticalToEntity(getFirstFromList(entities));
+            assertAssemblyEntityIdenticalToEntity(getFirstFromList(entities));
         }
 
         @Test
         void getAssemblyByRefseq() {
-            List<AssemblyEntity> entities = service.getAssemblyByRefseq(entity.getRefseq());
-            testAssemblyIdenticalToEntity(getFirstFromList(entities));
+            Page<AssemblyEntity> page = service.getAssemblyByRefseq(entity.getRefseq(),
+                                                                    DEFAULT_PAGE_REQUEST);
+            assertPageValid(page);
+            page.get().forEach(this::assertAssemblyEntityIdenticalToEntity);
         }
 
-        void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
-            assertEquals(entity.getName(), assembly.getName());
-            assertEquals(entity.getOrganism(), assembly.getOrganism());
-            assertEquals(entity.getGenbank(), assembly.getGenbank());
-            assertEquals(entity.getRefseq(), assembly.getRefseq());
-            assertEquals(entity.getTaxid(), assembly.getTaxid());
-            assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        @Test
+        void getAssembliesByTaxid() {
+
+            long TAX_ID = 8493L;
+
+            AssemblyEntity[] entities = new AssemblyEntity[MAX_CONSECUTIVE_ENTITIES];
+
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assemblyEntity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
+                entities[i] = assemblyEntity;
+                service.insertAssembly(assemblyEntity);
+            }
+
+            Page<AssemblyEntity> page = service.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST);
+            assertPageValid(page);
+            List<AssemblyEntity> entityList = page.get().collect(Collectors.toList());
+            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
+
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                assertAssemblyEntityIdenticalToEntity(entities[i], entityList.get(i));
+            }
+
+            for (AssemblyEntity assemblyEntity : entities) {
+                service.deleteAssemblyByGenbank(assemblyEntity.getGenbank());
+            }
         }
 
-        // TODO test for hateoas response
-//        @Test
-//        void getAssembliesByTaxid() {
-//
-//            long TAX_ID = 8493L;
-//
-//            AssemblyEntity[] entities = new AssemblyEntity[MAX_CONSECUTIVE_ENTITIES];
-//
-//            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
-//                AssemblyEntity assemblyEntity = AssemblyGenerator.generate(i).setTaxid(TAX_ID);
-//                entities[i] = assemblyEntity;
-//                service.insertAssembly(assemblyEntity);
-//            }
-//
-//            List<AssemblyEntity> entityList = service.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST);
-//            assertNotNull(entityList);
-//            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
-//
-//            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
-//                AssemblyEntity assembly = entityList.get(i);
-//                assertEquals(entities[i].getName(), assembly.getName());
-//                assertEquals(entities[i].getOrganism(), assembly.getOrganism());
-//                assertEquals(entities[i].getGenbank(), assembly.getGenbank());
-//                assertEquals(entities[i].getRefseq(), assembly.getRefseq());
-//                assertEquals(TAX_ID, assembly.getTaxid());
-//                assertEquals(entities[i].isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
-//            }
-//
-//            for (AssemblyEntity assemblyEntity : entities) {
-//                service.deleteAssemblyByGenbank(assemblyEntity.getGenbank());
-//            }
-//        }
+        void assertPageValid(Page<AssemblyEntity> page) {
+            assertNotNull(page);
+            assertTrue(page.getTotalElements() > 0);
+        }
 
+        void assertAssemblyEntityIdenticalToEntity(AssemblyEntity actual) {
+            assertAssemblyEntityIdenticalToEntity(this.entity, actual);
+        }
+
+        void assertAssemblyEntityIdenticalToEntity(AssemblyEntity expect, AssemblyEntity actual) {
+            assertEquals(expect.getName(), actual.getName());
+            assertEquals(expect.getOrganism(), actual.getOrganism());
+            assertEquals(expect.getGenbank(), actual.getGenbank());
+            assertEquals(expect.getRefseq(), actual.getRefseq());
+            assertEquals(expect.getTaxid(), actual.getTaxid());
+            assertEquals(expect.isGenbankRefseqIdentical(), actual.isGenbankRefseqIdentical());
+        }
     }
 
 }

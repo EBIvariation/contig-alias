@@ -108,14 +108,15 @@ public class ContigAliasController {
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
                     "code of 404.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(
-            @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String refseq,
-            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
-            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByRefseq(
+                @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String refseq,
+                @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+                @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq);
-            return createAppropriateResponseEntity(entities);
-        } else return BaseController.BAD_REQUEST;
+            Page<AssemblyEntity> page = assemblyService.getAssemblyByRefseq(refseq, BaseController.DEFAULT_PAGE_REQUEST);
+            PagedModel<EntityModel<AssemblyEntity>> entityModels = assemblyAssembler.toModel(page);
+            return new ResponseEntity<>(entityModels, page.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+        } else return BAD_REQUEST;
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",

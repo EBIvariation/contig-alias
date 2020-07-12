@@ -43,7 +43,7 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
 
     Optional<AssemblyEntity> findAssemblyEntityByGenbank(String genbank);
 
-    Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
+    Page<AssemblyEntity> findAssemblyEntityByRefseq(String refseq, Pageable pageable);
 
     Page<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 

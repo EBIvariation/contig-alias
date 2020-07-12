@@ -22,9 +22,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +42,7 @@ public class BaseController {
     public static final PageRequest DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER,
                                                                                             DEFAULT_PAGE_SIZE);
 
-    public static final ResponseEntity BAD_REQUEST
-            = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public static final ResponseEntity BAD_REQUEST = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
 
@@ -87,11 +83,12 @@ public class BaseController {
         return (page == null || page == 0) && (size == null || size > 1);
     }
 
-    public static <T> ResponseEntity<PagedModel<T>> getNoContentPagedModelResponse(Page<T> page, int pageNumber, int pageSize) {
+    public static <T> ResponseEntity<PagedModel<T>> getNoContentPagedModelResponse(Page<T> page, int pageNumber,
+                                                                                   int pageSize) {
         return new ResponseEntity<>(new PagedModel<>(Collections.emptyList(),
-                                                      new PagedModel.PageMetadata(pageSize,
-                                                                                  Math.max(pageNumber, 0),
-                                                                                  0)),
+                                                     new PagedModel.PageMetadata(pageSize,
+                                                                                 Math.max(pageNumber, 0),
+                                                                                 0)),
                                     HttpStatus.NO_CONTENT);
     }
 

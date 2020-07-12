@@ -75,9 +75,10 @@ public class AssemblyService {
         return convertOptionalToList(entity);
     }
 
-    public List<AssemblyEntity> getAssemblyByRefseq(String refseq) {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByRefseq(refseq);
-        return convertOptionalToList(entity);
+    public Page<AssemblyEntity> getAssemblyByRefseq(String refseq, Pageable request) {
+        Page<AssemblyEntity> page = repository.findAssemblyEntityByRefseq(refseq, request);
+        page.forEach(this::stripAssemblyFromChromosomes);
+        return page;
     }
 
     public Page<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
