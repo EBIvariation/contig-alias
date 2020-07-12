@@ -76,14 +76,14 @@ public class ContigAliasController {
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
                     "code of 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession);
-            return createAppropriateResponseEntity(entities);
-        } else return BaseController.BAD_REQUEST;
+            Page<AssemblyEntity> page = assemblyService.getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
+            return createAppropriateResponseEntity(page, assemblyAssembler);
+        } else return BAD_REQUEST;
     }
 
     @ApiOperation(value = "Get an assembly using its GenBank accession.",

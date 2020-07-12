@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @Service
 public class AssemblyService {
@@ -58,16 +61,18 @@ public class AssemblyService {
 
     public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
 
-        List<AssemblyEntity> entities = getAssemblyByAccession(accession);
+        Page<AssemblyEntity> entities = getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
         if (!entities.isEmpty()) {
-            return entities;
+            return entities.get().collect(Collectors.toList());
         }
         fetchAndInsertAssembly(accession);
 
-        entities = getAssemblyByAccession(accession);
+        entities = getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
         if (!entities.isEmpty()) {
-            return entities;
-        } else return new LinkedList<>();
+            return entities.get().collect(Collectors.toList());
+        } else {
+            return new LinkedList<>();
+        }
     }
 
     public Page<AssemblyEntity> getAssemblyByGenbank(String genbank, Pageable request) {
@@ -87,17 +92,18 @@ public class AssemblyService {
 
     public void fetchAndInsertAssembly(String accession)
             throws IOException, IllegalArgumentException {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
-        if (entity.isPresent()) {
-            throw duplicateAssemblyInsertionException(accession, entity.get());
+        Page<AssemblyEntity> page = repository.findAssemblyEntityByAccession(accession, DEFAULT_PAGE_REQUEST);
+        Optional<AssemblyEntity> first = page.get().findFirst();
+        if (first.isPresent()) {
+            throw duplicateAssemblyInsertionException(accession, first.get());
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
     }
 
-    public List<AssemblyEntity> getAssemblyByAccession(String accession) {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
-        return convertOptionalToList(entity);
+    public Page<AssemblyEntity> getAssemblyByAccession(String accession, Pageable request) {
+        Page<AssemblyEntity> page = repository.findAssemblyEntityByAccession(accession, request);
+        return stripAssemblyFromChromosomes(page);
     }
 
     public List<AssemblyEntity> convertOptionalToList(Optional<AssemblyEntity> optional) {
@@ -111,10 +117,10 @@ public class AssemblyService {
     }
 
     private Page<AssemblyEntity> stripAssemblyFromChromosomes(Page<AssemblyEntity> page) {
-    if (page != null && page.getTotalElements() > 0){
-        page.get().forEach(this::stripAssemblyFromChromosomes);
-    }
-    return page;
+        if (page != null && page.getTotalElements() > 0) {
+            page.get().forEach(this::stripAssemblyFromChromosomes);
+        }
+        return page;
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
@@ -160,11 +166,12 @@ public class AssemblyService {
         if (genbank == null && refseq == null) {
             return false;
         }
-        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
+        Page<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
                 genbank == null ? "##########" : genbank,
-                refseq == null ? "##########" : refseq);
-        return existingAssembly.isPresent();
+                refseq == null ? "##########" : refseq,
+                DEFAULT_PAGE_REQUEST);
+        return !existingAssembly.isEmpty();
     }
 
     public void fetchAndInsertAssembly(List<String> accessions) {
@@ -186,7 +193,7 @@ public class AssemblyService {
     }
 
     public void deleteAssemblyByAccession(String accession) {
-        List<AssemblyEntity> assemblies = getAssemblyByAccession(accession);
+        Page<AssemblyEntity> assemblies = getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
         if (!assemblies.isEmpty()) {
             assemblies.forEach(this::deleteAssembly);
         }

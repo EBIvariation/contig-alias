@@ -87,36 +87,38 @@ public class AssemblyServiceIntegrationTest {
 
         String targetGenbank = entities[0].getGenbank();
         service.fetchAndInsertAssembly(targetGenbank);
-        List<AssemblyEntity> assemblyEntities = service.getAssemblyByAccession(targetGenbank);
-        List<ChromosomeEntity> chromosomes = getFirstFromList(assemblyEntities).getChromosomes();
+        Page<AssemblyEntity> assemblyEntities = service.getAssemblyByAccession(targetGenbank, DEFAULT_PAGE_REQUEST);
+        assertPageValid(assemblyEntities);
+        Optional<AssemblyEntity> first = assemblyEntities.get().findFirst();
+        assertTrue(first.isPresent());
+        List<ChromosomeEntity> chromosomes = first.get().getChromosomes();
         assertNotNull(chromosomes);
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
             service.fetchAndInsertAssembly(genbank);
-            List<AssemblyEntity> entity = service.getAssemblyByAccession(genbank);
+            Page<AssemblyEntity> page = service.getAssemblyByAccession(genbank, DEFAULT_PAGE_REQUEST);
+            assertPageValid(page);
+            Optional<AssemblyEntity> entity = page.get().findFirst();
             assertNotNull(entity);
-            assertEquals(1, entity.size());
         }
 
-        List<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
+        Page<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank, DEFAULT_PAGE_REQUEST);
         assertTrue(targetGenbankEntity == null || targetGenbankEntity.isEmpty());
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
-            List<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
-            assertNotNull(accession);
-            assertTrue(accession.size() > 0);
+            Page<AssemblyEntity> accession = service.getAssemblyByAccession(genbank, DEFAULT_PAGE_REQUEST);
+            assertPageValid(accession);
             accession.forEach(service::deleteAssembly);
         }
 
         service.setCacheSize(cacheSize);
     }
 
-    private AssemblyEntity getFirstFromList(List<AssemblyEntity> list) {
-        assertNotNull(list);
-        assertTrue(list.size() > 0);
-        return list.get(0);
+    void assertPageValid(Page<AssemblyEntity> page) {
+        assertNotNull(page);
+        assertTrue(page.getTotalElements() > 0);
     }
 
     @Nested
@@ -138,10 +140,8 @@ public class AssemblyServiceIntegrationTest {
 
         @Test
         void getAssemblyByAccession() {
-            List<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
-            assertNotNull(accession);
-            assertTrue(accession.size() > 0);
-            accession.forEach(this::assertAssemblyEntityIdenticalToEntity);
+            Page<AssemblyEntity> page = service.getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_REQUEST);
+            assertAssemblyPageIdenticalToEntity(page);
         }
 
         @Test
@@ -183,14 +183,9 @@ public class AssemblyServiceIntegrationTest {
             }
         }
 
-        void assertAssemblyPageIdenticalToEntity(Page<AssemblyEntity> page){
+        void assertAssemblyPageIdenticalToEntity(Page<AssemblyEntity> page) {
             assertPageValid(page);
             page.get().forEach(this::assertAssemblyEntityIdenticalToEntity);
-        }
-
-        void assertPageValid(Page<AssemblyEntity> page) {
-            assertNotNull(page);
-            assertTrue(page.getTotalElements() > 0);
         }
 
         void assertAssemblyEntityIdenticalToEntity(AssemblyEntity actual) {

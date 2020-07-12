@@ -31,11 +31,11 @@ import java.util.Optional;
 public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
         JpaSpecificationExecutor<AssemblyEntity> {
 
-    default Optional<AssemblyEntity> findAssemblyEntityByAccession(String accession) {
-        return this.findAssemblyEntityByGenbankOrRefseq(accession, accession);
+    default Page<AssemblyEntity> findAssemblyEntityByAccession(String accession, Pageable pageable) {
+        return this.findAssemblyEntityByGenbankOrRefseq(accession, accession, pageable);
     }
 
-    Optional<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq);
+    Page<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq, Pageable pageable);
 
     long count();
 
