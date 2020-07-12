@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -35,6 +36,7 @@ import uk.ac.ebi.eva.contigalias.service.AliasService;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 public class ContigAliasControllerTest {
@@ -60,20 +63,19 @@ public class ContigAliasControllerTest {
         @BeforeEach
         void setUp() {
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
-            List<AssemblyEntity> entityAsList = Collections.singletonList(this.entity);
-            // TODO fix
-//            Mockito.when(mockAssemblyService
-//                                 .getAssemblyByAccession(this.entity.getGenbank()))
-//                   .thenReturn(entityAsList);
-//            Mockito.when(mockAssemblyService
-//                                 .getAssemblyByAccession(this.entity.getRefseq()))
-//                   .thenReturn(entityAsList);
-//            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
-//                   .thenReturn(entityAsList);
-//            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
-//                   .thenReturn(entityAsList);
-//            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
-//                   .thenReturn(entityAsList);
+            PageImpl<AssemblyEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
+            Mockito.when(mockAssemblyService
+                                 .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(page);
+            Mockito.when(mockAssemblyService
+                                 .getAssemblyByAccession(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(page);
+            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(page);
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(page);
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(page);
 
             PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
@@ -83,35 +85,36 @@ public class ContigAliasControllerTest {
             controller = new ContigAliasController(mockAssemblyService, null,null, assembler);
         }
 
-        // TODO fix
+        @Test
+        public void getAssemblyByAccession() {
+            testAssemblyEntityPagedResponse(
+                    controller.getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+            testAssemblyEntityPagedResponse(
+                    controller.getAssemblyByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
-//        @Test
-//        public void getAssemblyByAccession() {
-//            testAssemblyEntityResponse(
-//                    controller.getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
-//            testAssemblyEntityResponse(
-//                    controller.getAssemblyByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
-//        }
+        @Test
+        public void getAssemblyByGenbank() {
+            testAssemblyEntityPagedResponse(
+                    controller.getAssemblyByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
-//        @Test
-//        public void getAssemblyByGenbank() {
-//            testAssemblyEntityResponse(
-//                    controller.getAssemblyByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
-//        }
-//
-//        @Test
-//        public void getAssemblyByRefseq() {
-//            testAssemblyEntityResponse(
-//                    controller.getAssemblyByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
-//        }
+        @Test
+        public void getAssemblyByRefseq() {
+            testAssemblyEntityPagedResponse(
+                    controller.getAssemblyByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
-        void testAssemblyEntityResponse(ResponseEntity<List<AssemblyEntity>> response) {
+        void testAssemblyEntityPagedResponse(ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> response) {
             assertEquals(response.getStatusCode(), HttpStatus.OK);
             assertTrue(response.hasBody());
-            List<AssemblyEntity> body = response.getBody();
+            PagedModel<EntityModel<AssemblyEntity>> body = response.getBody();
             assertNotNull(body);
-            assertTrue(body.size() > 0);
-            AssemblyEntity assembly = body.get(0);
+            Collection<EntityModel<AssemblyEntity>> content = body.getContent();
+            content.forEach(it -> assertAssemblyIdenticalToEntity(it.getContent()));
+        }
+
+        void assertAssemblyIdenticalToEntity(AssemblyEntity assembly) {
             assertNotNull(assembly);
             assertEquals(entity.getName(), assembly.getName());
             assertEquals(entity.getOrganism(), assembly.getOrganism());
@@ -139,10 +142,10 @@ public class ContigAliasControllerTest {
                 entities.add(assemblyEntity);
             }
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
-            // TODO test for hateoas response
-//            Mockito.when(mockAssemblyService
-//                                 .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST))
-//                   .thenReturn(entities);
+
+            Mockito.when(mockAssemblyService
+                                 .getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST))
+                   .thenReturn(new PageImpl<>(entities));
 
             PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.wrap(entities, null);
@@ -151,28 +154,31 @@ public class ContigAliasControllerTest {
             controller = new ContigAliasController(mockAssemblyService, null,null, assembler);
         }
 
-        // TODO test for hateoas response
-//        @Test
-//        void getAssembliesByTaxid() {
-//            ResponseEntity<List<AssemblyEntity>> response
-//                    = controller.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-//            assertEquals(response.getStatusCode(), HttpStatus.OK);
-//            assertTrue(response.hasBody());
-//            List<AssemblyEntity> entityList = response.getBody();
-//            assertNotNull(entityList);
-//            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
-//
-//            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
-//                AssemblyEntity assembly = entityList.get(i);
-//                AssemblyEntity entity = entities.get(i);
-//                assertEquals(entity.getName(), assembly.getName());
-//                assertEquals(entity.getOrganism(), assembly.getOrganism());
-//                assertEquals(entity.getGenbank(), assembly.getGenbank());
-//                assertEquals(entity.getRefseq(), assembly.getRefseq());
-//                assertEquals(TAX_ID, assembly.getTaxid());
-//                assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
-//            }
-//        }
+        @Test
+        void getAssembliesByTaxid() {
+
+            ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> response = controller.getAssembliesByTaxid(
+                    TAX_ID, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            PagedModel<EntityModel<AssemblyEntity>> body = response.getBody();
+            assertNotNull(body);
+            List<EntityModel<AssemblyEntity>> entityList = new LinkedList<>(body.getContent());
+            assertNotNull(entityList);
+            assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
+
+            for (int i = 0; i < MAX_CONSECUTIVE_ENTITIES; i++) {
+                AssemblyEntity assembly = entityList.get(i).getContent();
+                assertNotNull(assembly);
+                AssemblyEntity entity = entities.get(i);
+                assertEquals(entity.getName(), assembly.getName());
+                assertEquals(entity.getOrganism(), assembly.getOrganism());
+                assertEquals(entity.getGenbank(), assembly.getGenbank());
+                assertEquals(entity.getRefseq(), assembly.getRefseq());
+                assertEquals(TAX_ID, assembly.getTaxid());
+                assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+            }
+        }
 
     }
 
