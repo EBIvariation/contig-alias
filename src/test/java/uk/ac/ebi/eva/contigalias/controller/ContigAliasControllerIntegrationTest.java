@@ -80,9 +80,9 @@ public class ContigAliasControllerIntegrationTest {
             when(mockAssemblyService
                          .getAssemblyByAccession(this.entity.getGenbank()))
                     .thenReturn(entityAsList);
-            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
-                    .thenReturn(entityAsList);
             // TODO fix
+//            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
+//                    .thenReturn(entityAsList);
 //            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
 //                    .thenReturn(entityAsList);
         }

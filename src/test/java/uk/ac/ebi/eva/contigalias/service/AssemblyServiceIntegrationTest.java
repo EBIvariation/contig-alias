@@ -146,16 +146,14 @@ public class AssemblyServiceIntegrationTest {
 
         @Test
         void getAssemblyByGenbank() {
-            List<AssemblyEntity> entities = service.getAssemblyByGenbank(entity.getGenbank());
-            assertAssemblyEntityIdenticalToEntity(getFirstFromList(entities));
+            Page<AssemblyEntity> page = service.getAssemblyByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST);
+            assertAssemblyPageIdenticalToEntity(page);
         }
 
         @Test
         void getAssemblyByRefseq() {
-            Page<AssemblyEntity> page = service.getAssemblyByRefseq(entity.getRefseq(),
-                                                                    DEFAULT_PAGE_REQUEST);
-            assertPageValid(page);
-            page.get().forEach(this::assertAssemblyEntityIdenticalToEntity);
+            Page<AssemblyEntity> page = service.getAssemblyByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST);
+            assertAssemblyPageIdenticalToEntity(page);
         }
 
         @Test
@@ -183,6 +181,11 @@ public class AssemblyServiceIntegrationTest {
             for (AssemblyEntity assemblyEntity : entities) {
                 service.deleteAssemblyByGenbank(assemblyEntity.getGenbank());
             }
+        }
+
+        void assertAssemblyPageIdenticalToEntity(Page<AssemblyEntity> page){
+            assertPageValid(page);
+            page.get().forEach(this::assertAssemblyEntityIdenticalToEntity);
         }
 
         void assertPageValid(Page<AssemblyEntity> page) {

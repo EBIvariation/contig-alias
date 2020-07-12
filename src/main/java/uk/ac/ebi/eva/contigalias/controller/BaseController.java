@@ -18,11 +18,12 @@ package uk.ac.ebi.eva.contigalias.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,29 +80,14 @@ public class BaseController {
         }
     }
 
+    public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(Page<T> page,
+                                                                                                 PagedResourcesAssembler<T> assembler) {
+        PagedModel<EntityModel<T>> entityModels = assembler.toModel(page);
+        return new ResponseEntity<>(entityModels, page.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+    }
+
     public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {
         return (page == null || page == 0) && (size == null || size > 1);
-    }
-
-    public static <T> ResponseEntity<PagedModel<T>> getNoContentPagedModelResponse(Page<T> page, int pageNumber,
-                                                                                   int pageSize) {
-        return new ResponseEntity<>(new PagedModel<>(Collections.emptyList(),
-                                                     new PagedModel.PageMetadata(pageSize,
-                                                                                 Math.max(pageNumber, 0),
-                                                                                 0)),
-                                    HttpStatus.NO_CONTENT);
-    }
-
-    public static PagedModel.PageMetadata buildPageMetadata(long totalNumberOfResults, int pageNumber, int pageSize)
-            throws IllegalArgumentException {
-        long totalPages = pageSize == 0L ? 0L : (long) Math.ceil((double) totalNumberOfResults / (double) pageSize);
-
-        if (pageNumber < 0 || pageNumber >= totalPages) {
-            throw new IllegalArgumentException("For the given page size, there are " + totalPages + " page(s), so " +
-                                                       "the correct page range is from 0 to " + (totalPages - 1) + " " +
-                                                       "(both included).");
-        }
-        return new PagedModel.PageMetadata(pageSize, pageNumber, totalNumberOfResults, totalPages);
     }
 
 }

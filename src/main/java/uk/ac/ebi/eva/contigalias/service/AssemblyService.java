@@ -70,21 +70,19 @@ public class AssemblyService {
         } else return new LinkedList<>();
     }
 
-    public List<AssemblyEntity> getAssemblyByGenbank(String genbank) {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
-        return convertOptionalToList(entity);
+    public Page<AssemblyEntity> getAssemblyByGenbank(String genbank, Pageable request) {
+        Page<AssemblyEntity> page = repository.findAssemblyEntityByGenbank(genbank, request);
+        return stripAssemblyFromChromosomes(page);
     }
 
     public Page<AssemblyEntity> getAssemblyByRefseq(String refseq, Pageable request) {
         Page<AssemblyEntity> page = repository.findAssemblyEntityByRefseq(refseq, request);
-        page.forEach(this::stripAssemblyFromChromosomes);
-        return page;
+        return stripAssemblyFromChromosomes(page);
     }
 
     public Page<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
         Page<AssemblyEntity> page = repository.findAssemblyEntitiesByTaxid(taxid, request);
-        page.forEach(this::stripAssemblyFromChromosomes);
-        return page;
+        return stripAssemblyFromChromosomes(page);
     }
 
     public void fetchAndInsertAssembly(String accession)
@@ -110,6 +108,13 @@ public class AssemblyService {
         } else {
             return new LinkedList<>();
         }
+    }
+
+    private Page<AssemblyEntity> stripAssemblyFromChromosomes(Page<AssemblyEntity> page) {
+    if (page != null && page.getTotalElements() > 0){
+        page.get().forEach(this::stripAssemblyFromChromosomes);
+    }
+    return page;
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
