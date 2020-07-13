@@ -199,13 +199,13 @@ public class ContigAliasControllerTest {
             Mockito.when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(entityListAsPage);
 
-            PagedResourcesAssembler<ChromosomeEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssmebler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = new PagedModel<>(
-                    Collections.singletonList(new EntityModel<>(new ChromosomeEntity())), null);
-            Mockito.when(assembler.toModel(any()))
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(mockChromosomeAssmebler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            controller = new ContigAliasController(null, mockChromosomeService, null,null, assembler);
+            controller = new ContigAliasController(null, mockChromosomeService, null,null, mockChromosomeAssmebler);
         }
 
         @Test
