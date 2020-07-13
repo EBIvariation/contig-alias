@@ -112,7 +112,7 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
-            String path = "$._embedded.assemblyEntityList[0]";
+            String path = "$._embedded.assemblyEntities[0]";
             actions.andExpect(status().isOk())
                    .andExpect(jsonPath(path).exists())
                    .andExpect(jsonPath(path + ".id").doesNotExist())
@@ -155,7 +155,7 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
-            String path = "$._embedded.chromosomeEntityList[0]";
+            String path = "$._embedded.chromosomeEntities[0]";
             actions.andExpect(status().isOk())
                    .andExpect(jsonPath(path).exists())
                    .andExpect(jsonPath(path + ".id").doesNotExist())

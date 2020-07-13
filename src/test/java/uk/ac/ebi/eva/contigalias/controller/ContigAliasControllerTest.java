@@ -208,18 +208,17 @@ public class ContigAliasControllerTest {
             controller = new ContigAliasController(null, mockChromosomeService, null,null, assembler);
         }
 
+        @Test
+        public void getChromosomeByGenbank() {
+            testChromosomeEntityResponse(
+                    controller.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
-//        @Test
-//        public void getChromosomeByGenbank() {
-//            testChromosomeEntityResponse(
-//                    controller.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
-//        }
-//
-//        @Test
-//        public void getChromosomeByRefseq() {
-//            testChromosomeEntityResponse(
-//                    controller.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
-//        }
+        @Test
+        public void getChromosomeByRefseq() {
+            testChromosomeEntityResponse(
+                    controller.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+        }
 
         void testChromosomeEntityResponse(ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> response) {
             assertEquals(response.getStatusCode(), HttpStatus.OK);
