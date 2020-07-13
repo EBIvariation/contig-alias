@@ -79,17 +79,15 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            Page<AssemblyEntity> entityAsList = new PageImpl<>(Collections.singletonList(this.entity));
+            Page<AssemblyEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
             when(mockAssemblyService
                          .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityAsList);
+                    .thenReturn(entityListAsPage);
             when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityAsList);
+                    .thenReturn(entityListAsPage);
             when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityAsList);
+                    .thenReturn(entityListAsPage);
         }
-
-        //TODO fix
 
         @Test
         void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
@@ -135,11 +133,11 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            Optional<ChromosomeEntity> entityAsOptional = Optional.of(this.entity);
-            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
-                    .thenReturn(entityAsOptional);
-            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
-                    .thenReturn(entityAsOptional);
+            Page<ChromosomeEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
+            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
+            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
         }
 
         @Test
@@ -157,11 +155,13 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
+            String path = "$._embedded.chromosomeEntityList[0]";
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(entity.getName())))
-                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())));
+                   .andExpect(jsonPath(path).exists())
+                   .andExpect(jsonPath(path + ".id").doesNotExist())
+                   .andExpect(jsonPath(path + ".name", is(entity.getName())))
+                   .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())));
         }
 
     }
@@ -254,6 +254,7 @@ public class ContigAliasControllerIntegrationTest {
                        .andExpect(jsonPath("$[" + i + "].genbank", is(entity.getGenbank())))
                        .andExpect(jsonPath("$[" + i + "].refseq", is(entity.getRefseq())));
             }
+
         }
 
     }

@@ -17,6 +17,8 @@
 package uk.ac.ebi.eva.contigalias.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -25,7 +27,6 @@ import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ChromosomeService {
@@ -37,16 +38,15 @@ public class ChromosomeService {
         this.repository = repository;
     }
 
-    public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
-        Optional<ChromosomeEntity> chromosome = repository.findChromosomeEntityByGenbank(genbank);
-        chromosome.ifPresent(this::stripChromosomeFromAssembly);
-        return chromosome;
+
+    public Page<ChromosomeEntity> getChromosomeByGenbank(String genbank, Pageable request) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntityByGenbank(genbank, request);
+        return stripChromosomeFromAssembly(page);
     }
 
-    public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
-        Optional<ChromosomeEntity> chromosome = repository.findChromosomeEntityByRefseq(refseq);
-        chromosome.ifPresent(this::stripChromosomeFromAssembly);
-        return chromosome;
+    public Page<ChromosomeEntity> getChromosomeByRefseq(String refseq, Pageable request) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntityByRefseq(refseq, request);
+        return stripChromosomeFromAssembly(page);
     }
 
     public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank) {
@@ -65,6 +65,13 @@ public class ChromosomeService {
         }
         chromosomes.forEach(this::stripAssemblyFromChromosome);
         return chromosomes;
+    }
+
+    private Page<ChromosomeEntity> stripChromosomeFromAssembly(Page<ChromosomeEntity> page) {
+        if (page != null && page.getTotalElements() > 0) {
+            page.get().forEach(this::stripChromosomeFromAssembly);
+        }
+        return page;
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {

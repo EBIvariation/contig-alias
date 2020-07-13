@@ -30,7 +30,6 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -104,16 +103,6 @@ public class AssemblyService {
     public Page<AssemblyEntity> getAssemblyByAccession(String accession, Pageable request) {
         Page<AssemblyEntity> page = repository.findAssemblyEntityByAccession(accession, request);
         return stripAssemblyFromChromosomes(page);
-    }
-
-    public List<AssemblyEntity> convertOptionalToList(Optional<AssemblyEntity> optional) {
-        if (optional.isPresent()) {
-            AssemblyEntity entity = optional.get();
-            stripAssemblyFromChromosomes(entity);
-            return Collections.singletonList(entity);
-        } else {
-            return new LinkedList<>();
-        }
     }
 
     private Page<AssemblyEntity> stripAssemblyFromChromosomes(Page<AssemblyEntity> page) {
