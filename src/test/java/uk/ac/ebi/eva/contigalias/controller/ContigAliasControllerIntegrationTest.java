@@ -241,7 +241,7 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomesByAssemblyGenbank() throws Exception {
             for (ChromosomeEntity e : chromosomeEntities) {
                 ResultActions resultActions = mockMvc.perform(
-                        get("/contig-alias/v1/chromosomes/assembly/genbank/{genbank}", assemblyEntity.getGenbank()));
+                        get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
                 assertChromosomesEqualToEntities(resultActions);
             }
         }
@@ -250,7 +250,7 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomesByAssemblyRefseq() throws Exception {
             for (ChromosomeEntity e : chromosomeEntities) {
                 ResultActions resultActions = mockMvc.perform(
-                        get("/contig-alias/v1/chromosomes/assembly/refseq/{refseq}", assemblyEntity.getRefseq()));
+                        get("/contig-alias/v1/assemblies/refseq/{refseq}/chromosomes", assemblyEntity.getRefseq()));
                 assertChromosomesEqualToEntities(resultActions);
             }
         }
