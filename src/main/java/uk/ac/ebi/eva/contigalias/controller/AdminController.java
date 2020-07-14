@@ -35,8 +35,8 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import java.io.IOException;
 import java.util.List;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_NUMBER;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.API_PARAM_VALUE_PAGE_SIZE;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
@@ -63,8 +63,8 @@ public class AdminController {
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
-            @RequestParam(required = false) @ApiParam(value = API_PARAM_VALUE_PAGE_NUMBER) Integer pageNumber,
-            @RequestParam(required = false) @ApiParam(value = API_PARAM_VALUE_PAGE_SIZE) Integer pageSize) throws IOException {
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities;
             try {
