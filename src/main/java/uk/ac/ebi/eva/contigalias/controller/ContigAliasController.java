@@ -61,11 +61,11 @@ public class ContigAliasController {
         this.aliasService = aliasService;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession. ",
+    @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
             notes = "Given an assembly's accession this endpoint will return an assembly that matches that accession." +
-                    "The accession can be either a genbank or refseq accession and the endpoint will automatically " +
-                    "fetch a result from the database for any assembly having the accession as it's " +
-                    "genbank or refseq accession. This endpoint will either return a list containing a single result " +
+                    "The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
+                    "fetch a result from the database for any assembly having the accession as its " +
+                    "GenBank or RefSeq accession. This endpoint will either return a list containing a single result " +
                     "or an HTTP Response with error code 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(
@@ -78,8 +78,8 @@ public class ContigAliasController {
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank accession.",
-            notes = "Given an assembly's genbank accession this endpoint will return an assembly that matches that " +
+    @ApiOperation(value = "Get an assembly using its GenBank accession.",
+            notes = "Given an assembly's GenBank accession this endpoint will return an assembly that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP " +
                     "Response with error code 404.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
@@ -93,8 +93,8 @@ public class ContigAliasController {
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Refseq accession.",
-            notes = "Given an assembly's refseq accession this endpoint will return an assembly that matches that " +
+    @ApiOperation(value = "Get an assembly using its RefSeq accession.",
+            notes = "Given an assembly's RefSeq accession this endpoint will return an assembly that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP " +
                     "Response with error code 404.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
@@ -165,8 +165,8 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an chromosome using its Refseq accession.",
-            notes = "Given a chromosome's refseq accession this endpoint will return a chromosome that matches that " +
+    @ApiOperation(value = "Get an chromosome using its RefSeq accession.",
+            notes = "Given a chromosome's RefSeq accession this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP " +
                     "Response with error code 404.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
