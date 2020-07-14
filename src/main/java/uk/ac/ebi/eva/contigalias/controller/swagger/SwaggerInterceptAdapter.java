@@ -30,7 +30,7 @@ public class SwaggerInterceptAdapter extends HandlerInterceptorAdapter {
                              Object handler) throws Exception {
         String req = request.getRequestURI();
 
-        if (req.equals("/") || req.equals("/ccontig-alias") || req.equals("/contig-alias/")
+        if (req.equals("/") || req.equals("/contig-alias") || req.equals("/contig-alias/")
                 || req.equals("/contig-alias-admin") || req.equals("/contig-alias-admin/")) {
             response.sendRedirect("/swagger-ui.html");
             return false;
