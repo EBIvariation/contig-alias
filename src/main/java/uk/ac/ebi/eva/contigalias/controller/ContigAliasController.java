@@ -100,7 +100,7 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(entities);
     }
 
-    @ApiOperation(value = "Get an assembly using the genbank accession of one of it's chromosomes.")
+    @ApiOperation(value = "Get an assembly using the genbank accession of one of its chromosomes.")
     @GetMapping(value = "v1/assemblies/chromosome/genbank/{genbank}")
     public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank(@PathVariable String genbank) {
         Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeGenbank(genbank);
@@ -108,7 +108,7 @@ public class ContigAliasController {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @ApiOperation(value = "Get an assembly using the refseq accession of one of it's chromosomes.")
+    @ApiOperation(value = "Get an assembly using the refseq accession of one of its chromosomes.")
     @GetMapping(value = "v1/assemblies/chromosome/refseq/{refseq}")
     public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
         Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeRefseq(refseq);
@@ -138,7 +138,7 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get chromosomes using the genbank accession of it's parent assembly.")
+    @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.")
     @GetMapping(value = "v1/chromosomes/assembly/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyGenbank(@PathVariable String genbank) {
         List<ChromosomeEntity> entities = aliasService.getChromosomesByAssemblyGenbank(genbank);
@@ -149,7 +149,7 @@ public class ContigAliasController {
         }
     }
 
-    @ApiOperation(value = "Get chromosomes using the refseq accession of it's parent assembly.")
+    @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
     @GetMapping(value = "v1/chromosomes/assembly/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyRefseq(@PathVariable String refseq) {
         List<ChromosomeEntity> entities = aliasService.getChromosomesByAssemblyRefseq(refseq);
