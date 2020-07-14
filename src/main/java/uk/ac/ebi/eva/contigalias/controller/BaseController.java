@@ -20,9 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +28,13 @@ public class BaseController {
     public static final int DEFAULT_PAGE_NUMBER = 0;
 
     public static final int DEFAULT_PAGE_SIZE = 10;
+
+    public static final String PAGE_NUMBER_DESCRIPTION = "You can provide a page index to return only a subset of" +
+            " the data. Page numbers start from 0 and if not specified then default page number is 0.";
+
+    public static final String PAGE_SIZE_DESCRIPTION = "You can provide a page size to return only a subset of"
+            + " the data. Page size should be greater than 0 and if not specified then default page size is 10 " +
+            "results per page.";
 
     public static final PageRequest DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER,
                                                                                             DEFAULT_PAGE_SIZE);

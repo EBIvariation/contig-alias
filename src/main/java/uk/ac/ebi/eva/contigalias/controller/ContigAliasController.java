@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.controller;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,8 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
@@ -58,57 +61,79 @@ public class ContigAliasController {
         this.aliasService = aliasService;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
+    @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
+            notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
+                    ". The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
+                    "fetch a result from the database for any assembly having the accession as its GenBank or RefSeq " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP status " +
+                    "code of 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
-                                                                       @RequestParam(required = false) Integer pageNumber,
-                                                                       @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession);
             return createAppropriateResponseEntity(entities);
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Genbank accession.")
+    @ApiOperation(value = "Get an assembly using its GenBank accession.",
+            notes = "Given an assembly's GenBank accession, this endpoint will return an assembly that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP status " +
+                    "code of 404.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(@PathVariable String genbank,
-                                                                     @RequestParam(required = false) Integer pageNumber,
-                                                                     @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(
+            @PathVariable @ApiParam(value = "Genbank assembly accession. Eg: GCA_000001405.10") String genbank,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByGenbank(genbank);
             return createAppropriateResponseEntity(entities);
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Refseq accession.")
+    @ApiOperation(value = "Get an assembly using its RefSeq accession.",
+            notes = "Given an assembly's RefSeq accession, this endpoint will return an assembly that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP status " +
+                    "code of 404.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(@PathVariable String refseq,
-                                                                    @RequestParam(required = false) Integer pageNumber,
-                                                                    @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(
+            @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String refseq,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq);
             return createAppropriateResponseEntity(entities);
         } else return BaseController.BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an assembly using its Taxonomic ID.")
+    @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
+            notes = "Given an assembly's Taxonomic ID, this endpoint will return all assemblies that match the given " +
+                    "Taxonomic ID. This endpoint will either return a list containing one or more assemblies or an " +
+                    "HTTP status code of 404.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid,
-                                                                     @RequestParam(required = false) Integer pageNumber,
-                                                                     @RequestParam(required = false) Integer pageSize) {
-        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, createPageRequest(pageNumber, pageSize));
+    public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(
+            @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        List<AssemblyEntity> entities =
+                assemblyService.getAssembliesByTaxid(taxid, createPageRequest(pageNumber, pageSize));
         return createAppropriateResponseEntity(entities);
     }
 
-    @ApiOperation(value = "Get an assembly using the genbank accession of one of its chromosomes.")
+    @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +
+            "chromosomes.")
     @GetMapping(value = "v1/assemblies/chromosome/genbank/{genbank}")
-    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank(@PathVariable String genbank) {
+    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank
+            (@PathVariable String genbank) {
         Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeGenbank(genbank);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @ApiOperation(value = "Get an assembly using the refseq accession of one of its chromosomes.")
+    @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
+            "chromosomes.")
     @GetMapping(value = "v1/assemblies/chromosome/refseq/{refseq}")
     public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
         Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeRefseq(refseq);
@@ -116,22 +141,31 @@ public class ContigAliasController {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @ApiOperation(value = "Get an chromosome using its Genbank accession.")
+    @ApiOperation(value = "Get an chromosome using its Genbank accession.",
+            notes = "Given a chromosome's genbank accession this endpoint will return a chromosome that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP " +
+                    "Response with error code 404.")
     @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
-    public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank,
-                                                                         @RequestParam(required = false) Integer pageNumber,
-                                                                         @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(
+            @PathVariable @ApiParam(value = "Genbank chromosome accession. Eg: CM000663.2") String genbank,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             Optional<ChromosomeEntity> entities = chromosomeService.getChromosomeByGenbank(genbank);
             return createAppropriateResponseEntity(entities);
         } else return BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an chromosome using its Refseq accession.")
+    @ApiOperation(value = "Get an chromosome using its RefSeq accession.",
+            notes = "Given a chromosome's RefSeq accession, this endpoint will return a chromosome that matches that " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP status " +
+                    "code of 400 in case the user is trying to insert an assembly that already exists in the local " +
+                    "database.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq,
-                                                                        @RequestParam(required = false) Integer pageNumber,
-                                                                        @RequestParam(required = false) Integer pageSize) {
+    public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(
+            @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
             return createAppropriateResponseEntity(entity);
@@ -158,6 +192,7 @@ public class ContigAliasController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
     }
 
 }
