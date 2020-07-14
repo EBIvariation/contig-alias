@@ -61,9 +61,9 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(@PathVariable String accession,
-                                                                       @RequestParam(required = false) Integer page,
-                                                                       @RequestParam(required = false) Integer size) {
-        if (paramsValidForSingleResponseQuery(page, size)) {
+                                                                       @RequestParam(required = false) Integer pageNumber,
+                                                                       @RequestParam(required = false) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByAccession(accession);
             return createAppropriateResponseEntity(entities);
         } else return BaseController.BAD_REQUEST;
@@ -72,9 +72,9 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its Genbank accession.")
     @GetMapping(value = "v1/assemblies/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByGenbank(@PathVariable String genbank,
-                                                                     @RequestParam(required = false) Integer page,
-                                                                     @RequestParam(required = false) Integer size) {
-        if (paramsValidForSingleResponseQuery(page, size)) {
+                                                                     @RequestParam(required = false) Integer pageNumber,
+                                                                     @RequestParam(required = false) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByGenbank(genbank);
             return createAppropriateResponseEntity(entities);
         } else return BaseController.BAD_REQUEST;
@@ -83,9 +83,9 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its Refseq accession.")
     @GetMapping(value = "v1/assemblies/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByRefseq(@PathVariable String refseq,
-                                                                    @RequestParam(required = false) Integer page,
-                                                                    @RequestParam(required = false) Integer size) {
-        if (paramsValidForSingleResponseQuery(page, size)) {
+                                                                    @RequestParam(required = false) Integer pageNumber,
+                                                                    @RequestParam(required = false) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities = assemblyService.getAssemblyByRefseq(refseq);
             return createAppropriateResponseEntity(entities);
         } else return BaseController.BAD_REQUEST;
@@ -94,9 +94,9 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.")
     @GetMapping(value = "v1/assemblies/taxid/{taxid}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssembliesByTaxid(@PathVariable long taxid,
-                                                                     @RequestParam(required = false) Integer page,
-                                                                     @RequestParam(required = false) Integer size) {
-        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, createPageRequest(page, size));
+                                                                     @RequestParam(required = false) Integer pageNumber,
+                                                                     @RequestParam(required = false) Integer pageSize) {
+        List<AssemblyEntity> entities = assemblyService.getAssembliesByTaxid(taxid, createPageRequest(pageNumber, pageSize));
         return createAppropriateResponseEntity(entities);
     }
 
@@ -119,9 +119,9 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an chromosome using its Genbank accession.")
     @GetMapping(value = "v1/chromosomes/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByGenbank(@PathVariable String genbank,
-                                                                         @RequestParam(required = false) Integer page,
-                                                                         @RequestParam(required = false) Integer size) {
-        if (paramsValidForSingleResponseQuery(page, size)) {
+                                                                         @RequestParam(required = false) Integer pageNumber,
+                                                                         @RequestParam(required = false) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             Optional<ChromosomeEntity> entities = chromosomeService.getChromosomeByGenbank(genbank);
             return createAppropriateResponseEntity(entities);
         } else return BAD_REQUEST;
@@ -130,9 +130,9 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an chromosome using its Refseq accession.")
     @GetMapping(value = "v1/chromosomes/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<ChromosomeEntity> getChromosomeByRefseq(@PathVariable String refseq,
-                                                                        @RequestParam(required = false) Integer page,
-                                                                        @RequestParam(required = false) Integer size) {
-        if (paramsValidForSingleResponseQuery(page, size)) {
+                                                                        @RequestParam(required = false) Integer pageNumber,
+                                                                        @RequestParam(required = false) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
             return createAppropriateResponseEntity(entity);
         } else return BAD_REQUEST;

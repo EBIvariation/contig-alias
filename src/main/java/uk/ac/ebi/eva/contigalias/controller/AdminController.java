@@ -50,8 +50,9 @@ public class AdminController {
     @ApiOperation(value = "Get or fetch an assembly using its Genbank or Refseq accession.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
-            @PathVariable String accession, @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size) throws IOException {
+            @PathVariable String accession,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize) throws IOException {
         List<AssemblyEntity> entities;
         try {
             entities = service.getAssemblyOrFetchByAccession(accession);
