@@ -24,6 +24,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public class BaseController {
 
@@ -34,10 +35,7 @@ public class BaseController {
     public static final PageRequest DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER,
                                                                                             DEFAULT_PAGE_SIZE);
 
-    public static final ResponseEntity<List<AssemblyEntity>> BAD_ASSEMBLY_REQUEST
-            = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-    public static final ResponseEntity<List<ChromosomeEntity>> BAD_CHROMOSOME_REQUEST
+    public static final ResponseEntity BAD_REQUEST
             = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
@@ -62,6 +60,14 @@ public class BaseController {
     public static <T> ResponseEntity<List<T>> createAppropriateResponseEntity(List<T> entities) {
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public static <T> ResponseEntity<T> createAppropriateResponseEntity(Optional<T> entities) {
+        if (entities.isPresent()) {
+            return new ResponseEntity<T>(entities.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

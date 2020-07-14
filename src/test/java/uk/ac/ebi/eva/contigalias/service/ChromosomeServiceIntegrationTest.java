@@ -27,6 +27,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -53,20 +54,28 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByGenbank() {
-        List<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank());
-        testChromosomeList(chromosomes);
+        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank());
+        testChromosomeOptional(chromosomes);
     }
 
     @Test
     void getChromosomeByRefseq() {
-        List<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
-        testChromosomeList(chromosomes);
+        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
+        testChromosomeOptional(chromosomes);
     }
 
     void testChromosomeList(List<ChromosomeEntity> chromosomes) {
         assertNotNull(chromosomes);
         assertTrue(chromosomes.size() > 0);
         chromosomes.forEach(this::testChromosomeIdenticalToEntity);
+    }
+
+    void testChromosomeOptional(Optional<ChromosomeEntity> entity) {
+        assertNotNull(entity);
+        assertTrue(entity.isPresent());
+        ChromosomeEntity chromosomeEntity = entity.get();
+        assertNotNull(chromosomeEntity);
+        testChromosomeIdenticalToEntity(chromosomeEntity);
     }
 
     void testChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {

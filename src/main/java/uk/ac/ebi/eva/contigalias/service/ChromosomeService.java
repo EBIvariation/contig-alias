@@ -24,7 +24,6 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,24 +37,34 @@ public class ChromosomeService {
         this.repository = repository;
     }
 
-    public List<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByGenbank(genbank);
-        return convertOptionalToList(entity);
+    public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
+        Optional<ChromosomeEntity> chromosome = repository.findChromosomeEntityByGenbank(genbank);
+        chromosome.ifPresent(this::stripChromosomeFromAssembly);
+        return chromosome;
     }
 
-    public List<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseq(refseq);
-        return convertOptionalToList(entity);
+    public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
+        Optional<ChromosomeEntity> chromosome = repository.findChromosomeEntityByRefseq(refseq);
+        chromosome.ifPresent(this::stripChromosomeFromAssembly);
+        return chromosome;
     }
 
-    public List<ChromosomeEntity> convertOptionalToList(Optional<ChromosomeEntity> optional) {
-        if (optional.isPresent()) {
-            ChromosomeEntity entity = optional.get();
-            stripChromosomeFromAssembly(entity);
-            return Collections.singletonList(entity);
-        } else {
-            return new LinkedList<>();
+    public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank) {
+        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Genbank(asmGenbank);
+        if (chromosomes == null) {
+            return Collections.emptyList();
         }
+        chromosomes.forEach(this::stripAssemblyFromChromosome);
+        return chromosomes;
+    }
+
+    public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq) {
+        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Refseq(asmRefseq);
+        if (chromosomes == null) {
+            return Collections.emptyList();
+        }
+        chromosomes.forEach(this::stripAssemblyFromChromosome);
+        return chromosomes;
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
@@ -63,6 +72,10 @@ public class ChromosomeService {
         if (assembly != null) {
             assembly.setChromosomes(null);
         }
+    }
+
+    private void stripAssemblyFromChromosome(ChromosomeEntity chromosome) {
+        chromosome.setAssembly(null);
     }
 
     public void insertChromosome(ChromosomeEntity entity) {
