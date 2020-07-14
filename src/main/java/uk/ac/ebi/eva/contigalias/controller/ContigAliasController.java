@@ -63,11 +63,10 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
             notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
-                    "." +
-                    "The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
-                    "fetch a result from the database for any assembly having the accession as its " +
-                    "GenBank or RefSeq accession. This endpoint will either return a list containing a single result " +
-                    "or an HTTP status code of 404.")
+                    ". The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
+                    "fetch a result from the database for any assembly having the accession as its GenBank or RefSeq " +
+                    "accession. This endpoint will either return a list containing a single result or an HTTP status " +
+                    "code of 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
