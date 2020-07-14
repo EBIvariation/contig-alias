@@ -17,6 +17,7 @@ package uk.ac.ebi.eva.contigalias.test;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.controller.authentication.CustomBasicAuthenticationEntryPoint;
 
