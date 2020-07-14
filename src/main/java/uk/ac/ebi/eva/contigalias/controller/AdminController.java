@@ -52,14 +52,14 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Get or fetch an assembly using its GenBank or RefSeq accession.",
-            notes = "Given an assembly's accession this endpoint will return an assembly that matches that accession." +
-                    " The accession can be either a GenBank or RefSeq accession and the software will automatically " +
-                    "fetch a result from the database for any assembly having the accession as its GenBank or RefSeq" +
+            notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession." +
+                    " The accession can be either a GenBank or a RefSeq accession and the software will automatically " +
+                    "fetch a result from the database for any assembly having the aforementioned accession as its GenBank or RefSeq" +
                     " accession. This endpoint will first look for the assembly in local database and return the " +
                     "result. If local search fails, it will search for the target assembly at a remote source (NCBI by " +
-                    "default). If desired assembly is found at remote source, it will fetch and add it to the local " +
-                    "database and also return the result to you. This endpoint will either return a list containing a" +
-                    " single result or an HTTP Response with error code 404.")
+                    "default). If the desired assembly is found at the remote source, it will fetch and add it to the local " +
+                    "database and also return the result to the user. This endpoint will either return a list containing a" +
+                    " single result or an HTTP status code of 404.")
     @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
@@ -78,13 +78,13 @@ public class AdminController {
 
     @ApiOperation(value = "Fetch an assembly from remote server using its GenBank or RefSeq accession and insert " +
             "into local database.",
-            notes = "Given an assembly's accession this endpoint will fetch and add the assembly that matches that " +
-                    "accession into the local database. The accession can be either a GenBank or RefSeq accession and" +
+            notes = "Given an assembly's accession, this endpoint will fetch and add the assembly that matches that " +
+                    "accession into the local database. The accession can be either a GenBank or a RefSeq accession and" +
                     " the endpoint will automatically fetch the correct assembly from remote server. It will first " +
                     "search for the target assembly in the local database as trying to insert an assembly which " +
                     "already exists in the database is prohibited. If such an assembly is not found locally then it " +
-                    "will look for it at a remote source (NCBI by default). If desired assembly is found at remote " +
-                    "source, it will fetch and add it to the local database. This endpoint does not return any data.")
+                    "will look for it at a remote source (NCBI by default). If the desired assembly is found at the remote " +
+                    "source, it will fetch it and add it to the local database. This endpoint does not return any data except an HTTP status code of 400 when the desired ..")
     @PutMapping(value = "v1/assemblies/{accession}")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
