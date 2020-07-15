@@ -19,11 +19,8 @@ package uk.ac.ebi.eva.contigalias.controller.contigalias;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,46 +30,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.service.AliasService;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
-import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
 import java.util.List;
-import java.util.Optional;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
 @RequestMapping("contig-alias/v1")
 @RestController
 public class ContigAliasController {
 
-    private final AssemblyService assemblyService;
-
-    private final ChromosomeService chromosomeService;
-
-    private final AliasService aliasService;
-
-    private final PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
-
-    private final PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler;
+    private final ContigAliasHandler handler;
 
     @Autowired
-    public ContigAliasController(AssemblyService assemblyService,
-                                 ChromosomeService chromosomeService,
-                                 AliasService aliasService,
-                                 PagedResourcesAssembler<AssemblyEntity> assemblyAssembler,
-                                 PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler) {
-        this.assemblyService = assemblyService;
-        this.chromosomeService = chromosomeService;
-        this.aliasService = aliasService;
-        this.assemblyAssembler = assemblyAssembler;
-        this.chromosomeAssembler = chromosomeAssembler;
+    public ContigAliasController(ContigAliasHandler handler) {
+        this.handler = handler;
     }
 
     @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
@@ -86,10 +58,7 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            Page<AssemblyEntity> page = assemblyService.getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
-            return createAppropriateResponseEntity(page, assemblyAssembler);
-        } else return BAD_REQUEST;
+        return handler.getAssemblyByAccession(accession, pageNumber, pageSize);
     }
 
     @ApiOperation(value = "Get an assembly using its GenBank accession.",
@@ -101,10 +70,7 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Genbank assembly accession. Eg: GCA_000001405.10") String genbank,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            Page<AssemblyEntity> page = assemblyService.getAssemblyByGenbank(genbank, DEFAULT_PAGE_REQUEST);
-            return createAppropriateResponseEntity(page, assemblyAssembler);
-        } else return BAD_REQUEST;
+        return handler.getAssemblyByGenbank(genbank, pageNumber, pageSize);
     }
 
     @ApiOperation(value = "Get an assembly using its RefSeq accession.",
@@ -116,10 +82,7 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String refseq,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            Page<AssemblyEntity> page = assemblyService.getAssemblyByRefseq(refseq, DEFAULT_PAGE_REQUEST);
-            return createAppropriateResponseEntity(page, assemblyAssembler);
-        } else return BAD_REQUEST;
+        return handler.getAssemblyByRefseq(refseq, pageNumber, pageSize);
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
@@ -131,28 +94,21 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        Page<AssemblyEntity> page = assemblyService.getAssembliesByTaxid(taxid,
-                                                                         createPageRequest(pageNumber, pageSize));
-        return createAppropriateResponseEntity(page, assemblyAssembler);
+        return handler.getAssembliesByTaxid(taxid, pageNumber, pageSize);
     }
 
     @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +
             "chromosomes.")
     @GetMapping(value = "assemblies/chromosome/genbank/{genbank}")
-    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank
-            (@PathVariable String genbank) {
-        Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeGenbank(genbank);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank(@PathVariable String genbank) {
+        return handler.getAssemblyByChromosomeGenbank(genbank);
     }
 
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
             "chromosomes.")
     @GetMapping(value = "assemblies/chromosome/refseq/{refseq}")
     public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
-        Optional<AssemblyEntity> entity = aliasService.getAssemblyByChromosomeRefseq(refseq);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return handler.getAssemblyByChromosomeRefseq(refseq);
     }
 
     @ApiOperation(value = "Get an chromosome using its Genbank accession.",
@@ -164,10 +120,7 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Genbank chromosome accession. Eg: CM000663.2") String genbank,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            Page<ChromosomeEntity> page = chromosomeService.getChromosomeByGenbank(genbank, DEFAULT_PAGE_REQUEST);
-            return createAppropriateResponseEntity(page, chromosomeAssembler);
-        } else return BAD_REQUEST;
+        return handler.getChromosomeByGenbank(genbank, pageNumber, pageSize);
     }
 
     @ApiOperation(value = "Get an chromosome using its RefSeq accession.",
@@ -180,33 +133,19 @@ public class ContigAliasController {
             @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            Page<ChromosomeEntity> page = chromosomeService.getChromosomeByRefseq(refseq, DEFAULT_PAGE_REQUEST);
-            return createAppropriateResponseEntity(page, chromosomeAssembler);
-        } else return BAD_REQUEST;
+        return handler.getChromosomeByRefseq(refseq, pageNumber, pageSize);
     }
 
     @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.")
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyGenbank(@PathVariable String genbank) {
-        List<ChromosomeEntity> entities = aliasService.getChromosomesByAssemblyGenbank(genbank);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return handler.getChromosomesByAssemblyGenbank(genbank);
     }
 
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyRefseq(@PathVariable String refseq) {
-        List<ChromosomeEntity> entities = aliasService.getChromosomesByAssemblyRefseq(refseq);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
+        return handler.getChromosomesByAssemblyRefseq(refseq);
     }
 
 }

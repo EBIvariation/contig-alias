@@ -29,7 +29,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
@@ -55,7 +54,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_S
 
 public class ContigAliasControllerTest {
 
-    private ContigAliasController controller;
+    private ContigAliasHandler controller;
 
     @Nested
     class AssemblyServiceTests {
@@ -84,7 +83,7 @@ public class ContigAliasControllerTest {
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            controller = new ContigAliasController(mockAssemblyService, null,null, assembler, null);
+            controller = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null);
         }
 
         @Test
@@ -153,7 +152,7 @@ public class ContigAliasControllerTest {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.wrap(entities, null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            controller = new ContigAliasController(mockAssemblyService, null,null, assembler, null);
+            controller = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null);
         }
 
         @Test
@@ -206,7 +205,7 @@ public class ContigAliasControllerTest {
             Mockito.when(mockChromosomeAssmebler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            controller = new ContigAliasController(null, mockChromosomeService, null,null, mockChromosomeAssmebler);
+            controller = new ContigAliasHandler(null, mockChromosomeService, null, null, mockChromosomeAssmebler);
         }
 
         @Test
@@ -265,7 +264,7 @@ public class ContigAliasControllerTest {
                    .thenReturn(chromosomeEntities);
             Mockito.when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                    .thenReturn(chromosomeEntities);
-            controller = new ContigAliasController(null, null, mockAliasService, null, null);
+            controller = new ContigAliasHandler(null, null, mockAliasService, null, null);
         }
 
         @AfterEach
