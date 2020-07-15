@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import uk.ac.ebi.eva.contigalias.controller.admin.AdminController;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
@@ -38,11 +37,11 @@ import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
-public class AdminControllerTest {
+public class AdminHandlerTest {
 
     private final AssemblyEntity entity = AssemblyGenerator.generate();
 
-    private AdminController controller;
+    private AdminHandler handler;
 
     @BeforeEach
     void setup() throws IOException {
@@ -53,27 +52,27 @@ public class AdminControllerTest {
         Mockito.when(mockAssemblyService
                              .getAssemblyOrFetchByAccession(entity.getRefseq()))
                .thenReturn(entityAsList);
-        controller = new AdminController(mockAssemblyService);
+        handler = new AdminHandler(mockAssemblyService);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws IOException {
         ResponseEntity<List<AssemblyEntity>> assemblyByAccession =
-                controller.getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+                handler.getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
         testAssemblyEntityResponse(assemblyByAccession);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws IOException {
         ResponseEntity<List<AssemblyEntity>> assemblyByAccession =
-                controller.getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+                handler.getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
         testAssemblyEntityResponse(assemblyByAccession);
     }
 
     @Test
     public void test404NotFound() throws IOException {
         ResponseEntity<List<AssemblyEntity>> assemblyByAccession =
-                controller.getAssemblyOrFetchByAccession("##INVALID##", DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+                handler.getAssemblyOrFetchByAccession("##INVALID##", DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
         assertEquals(assemblyByAccession.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
