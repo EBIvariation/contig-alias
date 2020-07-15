@@ -20,14 +20,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.server.core.TypeReferences;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
@@ -44,11 +57,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
@@ -57,7 +74,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_R
  * See https://github.com/json-path/JsonPath for the jsonPath syntax.
  */
 // TODO re-enable tests
-/*@WebMvcTest(ContigAliasController.class)*/
+@WebMvcTest(ContigAliasController.class)
 @Import(TestConfiguration.class)
 public class ContigAliasControllerIntegrationTest {
 
@@ -65,22 +82,75 @@ public class ContigAliasControllerIntegrationTest {
     void contextLoads() {
     }
 
-/*
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private AssemblyService mockAssemblyService;
-
-    @MockBean
-    private ChromosomeService mockChromosomeService;
-
-    @MockBean
-    private AliasService mockAliasService;
+    private ContigAliasHandler handler;
 
     @Nested
     class AssemblyServiceTests {
 
+        private final AssemblyEntity entity = AssemblyGenerator.generate();
+
+        @BeforeEach
+        void setup(){
+            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
+            PageImpl<AssemblyEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
+
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+
+            ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> responseEntity = new ResponseEntity<>(assembler.toModel(page), HttpStatus.OK);
+
+            when(handler.getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                    .thenReturn(responseEntity);
+            when(handler.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                    .thenReturn(responseEntity);
+            when(handler.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
+                    .thenReturn(responseEntity);
+
+        }
+
+        @Test
+        void getAssemblyByAccession() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/{accession}", this.entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+            assertAssemblyIdenticalToEntity(resultActions);
+        }
+
+        @Test
+        void getAssemblyByGenbank() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/genbank/{genbank}", entity.getGenbank()));
+            assertAssemblyIdenticalToEntity(resultActions);
+        }
+
+        @Test
+        void getAssemblyByRefseq() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/refseq/{refseq}", entity.getRefseq()));
+            assertAssemblyIdenticalToEntity(resultActions);
+        }
+
+        void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
+            String path = "$._embedded.assemblyEntities[0]";
+            actions.andDo(MockMvcResultHandlers.print());
+            actions.andExpect(status().isOk())
+                   .andExpect(jsonPath(path).exists())
+                   .andExpect(jsonPath(path + ".id").doesNotExist())
+                   .andExpect(jsonPath(path + ".name", is(entity.getName())))
+                   .andExpect(jsonPath(path + ".organism", is(entity.getOrganism())))
+                   .andExpect(jsonPath(path + ".taxid").value(entity.getTaxid()))
+                   .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())))
+                   .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+        }
+
+    }
+/*
         private final AssemblyEntity entity = AssemblyGenerator.generate();
 
         @BeforeEach
