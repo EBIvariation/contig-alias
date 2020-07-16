@@ -60,19 +60,17 @@ public class ContigAliasHandlerTest {
         @BeforeEach
         void setUp() {
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
-            PageImpl<AssemblyEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
-            Mockito.when(mockAssemblyService
-                                 .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                   .thenReturn(page);
-            Mockito.when(mockAssemblyService
-                                 .getAssemblyByAccession(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                   .thenReturn(page);
-            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                   .thenReturn(page);
-            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                   .thenReturn(page);
-            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                   .thenReturn(page);
+            Optional<AssemblyEntity> optionalOfEntity = Optional.of(this.entity);
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.entity.getGenbank()))
+                   .thenReturn(optionalOfEntity);
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.entity.getRefseq()))
+                   .thenReturn(optionalOfEntity);
+            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
+                   .thenReturn(optionalOfEntity);
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
+                   .thenReturn(optionalOfEntity);
+            Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
+                   .thenReturn(optionalOfEntity);
 
             PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(

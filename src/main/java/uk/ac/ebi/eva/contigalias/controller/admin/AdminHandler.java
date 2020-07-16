@@ -25,6 +25,8 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import java.io.IOException;
 import java.util.List;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToList;
+
 @Service
 public class AdminHandler {
 
@@ -36,7 +38,7 @@ public class AdminHandler {
     }
 
     public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
-        return service.getAssemblyOrFetchByAccession(accession);
+        return convertToList(service.getAssemblyOrFetchByAccession(accession));
     }
 
     public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {

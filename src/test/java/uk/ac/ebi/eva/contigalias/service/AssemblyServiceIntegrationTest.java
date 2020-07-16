@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -72,12 +73,19 @@ public class AssemblyServiceIntegrationTest {
         service = new AssemblyService(repository, mockDataSource);
     }
 
+    @AfterEach
+    void tearDown(){
+        for (AssemblyEntity entity : entities) {
+            service.deleteAssembly(entity);
+        }
+    }
+
     @Test
     void getAssemblyOrFetchByAccession() throws IOException {
-        List<AssemblyEntity> entities = service.getAssemblyOrFetchByAccession(this.entities[0].getGenbank());
-        assertNotNull(entities);
-        assertTrue(entities.size() > 0);
-        entities.forEach(service::deleteAssembly);
+        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession(this.entities[0].getGenbank());
+        assertNotNull(entity);
+        assertTrue(entity.isPresent());
+        service.deleteAssembly(entity.get());
     }
 
     @Test
@@ -87,38 +95,36 @@ public class AssemblyServiceIntegrationTest {
 
         String targetGenbank = entities[0].getGenbank();
         service.fetchAndInsertAssembly(targetGenbank);
-        Page<AssemblyEntity> assemblyEntities = service.getAssemblyByAccession(targetGenbank, DEFAULT_PAGE_REQUEST);
-        assertPageValid(assemblyEntities);
-        Optional<AssemblyEntity> first = assemblyEntities.get().findFirst();
-        assertTrue(first.isPresent());
-        List<ChromosomeEntity> chromosomes = first.get().getChromosomes();
+        Optional<AssemblyEntity> assemblyEntities = service.getAssemblyByAccession(targetGenbank);
+        assertOptionalValid(assemblyEntities);
+        AssemblyEntity first = assemblyEntities.get();
+        List<ChromosomeEntity> chromosomes = first.getChromosomes();
         assertNotNull(chromosomes);
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
             service.fetchAndInsertAssembly(genbank);
-            Page<AssemblyEntity> page = service.getAssemblyByAccession(genbank, DEFAULT_PAGE_REQUEST);
-            assertPageValid(page);
-            Optional<AssemblyEntity> entity = page.get().findFirst();
-            assertNotNull(entity);
+            Optional<AssemblyEntity> assembly = service.getAssemblyByAccession(genbank);
+            assertOptionalValid(assembly);
         }
 
-        Page<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank, DEFAULT_PAGE_REQUEST);
-        assertTrue(targetGenbankEntity == null || targetGenbankEntity.isEmpty());
+        Optional<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
+        assertNotNull(targetGenbankEntity);
+        assertFalse(targetGenbankEntity.isPresent());
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
-            Page<AssemblyEntity> accession = service.getAssemblyByAccession(genbank, DEFAULT_PAGE_REQUEST);
-            assertPageValid(accession);
-            accession.forEach(service::deleteAssembly);
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
+            assertOptionalValid(accession);
+            service.deleteAssembly(accession.get());
         }
 
         service.setCacheSize(cacheSize);
     }
 
-    void assertPageValid(Page<AssemblyEntity> page) {
-        assertNotNull(page);
-        assertTrue(page.getTotalElements() > 0);
+    void assertOptionalValid(Optional<AssemblyEntity> optional) {
+        assertNotNull(optional);
+        assertTrue(optional.isPresent());
     }
 
     @Nested
@@ -140,20 +146,20 @@ public class AssemblyServiceIntegrationTest {
 
         @Test
         void getAssemblyByAccession() {
-            Page<AssemblyEntity> page = service.getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_REQUEST);
-            assertAssemblyPageIdenticalToEntity(page);
+            Optional<AssemblyEntity> page = service.getAssemblyByAccession(entity.getGenbank());
+            assertAssemblyOptionalIdenticalToEntity(page);
         }
 
         @Test
         void getAssemblyByGenbank() {
-            Page<AssemblyEntity> page = service.getAssemblyByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST);
-            assertAssemblyPageIdenticalToEntity(page);
+            Optional<AssemblyEntity> page = service.getAssemblyByGenbank(entity.getGenbank());
+            assertAssemblyOptionalIdenticalToEntity(page);
         }
 
         @Test
         void getAssemblyByRefseq() {
-            Page<AssemblyEntity> page = service.getAssemblyByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST);
-            assertAssemblyPageIdenticalToEntity(page);
+            Optional<AssemblyEntity> page = service.getAssemblyByRefseq(entity.getRefseq());
+            assertAssemblyOptionalIdenticalToEntity(page);
         }
 
         @Test
@@ -170,7 +176,8 @@ public class AssemblyServiceIntegrationTest {
             }
 
             Page<AssemblyEntity> page = service.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST);
-            assertPageValid(page);
+            assertNotNull(page);
+            assertTrue(page.getTotalElements() > 0);
             List<AssemblyEntity> entityList = page.get().collect(Collectors.toList());
             assertEquals(MAX_CONSECUTIVE_ENTITIES, entityList.size());
 
@@ -183,9 +190,9 @@ public class AssemblyServiceIntegrationTest {
             }
         }
 
-        void assertAssemblyPageIdenticalToEntity(Page<AssemblyEntity> page) {
-            assertPageValid(page);
-            page.get().forEach(this::assertAssemblyEntityIdenticalToEntity);
+        void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> page) {
+            assertOptionalValid(page);
+            assertAssemblyEntityIdenticalToEntity(page.get());
         }
 
         void assertAssemblyEntityIdenticalToEntity(AssemblyEntity actual) {

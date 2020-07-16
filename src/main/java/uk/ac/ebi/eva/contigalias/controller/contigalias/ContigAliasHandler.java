@@ -34,7 +34,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.assemblyPagedModelFromPage;
+import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.assemblyPagedModelFromPage;
+import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToPage;
 
 @Service
 public class ContigAliasHandler {
@@ -63,18 +64,18 @@ public class ContigAliasHandler {
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByAccession(String accession) {
-        Page<AssemblyEntity> page = assemblyService.getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
-        return assemblyPagedModelFromPage(page, assemblyAssembler);
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
+        return assemblyPagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByGenbank(String genbank) {
-        Page<AssemblyEntity> page = assemblyService.getAssemblyByGenbank(genbank, DEFAULT_PAGE_REQUEST);
-        return assemblyPagedModelFromPage(page, assemblyAssembler);
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
+        return assemblyPagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByRefseq(String refseq) {
-        Page<AssemblyEntity> page = assemblyService.getAssemblyByRefseq(refseq, DEFAULT_PAGE_REQUEST);
-        return assemblyPagedModelFromPage(page, assemblyAssembler);
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
+        return assemblyPagedModelFromPage(convertToPage(entity), assemblyAssembler);
 
     }
 

@@ -25,8 +25,8 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,7 +42,7 @@ public class AdminHandlerTest {
     @BeforeEach
     void setup() throws IOException {
         AssemblyService mockAssemblyService = mock(AssemblyService.class);
-        List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
+        Optional<AssemblyEntity> entityAsList = Optional.of(entity);
         Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getGenbank()))
                .thenReturn(entityAsList);
         Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getRefseq()))
