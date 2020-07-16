@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -179,11 +178,10 @@ public class ContigAliasHandlerTest {
         void setUp() {
             ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
 
-            Page<ChromosomeEntity> entityListAsPage = new PageImpl<>(
-                    Collections.singletonList(entity));
-            Mockito.when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+            Optional<ChromosomeEntity> entityListAsPage = Optional.of(entity);
+            Mockito.when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank()))
                    .thenReturn(entityListAsPage);
-            Mockito.when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+            Mockito.when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq()))
                    .thenReturn(entityListAsPage);
 
             PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssmebler = mock(PagedResourcesAssembler.class);

@@ -27,10 +27,11 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -53,24 +54,20 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByGenbank() {
-        Page<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST);
+        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank());
         assertChromosomePageIdenticalToEntity(chromosomes);
     }
 
     @Test
     void getChromosomeByRefseq() {
-        Page<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST);
+        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
         assertChromosomePageIdenticalToEntity(chromosomes);
     }
 
-    void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
-        assertPageValid(page);
-        page.get().forEach(this::assertChromosomeIdenticalToEntity);
-    }
-
-    void assertPageValid(Page<ChromosomeEntity> page) {
-        assertNotNull(page);
-        assertTrue(page.getTotalElements() > 0);
+    void assertChromosomePageIdenticalToEntity(Optional<ChromosomeEntity> entity) {
+        assertNotNull(entity);
+        assertTrue(entity.isPresent());
+        assertChromosomeIdenticalToEntity(entity.get());
     }
 
     void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
