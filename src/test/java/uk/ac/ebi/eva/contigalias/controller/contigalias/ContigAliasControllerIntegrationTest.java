@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.contigalias.controller.contigalias;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +60,6 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_S
  * <p>
  * See https://github.com/json-path/JsonPath for the jsonPath syntax.
  */
-// TODO re-enable tests
 @WebMvcTest(ContigAliasController.class)
 @Import(TestConfiguration.class)
 public class ContigAliasControllerIntegrationTest {
@@ -66,10 +69,6 @@ public class ContigAliasControllerIntegrationTest {
 
     @MockBean
     private ContigAliasHandler handler;
-
-    @Test
-    void contextLoads() {
-    }
 
     @Nested
     class AssemblyServiceTests {
@@ -185,7 +184,7 @@ public class ContigAliasControllerIntegrationTest {
 
     }
 
-/*
+
     @Nested
     class AliasServiceTests {
 
@@ -201,15 +200,15 @@ public class ContigAliasControllerIntegrationTest {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
                 Optional<AssemblyEntity> assemblyEntityAsOptional = Optional.of(this.assemblyEntity);
-                when(mockAliasService.getAssemblyByChromosomeGenbank(generate.getGenbank()))
+                when(handler.getAssemblyByChromosomeGenbank(generate.getGenbank()))
                         .thenReturn(assemblyEntityAsOptional);
-                when(mockAliasService.getAssemblyByChromosomeRefseq(generate.getRefseq()))
+                when(handler.getAssemblyByChromosomeRefseq(generate.getRefseq()))
                         .thenReturn(assemblyEntityAsOptional);
             }
             assemblyEntity.setChromosomes(null);
-            when(mockAliasService.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
+            when(handler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
                     .thenReturn(chromosomeEntities);
-            when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
+            when(handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                     .thenReturn(chromosomeEntities);
         }
 
@@ -277,5 +276,5 @@ public class ContigAliasControllerIntegrationTest {
 
         }
 
-    }*/
+    }
 }
