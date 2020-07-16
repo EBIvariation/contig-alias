@@ -33,7 +33,6 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.assemblyPagedModelFromPage;
 import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToPage;
 
