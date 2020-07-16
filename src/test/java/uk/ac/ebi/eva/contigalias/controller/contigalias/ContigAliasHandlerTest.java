@@ -26,8 +26,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
@@ -48,9 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 public class ContigAliasHandlerTest {
 
@@ -89,27 +85,24 @@ public class ContigAliasHandlerTest {
         @Test
         public void getAssemblyByAccession() {
             testAssemblyEntityPagedResponse(
-                    handler.getAssemblyByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+                    handler.getAssemblyByAccession(entity.getGenbank()));
             testAssemblyEntityPagedResponse(
-                    handler.getAssemblyByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+                    handler.getAssemblyByAccession(entity.getRefseq()));
         }
 
         @Test
         public void getAssemblyByGenbank() {
             testAssemblyEntityPagedResponse(
-                    handler.getAssemblyByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+                    handler.getAssemblyByGenbank(entity.getGenbank()));
         }
 
         @Test
         public void getAssemblyByRefseq() {
             testAssemblyEntityPagedResponse(
-                    handler.getAssemblyByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+                    handler.getAssemblyByRefseq(entity.getRefseq()));
         }
 
-        void testAssemblyEntityPagedResponse(ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> response) {
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            PagedModel<EntityModel<AssemblyEntity>> body = response.getBody();
+        void testAssemblyEntityPagedResponse(PagedModel<EntityModel<AssemblyEntity>> body) {
             assertNotNull(body);
             Collection<EntityModel<AssemblyEntity>> content = body.getContent();
             content.forEach(it -> assertAssemblyIdenticalToEntity(it.getContent()));
@@ -158,11 +151,7 @@ public class ContigAliasHandlerTest {
         @Test
         void getAssembliesByTaxid() {
 
-            ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> response = handler.getAssembliesByTaxid(
-                    TAX_ID, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            PagedModel<EntityModel<AssemblyEntity>> body = response.getBody();
+            PagedModel<EntityModel<AssemblyEntity>> body = handler.getAssembliesByTaxid(TAX_ID, DEFAULT_PAGE_REQUEST);
             assertNotNull(body);
             List<EntityModel<AssemblyEntity>> entityList = new LinkedList<>(body.getContent());
             assertNotNull(entityList);
@@ -210,20 +199,15 @@ public class ContigAliasHandlerTest {
 
         @Test
         public void getChromosomeByGenbank() {
-            testChromosomeEntityResponse(
-                    handler.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+            testChromosomeEntityResponse(handler.getChromosomeByGenbank(entity.getGenbank()));
         }
 
         @Test
         public void getChromosomeByRefseq() {
-            testChromosomeEntityResponse(
-                    handler.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+            testChromosomeEntityResponse(handler.getChromosomeByRefseq(entity.getRefseq()));
         }
 
-        void testChromosomeEntityResponse(ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> response) {
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            PagedModel<EntityModel<ChromosomeEntity>> body = response.getBody();
+        void testChromosomeEntityResponse(PagedModel<EntityModel<ChromosomeEntity>> body) {
             assertNotNull(body);
             Collection<EntityModel<ChromosomeEntity>> content = body.getContent();
             assertTrue(content.size() > 0);
@@ -275,37 +259,35 @@ public class ContigAliasHandlerTest {
         @Test
         void getAssemblyByChromosomeGenbank() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                ResponseEntity<AssemblyEntity> genbank = handler.getAssemblyByChromosomeGenbank(
-                        chromosomeEntity.getGenbank());
-                testAssemblyEntityResponse(genbank);
+                testAssemblyEntityResponse(handler.getAssemblyByChromosomeGenbank(chromosomeEntity.getGenbank()));
             }
         }
 
         @Test
         void getAssemblyByChromosomeRefseq() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                testAssemblyEntityResponse(handler.getAssemblyByChromosomeRefseq(chromosomeEntity.getRefseq()));
+                Optional<AssemblyEntity> assembly = handler.getAssemblyByChromosomeRefseq(chromosomeEntity.getRefseq());
+                testAssemblyEntityResponse(assembly);
             }
         }
 
         @Test
         void getChromosomesByAssemblyGenbank() {
-            ResponseEntity<List<ChromosomeEntity>> chromosomes = handler.getChromosomesByAssemblyGenbank(
-                    assemblyEntity.getGenbank());
-            testChromosomeEntityResponses(chromosomes);
+            testChromosomeEntityResponses(handler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()));
         }
 
         @Test
         void getChromosomesByAssemblyRefseq() {
-            ResponseEntity<List<ChromosomeEntity>> chromosomes = handler.getChromosomesByAssemblyRefseq(
-                    assemblyEntity.getRefseq());
-            testChromosomeEntityResponses(chromosomes);
+            testChromosomeEntityResponses(handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()));
         }
 
-        void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            AssemblyEntity assembly = response.getBody();
+        void testAssemblyEntityResponse(Optional<AssemblyEntity> assembly) {
+            assertNotNull(assembly);
+            assertTrue(assembly.isPresent());
+            testAssemblyEntityResponse(assembly.get());
+        }
+
+        void testAssemblyEntityResponse(AssemblyEntity assembly) {
             assertNotNull(assembly);
             assertEquals(assemblyEntity.getName(), assembly.getName());
             assertEquals(assemblyEntity.getOrganism(), assembly.getOrganism());
@@ -315,10 +297,7 @@ public class ContigAliasHandlerTest {
             assertEquals(assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
         }
 
-        void testChromosomeEntityResponses(ResponseEntity<List<ChromosomeEntity>> response) {
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            List<ChromosomeEntity> entities = response.getBody();
+        void testChromosomeEntityResponses(List<ChromosomeEntity> entities) {
             assertNotNull(entities);
             assertEquals(chromosomeEntities.size(), entities.size());
             assertTrue(chromosomeEntities.containsAll(entities));

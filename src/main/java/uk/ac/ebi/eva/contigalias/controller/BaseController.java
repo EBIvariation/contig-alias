@@ -80,10 +80,13 @@ public class BaseController {
         }
     }
 
-    public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(Page<T> page,
-                                                                                                 PagedResourcesAssembler<T> assembler) {
-        PagedModel<EntityModel<T>> entityModels = assembler.toModel(page);
-        return new ResponseEntity<>(entityModels, page.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+    public static <T> PagedModel<EntityModel<T>> assemblyPagedModelFromPage(Page<T> page,
+                                                                            PagedResourcesAssembler<T> assembler){
+        return assembler.toModel(page);
+    }
+
+    public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(PagedModel<EntityModel<T>> entityModels) {
+        return new ResponseEntity<>(entityModels, entityModels.getContent().isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
     }
 
     public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {

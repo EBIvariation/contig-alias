@@ -103,14 +103,14 @@ public class ContigAliasControllerIntegrationTest {
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
 
-            ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> responseEntity = new ResponseEntity<>(assembler.toModel(page), HttpStatus.OK);
+            PagedModel<EntityModel<AssemblyEntity>> assembledModel = assembler.toModel(page);
 
-            when(handler.getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
-                    .thenReturn(responseEntity);
-            when(handler.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
-                    .thenReturn(responseEntity);
-            when(handler.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE))
-                    .thenReturn(responseEntity);
+            when(handler.getAssemblyByAccession(this.entity.getGenbank()))
+                    .thenReturn(assembledModel);
+            when(handler.getAssemblyByGenbank(this.entity.getGenbank()))
+                    .thenReturn(assembledModel);
+            when(handler.getAssemblyByRefseq(this.entity.getRefseq()))
+                    .thenReturn(assembledModel);
 
         }
 
