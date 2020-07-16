@@ -26,13 +26,13 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 public class ContigAliasApplication extends SpringBootServletInitializer {
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(ContigAliasApplication.class);
-	}
-
     public static void main(String[] args) {
         SpringApplication.run(ContigAliasApplication.class, args);
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(ContigAliasApplication.class);
     }
 
 }

@@ -80,8 +80,9 @@ public class BaseController {
 
     public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(
             PagedModel<EntityModel<T>> entityModels) {
-        return new ResponseEntity<>(entityModels,
-                                    entityModels.getContent().isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+        return new ResponseEntity<>(
+                entityModels,
+                entityModels.getContent().isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
     }
 
     public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {
