@@ -17,8 +17,6 @@
 package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -26,10 +24,6 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
 import java.util.List;
-
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
 @Service
 public class AdminHandler {
@@ -41,34 +35,16 @@ public class AdminHandler {
         this.service = service;
     }
 
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
-            String accession, Integer pageNumber, Integer pageSize) throws IOException {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            List<AssemblyEntity> entities;
-            try {
-                entities = service.getAssemblyOrFetchByAccession(accession);
-            } catch (IllegalArgumentException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            return createAppropriateResponseEntity(entities);
-        } else return BAD_REQUEST;
+    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
+        return service.getAssemblyOrFetchByAccession(accession);
     }
 
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(String accession) throws IOException {
-        try {
-            service.fetchAndInsertAssembly(accession);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+    public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {
+        service.fetchAndInsertAssembly(accession);
     }
 
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(List<String> accessions) {
-        if (accessions == null || accessions.size() <= 0) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public void fetchAndInsertAssemblyByAccession(List<String> accessions) {
         service.fetchAndInsertAssembly(accessions);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public void deleteAssemblyByAccession(String accession) {

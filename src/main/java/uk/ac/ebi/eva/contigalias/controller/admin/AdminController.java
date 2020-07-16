@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,16 +34,18 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import java.io.IOException;
 import java.util.List;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
 @RequestMapping("contig-alias-admin/v1")
 @RestController
 public class AdminController {
 
-    AdminHandler handler;
+    private final AdminHandler handler;
 
-    @Autowired
     public AdminController(AdminHandler handler) {
         this.handler = handler;
     }
@@ -62,7 +64,15 @@ public class AdminController {
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
-        return handler.getAssemblyOrFetchByAccession(accession, pageNumber, pageSize);
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            List<AssemblyEntity> entities;
+            try {
+                entities = handler.getAssemblyOrFetchByAccession(accession);
+            } catch (IllegalArgumentException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return createAppropriateResponseEntity(entities);
+        } else return BAD_REQUEST;
     }
 
     @ApiOperation(value = "Fetch an assembly from remote server using its GenBank or RefSeq accession and insert " +
@@ -79,7 +89,12 @@ public class AdminController {
     @PutMapping(value = "assemblies/{accession}")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
-        return handler.fetchAndInsertAssemblyByAccession(accession);
+        try {
+            handler.fetchAndInsertAssemblyByAccession(accession);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiOperation(value = "Fetch assemblies from remote server using their GenBank or RefSeq accessions and insert " +
@@ -97,7 +112,11 @@ public class AdminController {
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @RequestBody(required = false) @ApiParam(value = "A JSON array of GenBank or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
-        return handler.fetchAndInsertAssemblyByAccession(accessions);
+        if (accessions == null || accessions.size() <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        handler.fetchAndInsertAssemblyByAccession(accessions);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
