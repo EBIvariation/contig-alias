@@ -6,9 +6,9 @@ Reference sequences are files that are used as a reference to describe variants 
 
 This web service has some authenticated endpoints. The current approach to secure them is to provide the credentials in the src/main/resources/application.properties file at compilation time, using maven profiles.
 
-The application also requires to be connected to an external Postgres database to function. The configuration parameters for this database need to be provided at compilation time using the same maven profiles. 
+The application also requires to be connected to an external database (PostgreSQL by default) to function. The credentials for this database need to be provided at compilation time using the same maven profiles. 
 
-Copy this text, replace the values encolosed in ${} and put it all in your ~/.m2/settings.xml (or just add the profile if the file exists).
+Copy this text, replace manually the values enclosed in ${} and put it all in your ~/.m2/settings.xml (or just add the profile if the file exists).
 ```
 <settings>
     <profiles>
