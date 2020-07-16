@@ -16,28 +16,18 @@
 
 package uk.ac.ebi.eva.contigalias.controller.contigalias;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.client.RestTemplateCustomizer;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.hateoas.server.core.TypeReferences;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -46,15 +36,9 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
-import uk.ac.ebi.eva.contigalias.service.AliasService;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
-import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,7 +48,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 /**
@@ -78,15 +61,15 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_S
 @Import(TestConfiguration.class)
 public class ContigAliasControllerIntegrationTest {
 
-    @Test
-    void contextLoads() {
-    }
-
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private ContigAliasHandler handler;
+
+    @Test
+    void contextLoads() {
+    }
 
     @Nested
     class AssemblyServiceTests {
@@ -94,10 +77,10 @@ public class ContigAliasControllerIntegrationTest {
         private final AssemblyEntity entity = AssemblyGenerator.generate();
 
         @BeforeEach
-        void setup(){
-            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
+        void setup() {
             PageImpl<AssemblyEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
 
+            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(assembler.toModel(any()))
@@ -117,7 +100,8 @@ public class ContigAliasControllerIntegrationTest {
         @Test
         void getAssemblyByAccession() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/assemblies/{accession}", this.entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE));
+                    get("/contig-alias/v1/assemblies/{accession}", this.entity.getGenbank(), DEFAULT_PAGE_NUMBER,
+                        DEFAULT_PAGE_SIZE));
             assertAssemblyIdenticalToEntity(resultActions);
         }
 
@@ -150,57 +134,7 @@ public class ContigAliasControllerIntegrationTest {
         }
 
     }
-/*
-        private final AssemblyEntity entity = AssemblyGenerator.generate();
 
-        @BeforeEach
-        void setUp() {
-            Page<AssemblyEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
-            when(mockAssemblyService
-                         .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-        }
-
-        @Test
-        void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
-            ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/assemblies/{accession}", entity.getGenbank()));
-            assertAssemblyIdenticalToEntity(resultActions);
-        }
-
-
-        @Test
-        void getAssemblyByGenbank() throws Exception {
-            ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/assemblies/genbank/{genbank}", entity.getGenbank()));
-            assertAssemblyIdenticalToEntity(resultActions);
-        }
-
-        @Test
-        void getAssemblyByRefseq() throws Exception {
-            ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/assemblies/refseq/{refseq}", entity.getRefseq()));
-            assertAssemblyIdenticalToEntity(resultActions);
-        }
-
-        void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
-            String path = "$._embedded.assemblyEntities[0]";
-            actions.andExpect(status().isOk())
-                   .andExpect(jsonPath(path).exists())
-                   .andExpect(jsonPath(path + ".id").doesNotExist())
-                   .andExpect(jsonPath(path + ".name", is(entity.getName())))
-                   .andExpect(jsonPath(path + ".organism", is(entity.getOrganism())))
-                   .andExpect(jsonPath(path + ".taxid").value(entity.getTaxid()))
-                   .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())))
-                   .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
-        }
-
-    }
 
     @Nested
     class ChromosomeServiceTests {
@@ -209,11 +143,20 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            Page<ChromosomeEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
-            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
+            PageImpl<ChromosomeEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
+
+            PagedResourcesAssembler<ChromosomeEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+
+            PagedModel<EntityModel<ChromosomeEntity>> assembledModel = assembler.toModel(page);
+
+            when(handler.getChromosomeByGenbank(this.entity.getGenbank()))
+                    .thenReturn(assembledModel);
+            when(handler.getChromosomeByRefseq(this.entity.getRefseq()))
+                    .thenReturn(assembledModel);
         }
 
         @Test
@@ -242,6 +185,7 @@ public class ContigAliasControllerIntegrationTest {
 
     }
 
+/*
     @Nested
     class AliasServiceTests {
 
