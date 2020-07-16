@@ -68,7 +68,7 @@ public class ContigAliasControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ContigAliasHandler handler;
+    private ContigAliasHandler mockHandler;
 
     @Nested
     class AssemblyServiceTests {
@@ -87,11 +87,11 @@ public class ContigAliasControllerIntegrationTest {
 
             PagedModel<EntityModel<AssemblyEntity>> assembledModel = assembler.toModel(page);
 
-            when(handler.getAssemblyByAccession(this.entity.getGenbank()))
+            when(mockHandler.getAssemblyByAccession(this.entity.getGenbank()))
                     .thenReturn(assembledModel);
-            when(handler.getAssemblyByGenbank(this.entity.getGenbank()))
+            when(mockHandler.getAssemblyByGenbank(this.entity.getGenbank()))
                     .thenReturn(assembledModel);
-            when(handler.getAssemblyByRefseq(this.entity.getRefseq()))
+            when(mockHandler.getAssemblyByRefseq(this.entity.getRefseq()))
                     .thenReturn(assembledModel);
 
         }
@@ -152,9 +152,9 @@ public class ContigAliasControllerIntegrationTest {
 
             PagedModel<EntityModel<ChromosomeEntity>> assembledModel = assembler.toModel(page);
 
-            when(handler.getChromosomeByGenbank(this.entity.getGenbank()))
+            when(mockHandler.getChromosomeByGenbank(this.entity.getGenbank()))
                     .thenReturn(assembledModel);
-            when(handler.getChromosomeByRefseq(this.entity.getRefseq()))
+            when(mockHandler.getChromosomeByRefseq(this.entity.getRefseq()))
                     .thenReturn(assembledModel);
         }
 
@@ -200,15 +200,15 @@ public class ContigAliasControllerIntegrationTest {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
                 Optional<AssemblyEntity> assemblyEntityAsOptional = Optional.of(this.assemblyEntity);
-                when(handler.getAssemblyByChromosomeGenbank(generate.getGenbank()))
+                when(mockHandler.getAssemblyByChromosomeGenbank(generate.getGenbank()))
                         .thenReturn(assemblyEntityAsOptional);
-                when(handler.getAssemblyByChromosomeRefseq(generate.getRefseq()))
+                when(mockHandler.getAssemblyByChromosomeRefseq(generate.getRefseq()))
                         .thenReturn(assemblyEntityAsOptional);
             }
             assemblyEntity.setChromosomes(null);
-            when(handler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
+            when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
                     .thenReturn(chromosomeEntities);
-            when(handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
+            when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                     .thenReturn(chromosomeEntities);
         }
 

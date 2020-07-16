@@ -26,10 +26,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import uk.ac.ebi.eva.contigalias.controller.admin.AdminController;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.IOException;
@@ -42,34 +40,30 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// TODO fix
-/*@WithMockUser(roles = "ADMIN")
-@WebMvcTest(AdminController.class)*/
+@WithMockUser(roles = "ADMIN")
+@WebMvcTest(AdminController.class)
 @Import(TestConfiguration.class)
 public class AdminControllerIntegrationTest {
 
-    @Test
-    void contextLoads(){
-
-    }
-
-/*
     private final AssemblyEntity entity = AssemblyGenerator.generate();
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private AssemblyService mockAssemblyService;
+    private AdminHandler mockHandler;
+
+    @Test
+    void contextLoads() {
+
+    }
 
     @BeforeEach
     void setUp() throws IOException {
         List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
-        when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getGenbank()))
+        when(mockHandler.getAssemblyOrFetchByAccession(entity.getGenbank()))
                 .thenReturn(entityAsList);
-        when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getRefseq()))
+        when(mockHandler.getAssemblyOrFetchByAccession(entity.getRefseq()))
                 .thenReturn(entityAsList);
     }
 
@@ -104,5 +98,4 @@ public class AdminControllerIntegrationTest {
         this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", "##INVALID##"))
                     .andExpect(status().isNotFound());
     }
-*/
 }
