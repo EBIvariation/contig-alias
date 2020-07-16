@@ -19,8 +19,6 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
@@ -34,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 public class AdminHandlerTest {
 
@@ -49,49 +45,40 @@ public class AdminHandlerTest {
         List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
         Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getGenbank()))
                .thenReturn(entityAsList);
-        Mockito.when(mockAssemblyService
-                             .getAssemblyOrFetchByAccession(entity.getRefseq()))
+        Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getRefseq()))
                .thenReturn(entityAsList);
         handler = new AdminHandler(mockAssemblyService);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws IOException {
-        ResponseEntity<List<AssemblyEntity>> assemblyByAccession =
-                handler.getAssemblyOrFetchByAccession(entity.getGenbank(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-        testAssemblyEntityResponse(assemblyByAccession);
+        List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession(entity.getGenbank());
+        assertFirstIdenticalToEntity(assemblyByAccession);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws IOException {
-        ResponseEntity<List<AssemblyEntity>> assemblyByAccession =
-                handler.getAssemblyOrFetchByAccession(entity.getRefseq(), DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-        testAssemblyEntityResponse(assemblyByAccession);
+        List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession(entity.getRefseq());
+        assertFirstIdenticalToEntity(assemblyByAccession);
     }
 
     @Test
     public void test404NotFound() throws IOException {
-        ResponseEntity<List<AssemblyEntity>> assemblyByAccession =
-                handler.getAssemblyOrFetchByAccession("##INVALID##", DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-        assertEquals(assemblyByAccession.getStatusCode(), HttpStatus.NOT_FOUND);
+        List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession("##INVALID##");
+        assertNotNull(assemblyByAccession);
+        assertTrue(assemblyByAccession.isEmpty());
     }
 
-    private void testAssemblyEntityResponse(ResponseEntity<List<AssemblyEntity>> response) {
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
-        assertTrue(response.hasBody());
-        AssemblyEntity assembly = getFirstFromList(response.getBody());
+    private void assertFirstIdenticalToEntity(List<AssemblyEntity> list) {
+        assertNotNull(list);
+        assertTrue(list.size() > 0);
+        AssemblyEntity assembly = list.get(0);
         assertEquals(entity.getName(), assembly.getName());
         assertEquals(entity.getOrganism(), assembly.getOrganism());
         assertEquals(entity.getGenbank(), assembly.getGenbank());
         assertEquals(entity.getRefseq(), assembly.getRefseq());
         assertEquals(entity.getTaxid(), assembly.getTaxid());
         assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
-    }
-
-    private AssemblyEntity getFirstFromList(List<AssemblyEntity> list) {
-        assertNotNull(list);
-        assertTrue(list.size() > 0);
-        return list.get(0);
     }
 
 }
