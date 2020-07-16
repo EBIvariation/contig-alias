@@ -41,7 +41,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
-@RequestMapping("contig-alias-admin")
+@RequestMapping("contig-alias-admin/v1")
 @RestController
 public class AdminController {
 
@@ -60,7 +60,7 @@ public class AdminController {
                     "assembly at a remote source (NCBI by default). If the desired assembly is found at the remote " +
                     "source, it will fetch and add it to the local database and also return the result to the user. " +
                     "This endpoint will either return a list containing a single result or an HTTP status code of 404.")
-    @GetMapping(value = "v1/assemblies/{accession}", produces = "application/json")
+    @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
@@ -87,7 +87,7 @@ public class AdminController {
                     "remote source, it will fetch it and add it to the local database. This endpoint does not return " +
                     "any data except an HTTP status code of 400 in case the user tries to insert an assembly that " +
                     "already exists in the local database.")
-    @PutMapping(value = "v1/assemblies/{accession}")
+    @PutMapping(value = "assemblies/{accession}")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
         try {
@@ -109,7 +109,7 @@ public class AdminController {
                     "desired assembly is found at remote source, it will fetch and add it to the local database. This" +
                     " endpoint does not return any data and processes elements in the given list in an asynchronous " +
                     "parallel manner.")
-    @PutMapping(value = "v1/assemblies")
+    @PutMapping(value = "assemblies")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @RequestBody(required = false) @ApiParam(value = "A JSON array of GenBank or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
@@ -126,7 +126,7 @@ public class AdminController {
                     " the endpoint will automatically deletes the correct assembly from the database. Deleting an " +
                     "assembly also deletes all chromosomes that are associated with that assembly. This endpoint does" +
                     " not return any data.")
-    @DeleteMapping(value = "v1/assemblies/{accession}")
+    @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) {
         service.deleteAssemblyByAccession(accession);
