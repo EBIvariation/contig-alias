@@ -21,17 +21,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -54,35 +53,30 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByGenbank() {
-        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank());
-        testChromosomeOptional(chromosomes);
+        Page<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST);
+        assertChromosomePageIdenticalToEntity(chromosomes);
     }
 
     @Test
     void getChromosomeByRefseq() {
-        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
-        testChromosomeOptional(chromosomes);
+        Page<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST);
+        assertChromosomePageIdenticalToEntity(chromosomes);
     }
 
-    void testChromosomeList(List<ChromosomeEntity> chromosomes) {
-        assertNotNull(chromosomes);
-        assertTrue(chromosomes.size() > 0);
-        chromosomes.forEach(this::testChromosomeIdenticalToEntity);
+    void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
+        assertPageValid(page);
+        page.get().forEach(this::assertChromosomeIdenticalToEntity);
     }
 
-    void testChromosomeOptional(Optional<ChromosomeEntity> entity) {
-        assertNotNull(entity);
-        assertTrue(entity.isPresent());
-        ChromosomeEntity chromosomeEntity = entity.get();
-        assertNotNull(chromosomeEntity);
-        testChromosomeIdenticalToEntity(chromosomeEntity);
+    void assertPageValid(Page<ChromosomeEntity> page) {
+        assertNotNull(page);
+        assertTrue(page.getTotalElements() > 0);
     }
 
-    void testChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
+    void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
         assertEquals(entity.getName(), chromosomeEntity.getName());
         assertEquals(entity.getGenbank(), chromosomeEntity.getGenbank());
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
     }
-
 
 }

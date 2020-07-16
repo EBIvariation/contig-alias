@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -24,6 +25,8 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.util.List;
 import java.util.Optional;
+
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @Service
 public class AliasService {
@@ -36,13 +39,20 @@ public class AliasService {
     }
 
     public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String chrGenbank) {
-        Optional<ChromosomeEntity> chromosomeByGenbank = chromosomeService.getChromosomeByGenbank(chrGenbank);
-        return chromosomeByGenbank.map(ChromosomeEntity::getAssembly);
+        Page<ChromosomeEntity> chromosomeByGenbank
+                = chromosomeService.getChromosomeByGenbank(chrGenbank, DEFAULT_PAGE_REQUEST);
+        return extractAssemblyFromChromosomePage(chromosomeByGenbank);
     }
 
     public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String chrRefseq) {
-        Optional<ChromosomeEntity> chromosomeByGenbank = chromosomeService.getChromosomeByRefseq(chrRefseq);
-        return chromosomeByGenbank.map(ChromosomeEntity::getAssembly);
+        Page<ChromosomeEntity> chromosomeByGenbank
+                = chromosomeService.getChromosomeByRefseq(chrRefseq, DEFAULT_PAGE_REQUEST);
+        return extractAssemblyFromChromosomePage(chromosomeByGenbank);
+    }
+
+    public Optional<AssemblyEntity> extractAssemblyFromChromosomePage(Page<ChromosomeEntity> page) {
+        Optional<ChromosomeEntity> chromosomeEntity = page.get().findFirst();
+        return chromosomeEntity.map(ChromosomeEntity::getAssembly);
     }
 
     public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank) {

@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -46,6 +48,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
@@ -76,14 +79,14 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            List<AssemblyEntity> entityAsList = Collections.singletonList(this.entity);
+            Page<AssemblyEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
             when(mockAssemblyService
-                         .getAssemblyByAccession(this.entity.getGenbank()))
-                    .thenReturn(entityAsList);
-            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
-                    .thenReturn(entityAsList);
-            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
-                    .thenReturn(entityAsList);
+                         .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
+            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
+            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
         }
 
         @Test
@@ -92,6 +95,7 @@ public class ContigAliasControllerIntegrationTest {
                     get("/contig-alias/v1/assemblies/{accession}", entity.getGenbank()));
             assertAssemblyIdenticalToEntity(resultActions);
         }
+
 
         @Test
         void getAssemblyByGenbank() throws Exception {
@@ -108,26 +112,18 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
+            String path = "$._embedded.assemblyEntities[0]";
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$[0]").exists())
-                   .andExpect(jsonPath("$[0].id").doesNotExist())
-                   .andExpect(jsonPath("$[0].name", is(entity.getName())))
-                   .andExpect(jsonPath("$[0].organism", is(entity.getOrganism())))
-                   .andExpect(jsonPath("$[0].taxid").value(entity.getTaxid()))
-                   .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())))
-                   .andExpect(jsonPath("$[0].genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+                   .andExpect(jsonPath(path).exists())
+                   .andExpect(jsonPath(path + ".id").doesNotExist())
+                   .andExpect(jsonPath(path + ".name", is(entity.getName())))
+                   .andExpect(jsonPath(path + ".organism", is(entity.getOrganism())))
+                   .andExpect(jsonPath(path + ".taxid").value(entity.getTaxid()))
+                   .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())))
+                   .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
         }
 
-        @Test
-        void test404NotFound() throws Exception {
-            mockMvc.perform(get("/contig-alias/v1/assemblies/{accession}", "##INVALID##"))
-                   .andExpect(status().isNotFound());
-            mockMvc.perform(get("/contig-alias/v1/assemblies/genbank/{genbank}", entity.getRefseq()))
-                   .andExpect(status().isNotFound());
-            mockMvc.perform(get("/contig-alias/v1/assemblies/refseq/{refseq}", entity.getGenbank()))
-                   .andExpect(status().isNotFound());
-        }
     }
 
     @Nested
@@ -137,11 +133,11 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            Optional<ChromosomeEntity> entityAsOptional = Optional.of(this.entity);
-            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank()))
-                    .thenReturn(entityAsOptional);
-            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq()))
-                    .thenReturn(entityAsOptional);
+            Page<ChromosomeEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
+            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
+            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(entityListAsPage);
         }
 
         @Test
@@ -159,19 +155,13 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
+            String path = "$._embedded.chromosomeEntities[0]";
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(entity.getName())))
-                   .andExpect(jsonPath("$.genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(entity.getRefseq())));
-        }
-
-        @Test
-        void test404NotFound() throws Exception {
-            mockMvc.perform(get("/contig-alias/v1/chromosomes/genbank/{genbank}", entity.getRefseq()))
-                   .andExpect(status().isNotFound());
-            mockMvc.perform(get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getGenbank()))
-                   .andExpect(status().isNotFound());
+                   .andExpect(jsonPath(path).exists())
+                   .andExpect(jsonPath(path + ".id").doesNotExist())
+                   .andExpect(jsonPath(path + ".name", is(entity.getName())))
+                   .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())));
         }
 
     }
@@ -264,6 +254,7 @@ public class ContigAliasControllerIntegrationTest {
                        .andExpect(jsonPath("$[" + i + "].genbank", is(entity.getGenbank())))
                        .andExpect(jsonPath("$[" + i + "].refseq", is(entity.getRefseq())));
             }
+
         }
 
     }

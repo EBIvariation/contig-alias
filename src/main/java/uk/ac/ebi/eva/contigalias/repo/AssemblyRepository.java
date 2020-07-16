@@ -16,8 +16,8 @@
 
 package uk.ac.ebi.eva.contigalias.repo;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -31,21 +31,21 @@ import java.util.Optional;
 public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
         JpaSpecificationExecutor<AssemblyEntity> {
 
-    default Optional<AssemblyEntity> findAssemblyEntityByAccession(String accession) {
-        return this.findAssemblyEntityByGenbankOrRefseq(accession, accession);
+    default Page<AssemblyEntity> findAssemblyEntityByAccession(String accession, Pageable pageable) {
+        return this.findAssemblyEntityByGenbankOrRefseq(accession, accession, pageable);
     }
 
-    Optional<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq);
+    Page<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq, Pageable pageable);
 
     long count();
 
     Optional<AssemblyEntity> findTopByIdNotNullOrderById();
 
-    Optional<AssemblyEntity> findAssemblyEntityByGenbank(String genbank);
+    Page<AssemblyEntity> findAssemblyEntityByGenbank(String genbank, Pageable pageable);
 
-    Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
+    Page<AssemblyEntity> findAssemblyEntityByRefseq(String refseq, Pageable pageable);
 
-    Slice<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
+    Page<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
     @Transactional
     void deleteAssemblyEntityByGenbank(String genbank);
