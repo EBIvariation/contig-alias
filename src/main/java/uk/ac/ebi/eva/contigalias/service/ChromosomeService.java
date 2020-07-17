@@ -52,20 +52,17 @@ public class ChromosomeService {
 
     public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank) {
         List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Genbank(asmGenbank);
-        if (chromosomes == null) {
-            return Collections.emptyList();
-        }
-        chromosomes.forEach(this::stripAssemblyFromChromosome);
-        return chromosomes;
+        return stripAssembliesFromChromosomes(chromosomes);
     }
 
     public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq) {
         List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Refseq(asmRefseq);
-        if (chromosomes == null) {
-            return Collections.emptyList();
-        }
-        chromosomes.forEach(this::stripAssemblyFromChromosome);
-        return chromosomes;
+        return stripAssembliesFromChromosomes(chromosomes);
+    }
+
+    public List<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid) {
+        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid);
+        return stripAssembliesFromChromosomes(chromosomes);
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
@@ -73,6 +70,14 @@ public class ChromosomeService {
         if (assembly != null) {
             assembly.setChromosomes(null);
         }
+    }
+
+    private List<ChromosomeEntity> stripAssembliesFromChromosomes(List<ChromosomeEntity> chromosomes) {
+        if (chromosomes == null) {
+            return Collections.emptyList();
+        }
+        chromosomes.forEach(this::stripAssemblyFromChromosome);
+        return chromosomes;
     }
 
     private void stripAssemblyFromChromosome(ChromosomeEntity chromosome) {
