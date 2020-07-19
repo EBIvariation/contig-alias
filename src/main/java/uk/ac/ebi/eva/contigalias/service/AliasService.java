@@ -57,11 +57,11 @@ public class AliasService {
         return chromosomeService.getChromosomesByAssemblyRefseq(asmRefseq);
     }
 
-    List<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid) {
+    public List<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid) {
         return chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, asmTaxid);
     }
 
-    List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
+    public List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
         return chromosomeService.getChromosomesByNameAndAssembly(name, assembly);
     }
 

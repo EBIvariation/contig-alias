@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -244,6 +245,15 @@ public class ContigAliasHandlerTest {
                    .thenReturn(chromosomeEntities);
             Mockito.when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                    .thenReturn(chromosomeEntities);
+            String chrName = chromosomeEntities.get(0)
+                                               .getName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            Mockito.when(mockAliasService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid))
+                   .thenReturn(chromosomeEntities
+                                       .parallelStream()
+                                       .filter(it -> it.getName().equals(chrName) &&
+                                               it.getAssembly().getTaxid().equals(asmTaxid))
+                                       .collect(Collectors.toList()));
             handler = new ContigAliasHandler(null, null, mockAliasService, null, null);
         }
 
@@ -277,7 +287,29 @@ public class ContigAliasHandlerTest {
             testChromosomeEntityResponses(handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()));
         }
 
-        void testAssemblyEntityResponse(Optional<AssemblyEntity> assembly) {
+        @Test
+        void getChromosomesByChromosomeNameAndAssemblyTaxid() {
+            String chrName = chromosomeEntities.get(0).getName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            ResponseEntity<List<ChromosomeEntity>> response = controller
+                    .getChromosomesByChromosomeNameAndAssemblyTaxid(chrName, asmTaxid);
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            List<ChromosomeEntity> entities = response.getBody();
+            assertNotNull(entities);
+            for (ChromosomeEntity chx : entities) {
+                assertNotNull(chx);
+                assertEquals(chrName, chx.getName());
+                AssemblyEntity asx = chx.getAssembly();
+                assertNotNull(asx);
+                assertEquals(asmTaxid, asx.getTaxid());
+            }
+        }
+
+        void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
+            assertEquals(response.getStatusCode(), HttpStatus.OK);
+            assertTrue(response.hasBody());
+            AssemblyEntity assembly = response.getBody();
             assertNotNull(assembly);
             assertTrue(assembly.isPresent());
             testAssemblyEntityResponse(assembly.get());

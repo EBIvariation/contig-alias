@@ -188,4 +188,19 @@ public class ContigAliasController {
 
     }
 
+    @GetMapping(value = "v1/chromosomes/name/{name}/assembly/taxid/{taxid}")
+    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
+            @PathVariable String name, @PathVariable long taxid) {
+        if (name == null || name.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<ChromosomeEntity> entities = aliasService.getChromosomesByNameAndAssemblyTaxid(
+                name, taxid);
+        if (entities != null && !entities.isEmpty()) {
+            return new ResponseEntity<>(entities, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

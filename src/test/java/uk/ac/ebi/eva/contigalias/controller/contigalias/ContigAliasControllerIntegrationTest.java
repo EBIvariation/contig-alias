@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -210,6 +211,14 @@ public class ContigAliasControllerIntegrationTest {
                     .thenReturn(chromosomeEntities);
             when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                     .thenReturn(chromosomeEntities);
+            String chrName = chromosomeEntities.get(0).getName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            when(mockAliasService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid))
+                    .thenReturn(chromosomeEntities
+                                        .parallelStream()
+                                        .filter(it -> it.getName().equals(chrName) &&
+                                                it.getAssembly().getTaxid().equals(asmTaxid))
+                                        .collect(Collectors.toList()));
         }
 
         @AfterEach
@@ -260,6 +269,14 @@ public class ContigAliasControllerIntegrationTest {
                         get("/contig-alias/v1/assemblies/refseq/{refseq}/chromosomes", assemblyEntity.getRefseq()));
                 assertChromosomesEqualToEntities(resultActions);
             }
+        }
+
+        @Test
+        void getChromosomesByChromosomeNameAndAssemblyTaxid() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/chromosomes/name/{name}/assembly/taxid/{taxid}",
+                        chromosomeEntities.get(0).getName(), assemblyEntity.getTaxid()));
+            resultActions.andExpect(status().isOk());
         }
 
         void assertChromosomesEqualToEntities(ResultActions actions) throws Exception {
