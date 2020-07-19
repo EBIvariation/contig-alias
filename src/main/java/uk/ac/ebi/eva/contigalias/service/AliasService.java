@@ -61,4 +61,8 @@ public class AliasService {
         return chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, asmTaxid);
     }
 
+    List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
+        return chromosomeService.getChromosomesByNameAndAssembly(name, assembly);
+    }
+
 }

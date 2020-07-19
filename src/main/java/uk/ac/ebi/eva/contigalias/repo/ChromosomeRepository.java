@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.contigalias.repo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.util.List;
@@ -36,5 +37,7 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
 
     List<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid);
+
+    List<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
 
 }

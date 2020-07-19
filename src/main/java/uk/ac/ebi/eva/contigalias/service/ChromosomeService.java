@@ -65,6 +65,18 @@ public class ChromosomeService {
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
+    public List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
+        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByNameAndAssembly(name, assembly);
+        return stripAssembliesFromChromosomes(chromosomes);
+    }
+
+    private Page<ChromosomeEntity> stripChromosomeFromAssembly(Page<ChromosomeEntity> page) {
+        if (page != null && page.getTotalElements() > 0) {
+            page.get().forEach(this::stripChromosomeFromAssembly);
+        }
+        return page;
+    }
+
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
         AssemblyEntity assembly = chromosome.getAssembly();
         if (assembly != null) {

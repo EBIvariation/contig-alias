@@ -220,6 +220,15 @@ public class AliasServiceIntegrationTest {
             assertChromosomeEntityIdentical(chromosomeEntity, entities.get(0));
         }
 
+        @Test
+        void getChromosomeByNameAndAssembly() {
+            ChromosomeEntity chromosomeEntity = chromosomeEntities[0];
+            List<ChromosomeEntity> chromosomes = service.getChromosomesByNameAndAssembly(
+                    chromosomeEntity.getName(), assemblyEntities[0]);
+            assertNotNull(chromosomes);
+            assertEquals(1, chromosomes.size());
+            assertChromosomeEntityIdentical(chromosomeEntity, chromosomes.get(0));
+        }
 
     }
 
