@@ -76,7 +76,7 @@ public class ContigAliasHandlerTest {
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null,assembler, null);
+            handler = new ContigAliasHandler(mockAssemblyService, null, assembler, null);
         }
 
         @Test
@@ -253,7 +253,18 @@ public class ContigAliasHandlerTest {
                                        .filter(it -> it.getName().equals(chrName) &&
                                                it.getAssembly().getTaxid().equals(asmTaxid))
                                        .collect(Collectors.toList()));
-            handler = new ContigAliasHandler(null,mockChromosomeService, null, null);
+            Mockito.when(mockChromosomeService.getChromosomesByNameAndAssembly(chrName, assemblyEntity))
+                   .thenReturn(chromosomeEntities
+                                       .parallelStream()
+                                       .filter(it -> it.getName().equals(chrName) &&
+                                               it.getAssembly().equals(assemblyEntity))
+                                       .collect(Collectors.toList()));
+
+            AssemblyService mockAssemblyService = mock(AssemblyService.class);
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(assemblyEntity.getGenbank()))
+                   .thenReturn(Optional.of(assemblyEntity));
+
+            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, null, null);
         }
 
         @AfterEach
@@ -300,6 +311,22 @@ public class ContigAliasHandlerTest {
                 assertNotNull(asx);
                 assertEquals(asmTaxid, asx.getTaxid());
             }
+        }
+
+        @Test
+        void getChromosomesByChromosomeNameAndAssemblyAccession() {
+            String chrName = chromosomeEntities.get(0).getName();
+            List<ChromosomeEntity> entities = handler
+                    .getChromosomesByChromosomeNameAndAssemblyAccession(chrName, assemblyEntity.getGenbank());
+            assertNotNull(entities);
+            for (ChromosomeEntity chx : entities) {
+                assertNotNull(chx);
+                assertEquals(chrName, chx.getName());
+                AssemblyEntity asx = chx.getAssembly();
+                assertNotNull(asx);
+                assertTrue(asx.equals(assemblyEntity));
+            }
+
         }
 
         void testAssemblyEntityResponse(Optional<AssemblyEntity> optional) {
