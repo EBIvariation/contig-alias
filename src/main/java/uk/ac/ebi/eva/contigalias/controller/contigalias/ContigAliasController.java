@@ -134,7 +134,7 @@ public class ContigAliasController {
                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @ApiOperation(value = "Get an chromosome using its Genbank accession.",
+    @ApiOperation(value = "Get a chromosome using its Genbank accession.",
             notes = "Given a chromosome's genbank accession this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP " +
                     "Response with error code 404.")
@@ -149,7 +149,7 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an chromosome using its RefSeq accession.",
+    @ApiOperation(value = "Get a chromosome using its RefSeq accession.",
             notes = "Given a chromosome's RefSeq accession, this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
                     "code of 400 in case the user is trying to insert an assembly that already exists in the local " +
@@ -179,10 +179,12 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(entities);
     }
 
-    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their parent assemblies.")
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
+            "parent assemblies.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
-            @PathVariable String name, @PathVariable long taxid) {
+            @PathVariable @ApiParam(value = "Name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid) {
         if (name == null || name.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -190,16 +192,21 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(entities);
     }
 
-    @ApiOperation(value = "Get chromosomes using a combination of their own name and the GenBank or RefSeq accessions of their parent assemblies.")
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the GenBank or RefSeq accessions" +
+            " of their parent assemblies.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/accession/{accession}")
-    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
-            @PathVariable String name, @PathVariable String accession) {
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyAccession(
+            @PathVariable @ApiParam(value = "Name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (name == null || name.isEmpty() || accession == null || accession.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<ChromosomeEntity> entities
-                = handler.getChromosomesByChromosomeNameAndAssemblyAccession(name, accession);
-        return createAppropriateResponseEntity(entities);
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
+                = handler.getChromosomesByChromosomeNameAndAssemblyAccession(name, accession, pageRequest);
+        return createAppropriateResponseEntity(pagedModel);
     }
 
 }

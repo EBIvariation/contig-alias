@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.contigalias.repo;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -38,6 +40,7 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     List<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid);
 
-    List<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
+    Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly,
+                                                                   Pageable request);
 
 }

@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.contigalias.controller.contigalias;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -33,8 +34,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.assemblyPagedModelFromPage;
 import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToPage;
+import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.generatePagedModelFromPage;
 
 @Service
 public class ContigAliasHandler {
@@ -60,23 +61,23 @@ public class ContigAliasHandler {
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
-        return assemblyPagedModelFromPage(convertToPage(entity), assemblyAssembler);
+        return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByGenbank(String genbank) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
-        return assemblyPagedModelFromPage(convertToPage(entity), assemblyAssembler);
+        return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByRefseq(String refseq) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
-        return assemblyPagedModelFromPage(convertToPage(entity), assemblyAssembler);
+        return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
 
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssembliesByTaxid(long taxid, Pageable request) {
         Page<AssemblyEntity> page = assemblyService.getAssembliesByTaxid(taxid, request);
-        return assemblyPagedModelFromPage(page, assemblyAssembler);
+        return generatePagedModelFromPage(page, assemblyAssembler);
     }
 
     public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String genbank) {
@@ -89,12 +90,12 @@ public class ContigAliasHandler {
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByGenbank(String genbank) {
         Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByGenbank(genbank);
-        return assemblyPagedModelFromPage(convertToPage(entity), chromosomeAssembler);
+        return generatePagedModelFromPage(convertToPage(entity), chromosomeAssembler);
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByRefseq(String refseq) {
         Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
-        return assemblyPagedModelFromPage(convertToPage(entity), chromosomeAssembler);
+        return generatePagedModelFromPage(convertToPage(entity), chromosomeAssembler);
     }
 
     public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String genbank) {
@@ -109,16 +110,17 @@ public class ContigAliasHandler {
         return chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid);
     }
 
-    public List<ChromosomeEntity> getChromosomesByChromosomeNameAndAssemblyAccession(String name, String accession) {
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
+            String name,
+            String accession,
+            Pageable request) {
+        Page<ChromosomeEntity> page = new PageImpl<>(Collections.emptyList());
         Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
         if (assembly.isPresent()) {
-            List<ChromosomeEntity> chromosomes = chromosomeService.getChromosomesByNameAndAssembly(
-                    name, assembly.get());
-            if (chromosomes != null) {
-                return chromosomes;
-            }
+            page = chromosomeService.getChromosomesByNameAndAssembly(name, assembly.get(), request);
+
         }
-        return Collections.emptyList();
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
 }

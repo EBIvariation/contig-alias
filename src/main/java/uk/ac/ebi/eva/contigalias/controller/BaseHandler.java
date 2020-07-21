@@ -43,7 +43,7 @@ public class BaseHandler {
         return list;
     }
 
-    public static <T> PagedModel<EntityModel<T>> assemblyPagedModelFromPage(
+    public static <T> PagedModel<EntityModel<T>> generatePagedModelFromPage(
             Page<T> page,
             PagedResourcesAssembler<T> assembler) {
         return assembler.toModel(page);

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -223,11 +225,14 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         @Test
         void getChromosomeByNameAndAssembly() {
             ChromosomeEntity chromosomeEntity = chromosomeEntities[0];
-            List<ChromosomeEntity> chromosomes = service.getChromosomesByNameAndAssembly(
-                    chromosomeEntity.getName(), assemblyEntities[0]);
-            assertNotNull(chromosomes);
-            assertEquals(1, chromosomes.size());
-            assertChromosomeEntityIdentical(chromosomeEntity, chromosomes.get(0));
+            Page<ChromosomeEntity> page = service.getChromosomesByNameAndAssembly(
+                    chromosomeEntity.getName(), assemblyEntities[0], DEFAULT_PAGE_REQUEST);
+            assertNotNull(page);
+            assertEquals(1, page.getNumberOfElements());
+            Optional<ChromosomeEntity> entity = page.get().findFirst();
+            assertNotNull(entity);
+            assertTrue(entity.isPresent());
+            assertChromosomeEntityIdentical(chromosomeEntity, entity.get());
         }
 
     }

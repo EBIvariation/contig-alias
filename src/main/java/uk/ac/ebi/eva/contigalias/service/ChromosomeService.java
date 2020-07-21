@@ -17,6 +17,9 @@
 package uk.ac.ebi.eva.contigalias.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -79,17 +82,17 @@ public class ChromosomeService {
         return stripChromosomeFromAssembly(chromosomes);
     }
 
-    public List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
-        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByNameAndAssembly(name, assembly);
+    public Page<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly, Pageable request) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByNameAndAssembly(name, assembly, request);
         assembly.setChromosomes(null);
-        return injectAssemblyIntoChromosomes(chromosomes, assembly);
+        return injectAssemblyIntoChromosomes(page, assembly);
     }
 
-    private List<ChromosomeEntity> injectAssemblyIntoChromosomes(List<ChromosomeEntity> list, AssemblyEntity assembly) {
-        if (list != null && list.size() > 0) {
-            list.forEach(it -> it.setAssembly(assembly));
+    private Page<ChromosomeEntity> injectAssemblyIntoChromosomes(Page<ChromosomeEntity> page, AssemblyEntity assembly) {
+        if (page != null && page.getTotalElements() > 0) {
+            page.forEach(it -> it.setAssembly(assembly));
         }
-        return list;
+        return page;
     }
 
     private List<ChromosomeEntity> stripChromosomeFromAssembly(List<ChromosomeEntity> list) {
