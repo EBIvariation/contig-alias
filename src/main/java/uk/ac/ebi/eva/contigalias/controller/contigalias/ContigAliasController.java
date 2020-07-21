@@ -179,6 +179,7 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(entities);
     }
 
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their parent assemblies.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             @PathVariable String name, @PathVariable long taxid) {
@@ -189,6 +190,7 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(entities);
     }
 
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the GenBank or RefSeq accessions of their parent assemblies.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/accession/{accession}")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
             @PathVariable String name, @PathVariable String accession) {
