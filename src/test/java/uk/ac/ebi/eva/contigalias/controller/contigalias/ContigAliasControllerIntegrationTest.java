@@ -219,6 +219,8 @@ public class ContigAliasControllerIntegrationTest {
                                         .filter(it -> it.getName().equals(chrName) &&
                                                 it.getAssembly().getTaxid().equals(asmTaxid))
                                         .collect(Collectors.toList()));
+            when(mockHandler.getChromosomesByChromosomeNameAndAssemblyAccession(chrName, assemblyEntity.getGenbank()))
+                    .thenReturn(chromosomeEntities);
         }
 
         @AfterEach
@@ -257,9 +259,9 @@ public class ContigAliasControllerIntegrationTest {
 
         @Test
         void getChromosomesByAssemblyGenbank() throws Exception {
-                ResultActions resultActions = mockMvc.perform(
-                        get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
-                assertChromosomesEqualToEntities(resultActions);
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
+            assertChromosomesEqualToEntities(resultActions);
         }
 
         @Test
@@ -277,6 +279,14 @@ public class ContigAliasControllerIntegrationTest {
                     get("/contig-alias/v1/chromosomes/name/{name}/assembly/taxid/{taxid}",
                         chromosomeEntities.get(0).getName(), assemblyEntity.getTaxid()));
             resultActions.andExpect(status().isOk());
+        }
+
+        @Test
+        void getChromosomesByChromosomeNameAndAssemblyAccession() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/chromosomes/name/{name}/assembly/accession/{accession}",
+                        chromosomeEntities.get(0).getName(), assemblyEntity.getGenbank()));
+            assertChromosomesEqualToEntities(resultActions);
         }
 
         void assertChromosomesEqualToEntities(ResultActions actions) throws Exception {

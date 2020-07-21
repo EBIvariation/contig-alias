@@ -81,7 +81,15 @@ public class ChromosomeService {
 
     public List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
         List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByNameAndAssembly(name, assembly);
-        return stripChromosomeFromAssembly(chromosomes);
+        assembly.setChromosomes(null);
+        return injectAssemblyIntoChromosomes(chromosomes, assembly);
+    }
+
+    private List<ChromosomeEntity> injectAssemblyIntoChromosomes(List<ChromosomeEntity> list, AssemblyEntity assembly) {
+        if (list != null && list.size() > 0) {
+            list.forEach(it -> it.setAssembly(assembly));
+        }
+        return list;
     }
 
     private List<ChromosomeEntity> stripChromosomeFromAssembly(List<ChromosomeEntity> list) {
