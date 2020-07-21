@@ -17,7 +17,6 @@
 package uk.ac.ebi.eva.contigalias.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -59,6 +58,20 @@ public class ChromosomeService {
     public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq) {
         List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Refseq(asmRefseq);
         return stripAssembliesFromChromosomes(chromosomes);
+    }
+
+    public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String chrGenbank) {
+        Optional<ChromosomeEntity> entity = getChromosomeByGenbank(chrGenbank);
+        return extractAssemblyFromChromosome(entity);
+    }
+
+    public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String chrRefseq) {
+        Optional<ChromosomeEntity> entity = getChromosomeByRefseq(chrRefseq);
+        return extractAssemblyFromChromosome(entity);
+    }
+
+    public Optional<AssemblyEntity> extractAssemblyFromChromosome(Optional<ChromosomeEntity> entity) {
+        return entity.map(ChromosomeEntity::getAssembly);
     }
 
     public List<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid) {

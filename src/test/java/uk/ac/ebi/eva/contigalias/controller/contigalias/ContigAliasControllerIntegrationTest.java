@@ -187,7 +187,7 @@ public class ContigAliasControllerIntegrationTest {
 
 
     @Nested
-    class AliasServiceTests {
+    class ChrosomosomeServiceTests {
 
         private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
 

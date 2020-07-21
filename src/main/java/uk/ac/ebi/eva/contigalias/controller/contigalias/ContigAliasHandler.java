@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.service.AliasService;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
@@ -43,8 +42,6 @@ public class ContigAliasHandler {
 
     private final ChromosomeService chromosomeService;
 
-    private final AliasService aliasService;
-
     private final PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
 
     private final PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler;
@@ -52,12 +49,10 @@ public class ContigAliasHandler {
     @Autowired
     public ContigAliasHandler(AssemblyService assemblyService,
                               ChromosomeService chromosomeService,
-                              AliasService aliasService,
                               PagedResourcesAssembler<AssemblyEntity> assemblyAssembler,
                               PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
-        this.aliasService = aliasService;
         this.assemblyAssembler = assemblyAssembler;
         this.chromosomeAssembler = chromosomeAssembler;
     }
@@ -84,11 +79,11 @@ public class ContigAliasHandler {
     }
 
     public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String genbank) {
-        return aliasService.getAssemblyByChromosomeGenbank(genbank);
+        return chromosomeService.getAssemblyByChromosomeGenbank(genbank);
     }
 
     public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String refseq) {
-        return aliasService.getAssemblyByChromosomeRefseq(refseq);
+        return chromosomeService.getAssemblyByChromosomeRefseq(refseq);
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByGenbank(String genbank) {
@@ -102,15 +97,15 @@ public class ContigAliasHandler {
     }
 
     public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String genbank) {
-        return aliasService.getChromosomesByAssemblyGenbank(genbank);
+        return chromosomeService.getChromosomesByAssemblyGenbank(genbank);
     }
 
     public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String refseq) {
-        return aliasService.getChromosomesByAssemblyRefseq(refseq);
+        return chromosomeService.getChromosomesByAssemblyRefseq(refseq);
     }
 
     public List<ChromosomeEntity> getChromosomesByChromosomeNameAndAssemblyTaxid(String name, long taxid) {
-        return aliasService.getChromosomesByNameAndAssemblyTaxid(name, taxid);
+        return chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid);
     }
 
 }

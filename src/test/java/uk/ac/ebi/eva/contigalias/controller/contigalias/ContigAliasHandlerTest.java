@@ -30,7 +30,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
-import uk.ac.ebi.eva.contigalias.service.AliasService;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
@@ -77,7 +76,7 @@ public class ContigAliasHandlerTest {
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null);
+            handler = new ContigAliasHandler(mockAssemblyService, null,assembler, null);
         }
 
         @Test
@@ -143,7 +142,7 @@ public class ContigAliasHandlerTest {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.wrap(entities, null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null);
+            handler = new ContigAliasHandler(mockAssemblyService, null, assembler, null);
         }
 
         @Test
@@ -191,7 +190,7 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeAssmebler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            handler = new ContigAliasHandler(null, mockChromosomeService, null, null, mockChromosomeAssmebler);
+            handler = new ContigAliasHandler(null, mockChromosomeService, null, mockChromosomeAssmebler);
         }
 
         @Test
@@ -221,7 +220,7 @@ public class ContigAliasHandlerTest {
     }
 
     @Nested
-    class AliasServiceTests {
+    class ChromosomeServiceTestsWithAssemblies {
 
         private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
 
@@ -231,30 +230,30 @@ public class ContigAliasHandlerTest {
 
         @BeforeEach
         void setup() {
-            AliasService mockAliasService = mock(AliasService.class);
+            ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
                 Optional<AssemblyEntity> entityOptional = Optional.of(this.assemblyEntity);
-                Mockito.when(mockAliasService.getAssemblyByChromosomeGenbank(generate.getGenbank()))
+                Mockito.when(mockChromosomeService.getAssemblyByChromosomeGenbank(generate.getGenbank()))
                        .thenReturn(entityOptional);
-                Mockito.when(mockAliasService.getAssemblyByChromosomeRefseq(generate.getRefseq()))
+                Mockito.when(mockChromosomeService.getAssemblyByChromosomeRefseq(generate.getRefseq()))
                        .thenReturn(entityOptional);
             }
-            Mockito.when(mockAliasService.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
+            Mockito.when(mockChromosomeService.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
                    .thenReturn(chromosomeEntities);
-            Mockito.when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
+            Mockito.when(mockChromosomeService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                    .thenReturn(chromosomeEntities);
             String chrName = chromosomeEntities.get(0)
                                                .getName();
             Long asmTaxid = assemblyEntity.getTaxid();
-            Mockito.when(mockAliasService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid))
+            Mockito.when(mockChromosomeService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid))
                    .thenReturn(chromosomeEntities
                                        .parallelStream()
                                        .filter(it -> it.getName().equals(chrName) &&
                                                it.getAssembly().getTaxid().equals(asmTaxid))
                                        .collect(Collectors.toList()));
-            handler = new ContigAliasHandler(null, null, mockAliasService, null, null);
+            handler = new ContigAliasHandler(null,mockChromosomeService, null, null);
         }
 
         @AfterEach

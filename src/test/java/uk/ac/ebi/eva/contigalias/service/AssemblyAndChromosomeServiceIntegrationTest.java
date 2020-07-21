@@ -39,10 +39,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class AliasServiceIntegrationTest {
+public class AssemblyAndChromosomeServiceIntegrationTest {
 
     @Autowired
-    private AliasService service;
+    private ChromosomeService service;
 
     @Autowired
     private AssemblyService assemblyService;
