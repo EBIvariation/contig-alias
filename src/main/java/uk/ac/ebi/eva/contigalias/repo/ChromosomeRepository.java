@@ -38,7 +38,7 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
 
-    List<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid);
+    Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly,
                                                                    Pageable request);

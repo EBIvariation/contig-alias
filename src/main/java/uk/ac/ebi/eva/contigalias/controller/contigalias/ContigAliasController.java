@@ -182,14 +182,17 @@ public class ContigAliasController {
     @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
             "parent assemblies.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
-    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             @PathVariable @ApiParam(value = "Name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
-            @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid) {
+            @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (name == null || name.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<ChromosomeEntity> entities = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(name, taxid);
-        return createAppropriateResponseEntity(entities);
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(name, taxid, pageRequest);
+        return createAppropriateResponseEntity(pagedModel);
     }
 
     @ApiOperation(value = "Get chromosomes using a combination of their own name and the GenBank or RefSeq accessions" +
