@@ -63,7 +63,7 @@ public class AdminHandlerTest {
     }
 
     @Test
-    public void test404NotFound() throws IOException {
+    public void testAssemblyByInvalidAccessionNotFound() throws IOException {
         List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession("##INVALID##");
         assertNotNull(assemblyByAccession);
         assertTrue(assemblyByAccession.isEmpty());
