@@ -63,19 +63,19 @@ public class ChromosomeService {
 
     public List<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid) {
         List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid);
-        return stripAssembliesFromChromosomes(chromosomes);
+        return stripChromosomeFromAssembly(chromosomes);
     }
 
     public List<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly) {
         List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByNameAndAssembly(name, assembly);
-        return stripAssembliesFromChromosomes(chromosomes);
+        return stripChromosomeFromAssembly(chromosomes);
     }
 
-    private Page<ChromosomeEntity> stripChromosomeFromAssembly(Page<ChromosomeEntity> page) {
-        if (page != null && page.getTotalElements() > 0) {
-            page.get().forEach(this::stripChromosomeFromAssembly);
+    private List<ChromosomeEntity> stripChromosomeFromAssembly(List<ChromosomeEntity> list) {
+        if (list != null && list.size() > 0) {
+            list.forEach(this::stripChromosomeFromAssembly);
         }
-        return page;
+        return list;
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
