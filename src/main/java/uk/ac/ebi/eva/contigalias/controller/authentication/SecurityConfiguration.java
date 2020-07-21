@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,13 +33,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private static final String ROLE_ADMIN = "ADMIN";
 
+    private final CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
+
     @Value("${controller.auth.admin.username}")
     private String USERNAME_ADMIN;
 
     @Value("${controller.auth.admin.password}")
     private String PASSWORD_ADMIN;
-
-    private final CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
 
     @Autowired
     public SecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint) {

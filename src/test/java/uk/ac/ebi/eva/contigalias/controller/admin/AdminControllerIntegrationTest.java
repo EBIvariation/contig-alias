@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.contigalias.controller;
+package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.IOException;
@@ -52,16 +51,19 @@ public class AdminControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AssemblyService mockAssemblyService;
+    private AdminHandler mockHandler;
+
+    @Test
+    void contextLoads() {
+
+    }
 
     @BeforeEach
     void setUp() throws IOException {
         List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
-        when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getGenbank()))
+        when(mockHandler.getAssemblyOrFetchByAccession(entity.getGenbank()))
                 .thenReturn(entityAsList);
-        when(mockAssemblyService
-                     .getAssemblyOrFetchByAccession(entity.getRefseq()))
+        when(mockHandler.getAssemblyOrFetchByAccession(entity.getRefseq()))
                 .thenReturn(entityAsList);
     }
 

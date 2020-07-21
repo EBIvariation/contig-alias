@@ -35,9 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @Service
 public class AssemblyService {
@@ -58,58 +55,57 @@ public class AssemblyService {
         this.dataSource = dataSource;
     }
 
-    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
+    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
 
-        Page<AssemblyEntity> entities = getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
-        if (!entities.isEmpty()) {
-            return entities.get().collect(Collectors.toList());
+        Optional<AssemblyEntity> entities = getAssemblyByAccession(accession);
+        if (entities.isPresent()) {
+            return entities;
         }
         fetchAndInsertAssembly(accession);
 
-        entities = getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
-        if (!entities.isEmpty()) {
-            return entities.get().collect(Collectors.toList());
-        } else {
-            return new LinkedList<>();
-        }
+        entities = getAssemblyByAccession(accession);
+        return entities;
     }
 
-    public Page<AssemblyEntity> getAssemblyByGenbank(String genbank, Pageable request) {
-        Page<AssemblyEntity> page = repository.findAssemblyEntityByGenbank(genbank, request);
-        return stripAssemblyFromChromosomes(page);
+    public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
+        stripAssemblyFromChromosomes(entity);
+        return entity;
     }
 
-    public Page<AssemblyEntity> getAssemblyByRefseq(String refseq, Pageable request) {
-        Page<AssemblyEntity> page = repository.findAssemblyEntityByRefseq(refseq, request);
-        return stripAssemblyFromChromosomes(page);
+    public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByRefseq(refseq);
+        stripAssemblyFromChromosomes(entity);
+        return entity;
     }
 
     public Page<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
         Page<AssemblyEntity> page = repository.findAssemblyEntitiesByTaxid(taxid, request);
-        return stripAssemblyFromChromosomes(page);
+        page.forEach(this::stripAssemblyFromChromosomes);
+        return page;
     }
 
     public void fetchAndInsertAssembly(String accession)
             throws IOException, IllegalArgumentException {
-        Page<AssemblyEntity> page = repository.findAssemblyEntityByAccession(accession, DEFAULT_PAGE_REQUEST);
-        Optional<AssemblyEntity> first = page.get().findFirst();
-        if (first.isPresent()) {
-            throw duplicateAssemblyInsertionException(accession, first.get());
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
+        if (entity.isPresent()) {
+            throw duplicateAssemblyInsertionException(accession, entity.get());
         }
         Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
         fetchAssembly.ifPresent(this::insertAssembly);
     }
 
-    public Page<AssemblyEntity> getAssemblyByAccession(String accession, Pageable request) {
-        Page<AssemblyEntity> page = repository.findAssemblyEntityByAccession(accession, request);
-        return stripAssemblyFromChromosomes(page);
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
+        stripAssemblyFromChromosomes(entity);
+        return entity;
     }
 
-    private Page<AssemblyEntity> stripAssemblyFromChromosomes(Page<AssemblyEntity> page) {
-        if (page != null && page.getTotalElements() > 0) {
-            page.get().forEach(this::stripAssemblyFromChromosomes);
+    public void stripAssemblyFromChromosomes(Optional<AssemblyEntity> optional) {
+        if (optional.isPresent()) {
+            AssemblyEntity entity = optional.get();
+            stripAssemblyFromChromosomes(entity);
         }
-        return page;
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
@@ -155,12 +151,11 @@ public class AssemblyService {
         if (genbank == null && refseq == null) {
             return false;
         }
-        Page<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
+        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
                 genbank == null ? "##########" : genbank,
-                refseq == null ? "##########" : refseq,
-                DEFAULT_PAGE_REQUEST);
-        return !existingAssembly.isEmpty();
+                refseq == null ? "##########" : refseq);
+        return existingAssembly.isPresent();
     }
 
     public void fetchAndInsertAssembly(List<String> accessions) {
@@ -182,10 +177,8 @@ public class AssemblyService {
     }
 
     public void deleteAssemblyByAccession(String accession) {
-        Page<AssemblyEntity> assemblies = getAssemblyByAccession(accession, DEFAULT_PAGE_REQUEST);
-        if (!assemblies.isEmpty()) {
-            assemblies.forEach(this::deleteAssembly);
-        }
+        Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
+        assembly.ifPresent(this::deleteAssembly);
     }
 
     public void deleteAssembly(AssemblyEntity entity) {

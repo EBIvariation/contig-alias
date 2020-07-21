@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.contigalias.controller;
+package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -30,14 +30,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
 import java.util.List;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
@@ -45,10 +44,10 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidFor
 @RestController
 public class AdminController {
 
-    private final AssemblyService service;
+    private final AdminHandler handler;
 
-    public AdminController(AssemblyService service) {
-        this.service = service;
+    public AdminController(AdminHandler handler) {
+        this.handler = handler;
     }
 
     @ApiOperation(value = "Get or fetch an assembly using its GenBank or RefSeq accession.",
@@ -68,7 +67,7 @@ public class AdminController {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities;
             try {
-                entities = service.getAssemblyOrFetchByAccession(accession);
+                entities = handler.getAssemblyOrFetchByAccession(accession);
             } catch (IllegalArgumentException e) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -91,7 +90,7 @@ public class AdminController {
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
         try {
-            service.fetchAndInsertAssembly(accession);
+            handler.fetchAndInsertAssemblyByAccession(accession);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -116,7 +115,7 @@ public class AdminController {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        service.fetchAndInsertAssembly(accessions);
+        handler.fetchAndInsertAssemblyByAccession(accessions);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -129,7 +128,7 @@ public class AdminController {
     @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) {
-        service.deleteAssemblyByAccession(accession);
+        handler.deleteAssemblyByAccession(accession);
     }
 
 }

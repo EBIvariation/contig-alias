@@ -16,9 +16,7 @@
 
 package uk.ac.ebi.eva.contigalias.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
@@ -80,10 +78,11 @@ public class BaseController {
         }
     }
 
-    public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(Page<T> page,
-                                                                                                 PagedResourcesAssembler<T> assembler) {
-        PagedModel<EntityModel<T>> entityModels = assembler.toModel(page);
-        return new ResponseEntity<>(entityModels, page.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+    public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(
+            PagedModel<EntityModel<T>> entityModels) {
+        return new ResponseEntity<>(
+                entityModels,
+                entityModels.getContent().isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
     }
 
     public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {

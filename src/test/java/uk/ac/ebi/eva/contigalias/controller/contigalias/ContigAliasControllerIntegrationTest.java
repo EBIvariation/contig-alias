@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package uk.ac.ebi.eva.contigalias.controller;
+package uk.ac.ebi.eva.contigalias.controller.contigalias;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
-import uk.ac.ebi.eva.contigalias.service.AliasService;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
-import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.util.Collections;
@@ -44,11 +45,14 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
@@ -64,13 +68,7 @@ public class ContigAliasControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AssemblyService mockAssemblyService;
-
-    @MockBean
-    private ChromosomeService mockChromosomeService;
-
-    @MockBean
-    private AliasService mockAliasService;
+    private ContigAliasHandler mockHandler;
 
     @Nested
     class AssemblyServiceTests {
@@ -78,24 +76,33 @@ public class ContigAliasControllerIntegrationTest {
         private final AssemblyEntity entity = AssemblyGenerator.generate();
 
         @BeforeEach
-        void setUp() {
-            Page<AssemblyEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
-            when(mockAssemblyService
-                         .getAssemblyByAccession(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-            when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-            when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
+        void setup() {
+            PageImpl<AssemblyEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
+
+            PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+
+            PagedModel<EntityModel<AssemblyEntity>> assembledModel = assembler.toModel(page);
+
+            when(mockHandler.getAssemblyByAccession(this.entity.getGenbank()))
+                    .thenReturn(assembledModel);
+            when(mockHandler.getAssemblyByGenbank(this.entity.getGenbank()))
+                    .thenReturn(assembledModel);
+            when(mockHandler.getAssemblyByRefseq(this.entity.getRefseq()))
+                    .thenReturn(assembledModel);
+
         }
 
         @Test
-        void getAssemblyByAccessionGCAHavingChromosomes() throws Exception {
+        void getAssemblyByAccession() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/assemblies/{accession}", entity.getGenbank()));
+                    get("/contig-alias/v1/assemblies/{accession}", this.entity.getGenbank(), DEFAULT_PAGE_NUMBER,
+                        DEFAULT_PAGE_SIZE));
             assertAssemblyIdenticalToEntity(resultActions);
         }
-
 
         @Test
         void getAssemblyByGenbank() throws Exception {
@@ -113,6 +120,7 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
             String path = "$._embedded.assemblyEntities[0]";
+            actions.andDo(MockMvcResultHandlers.print());
             actions.andExpect(status().isOk())
                    .andExpect(jsonPath(path).exists())
                    .andExpect(jsonPath(path + ".id").doesNotExist())
@@ -126,6 +134,7 @@ public class ContigAliasControllerIntegrationTest {
 
     }
 
+
     @Nested
     class ChromosomeServiceTests {
 
@@ -133,11 +142,20 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            Page<ChromosomeEntity> entityListAsPage = new PageImpl<>(Collections.singletonList(this.entity));
-            when(mockChromosomeService.getChromosomeByGenbank(this.entity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
-            when(mockChromosomeService.getChromosomeByRefseq(this.entity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(entityListAsPage);
+            PageImpl<ChromosomeEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
+
+            PagedResourcesAssembler<ChromosomeEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+
+            PagedModel<EntityModel<ChromosomeEntity>> assembledModel = assembler.toModel(page);
+
+            when(mockHandler.getChromosomeByGenbank(this.entity.getGenbank()))
+                    .thenReturn(assembledModel);
+            when(mockHandler.getChromosomeByRefseq(this.entity.getRefseq()))
+                    .thenReturn(assembledModel);
         }
 
         @Test
@@ -166,6 +184,7 @@ public class ContigAliasControllerIntegrationTest {
 
     }
 
+
     @Nested
     class AliasServiceTests {
 
@@ -181,15 +200,15 @@ public class ContigAliasControllerIntegrationTest {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
                 Optional<AssemblyEntity> assemblyEntityAsOptional = Optional.of(this.assemblyEntity);
-                when(mockAliasService.getAssemblyByChromosomeGenbank(generate.getGenbank()))
+                when(mockHandler.getAssemblyByChromosomeGenbank(generate.getGenbank()))
                         .thenReturn(assemblyEntityAsOptional);
-                when(mockAliasService.getAssemblyByChromosomeRefseq(generate.getRefseq()))
+                when(mockHandler.getAssemblyByChromosomeRefseq(generate.getRefseq()))
                         .thenReturn(assemblyEntityAsOptional);
             }
             assemblyEntity.setChromosomes(null);
-            when(mockAliasService.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
+            when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
                     .thenReturn(chromosomeEntities);
-            when(mockAliasService.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
+            when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                     .thenReturn(chromosomeEntities);
         }
 
@@ -229,11 +248,9 @@ public class ContigAliasControllerIntegrationTest {
 
         @Test
         void getChromosomesByAssemblyGenbank() throws Exception {
-            for (ChromosomeEntity e : chromosomeEntities) {
                 ResultActions resultActions = mockMvc.perform(
                         get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
                 assertChromosomesEqualToEntities(resultActions);
-            }
         }
 
         @Test
