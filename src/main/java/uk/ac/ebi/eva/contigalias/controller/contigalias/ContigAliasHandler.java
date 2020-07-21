@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +107,18 @@ public class ContigAliasHandler {
 
     public List<ChromosomeEntity> getChromosomesByChromosomeNameAndAssemblyTaxid(String name, long taxid) {
         return chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid);
+    }
+
+    public List<ChromosomeEntity> getChromosomesByChromosomeNameAndAssemblyAccession(String name, String accession) {
+        Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
+        if (assembly.isPresent()) {
+            List<ChromosomeEntity> chromosomes = chromosomeService.getChromosomesByNameAndAssembly(
+                    name, assembly.get());
+            if (chromosomes != null) {
+                return chromosomes;
+            }
+        }
+        return Collections.emptyList();
     }
 
 }

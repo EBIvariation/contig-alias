@@ -169,23 +169,14 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyGenbank(@PathVariable String genbank) {
         List<ChromosomeEntity> entities = handler.getChromosomesByAssemblyGenbank(genbank);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyRefseq(@PathVariable String refseq) {
         List<ChromosomeEntity> entities = handler.getChromosomesByAssemblyRefseq(refseq);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
+        return createAppropriateResponseEntity(entities);
     }
 
     @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
@@ -195,11 +186,18 @@ public class ContigAliasController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         List<ChromosomeEntity> entities = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(name, taxid);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return createAppropriateResponseEntity(entities);
+    }
+
+    @GetMapping(value = "chromosomes/name/{name}/assembly/accession/{accession}")
+    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
+            @PathVariable String name, @PathVariable String accession) {
+        if (name == null || name.isEmpty() || accession == null || accession.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        List<ChromosomeEntity> entities
+                = handler.getChromosomesByChromosomeNameAndAssemblyAccession(name, accession);
+        return createAppropriateResponseEntity(entities);
     }
 
 }
