@@ -36,8 +36,7 @@ public class BaseHandler {
     public static <T> List<T> convertToList(Optional<T> optional) {
         List<T> list;
         if (optional.isPresent()) {
-            list = new LinkedList<>();
-            list.add(optional.get());
+            list = Collections.singletonList(optional.get());
         } else {
             list = Collections.emptyList();
         }
