@@ -213,7 +213,7 @@ public class ContigAliasControllerIntegrationTest {
                     .thenReturn(chromosomeEntities);
             String chrName = chromosomeEntities.get(0).getName();
             Long asmTaxid = assemblyEntity.getTaxid();
-            when(mockAliasService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid))
+            when(mockHandler.getChromosomesByChromosomeNameAndAssemblyTaxid(chrName, asmTaxid))
                     .thenReturn(chromosomeEntities
                                         .parallelStream()
                                         .filter(it -> it.getName().equals(chrName) &&

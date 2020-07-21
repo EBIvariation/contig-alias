@@ -109,4 +109,8 @@ public class ContigAliasHandler {
         return aliasService.getChromosomesByAssemblyRefseq(refseq);
     }
 
+    public List<ChromosomeEntity> getChromosomesByChromosomeNameAndAssemblyTaxid(String name, long taxid) {
+        return aliasService.getChromosomesByNameAndAssemblyTaxid(name, taxid);
+    }
+
 }

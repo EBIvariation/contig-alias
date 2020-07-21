@@ -291,11 +291,8 @@ public class ContigAliasHandlerTest {
         void getChromosomesByChromosomeNameAndAssemblyTaxid() {
             String chrName = chromosomeEntities.get(0).getName();
             Long asmTaxid = assemblyEntity.getTaxid();
-            ResponseEntity<List<ChromosomeEntity>> response = controller
+            List<ChromosomeEntity> entities = handler
                     .getChromosomesByChromosomeNameAndAssemblyTaxid(chrName, asmTaxid);
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            List<ChromosomeEntity> entities = response.getBody();
             assertNotNull(entities);
             for (ChromosomeEntity chx : entities) {
                 assertNotNull(chx);
@@ -306,23 +303,16 @@ public class ContigAliasHandlerTest {
             }
         }
 
-        void testAssemblyEntityResponse(ResponseEntity<AssemblyEntity> response) {
-            assertEquals(response.getStatusCode(), HttpStatus.OK);
-            assertTrue(response.hasBody());
-            AssemblyEntity assembly = response.getBody();
-            assertNotNull(assembly);
-            assertTrue(assembly.isPresent());
-            testAssemblyEntityResponse(assembly.get());
-        }
-
-        void testAssemblyEntityResponse(AssemblyEntity assembly) {
-            assertNotNull(assembly);
-            assertEquals(assemblyEntity.getName(), assembly.getName());
-            assertEquals(assemblyEntity.getOrganism(), assembly.getOrganism());
-            assertEquals(assemblyEntity.getGenbank(), assembly.getGenbank());
-            assertEquals(assemblyEntity.getRefseq(), assembly.getRefseq());
-            assertEquals(assemblyEntity.getTaxid(), assembly.getTaxid());
-            assertEquals(assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        void testAssemblyEntityResponse(Optional<AssemblyEntity> optional) {
+            assertNotNull(optional);
+            assertTrue(optional.isPresent());
+            AssemblyEntity assembly = optional.get();
+            assertEquals(this.assemblyEntity.getName(), assembly.getName());
+            assertEquals(this.assemblyEntity.getOrganism(), assembly.getOrganism());
+            assertEquals(this.assemblyEntity.getGenbank(), assembly.getGenbank());
+            assertEquals(this.assemblyEntity.getRefseq(), assembly.getRefseq());
+            assertEquals(this.assemblyEntity.getTaxid(), assembly.getTaxid());
+            assertEquals(this.assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
         }
 
         void testChromosomeEntityResponses(List<ChromosomeEntity> entities) {

@@ -194,8 +194,7 @@ public class ContigAliasController {
         if (name == null || name.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<ChromosomeEntity> entities = aliasService.getChromosomesByNameAndAssemblyTaxid(
-                name, taxid);
+        List<ChromosomeEntity> entities = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(name, taxid);
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         } else {
