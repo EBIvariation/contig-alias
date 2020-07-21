@@ -188,7 +188,7 @@ public class ContigAliasController {
 
     }
 
-    @GetMapping(value = "v1/chromosomes/name/{name}/assembly/taxid/{taxid}")
+    @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             @PathVariable String name, @PathVariable long taxid) {
         if (name == null || name.isEmpty()) {
