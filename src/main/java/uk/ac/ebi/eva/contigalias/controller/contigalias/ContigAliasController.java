@@ -169,24 +169,28 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
-            @RequestParam String authority) {
+            @RequestParam(required = false) String authority) {
         if (accession == null || accession.isEmpty()) {
             return BAD_REQUEST;
         }
         List<ChromosomeEntity> entities;
-        switch (authority.toLowerCase()) {
-            case "genbank": {
-                entities = handler.getChromosomesByAssemblyGenbank(accession);
-                break;
+        if (authority != null && !authority.isEmpty()) {
+            switch (authority.toLowerCase()) {
+                case "genbank": {
+                    entities = handler.getChromosomesByAssemblyGenbank(accession);
+                    break;
+                }
+                case "refseq": {
+                    entities = handler.getChromosomesByAssemblyRefseq(accession);
+                    break;
+                }
+                default: {
+                    entities = handler.getChromosomesByAssemblyAccession(accession);
+                    break;
+                }
             }
-            case "refseq": {
-                entities = handler.getChromosomesByAssemblyRefseq(accession);
-                break;
-            }
-            default: {
-                entities = handler.getChromosomesByAssemblyAccession(accession);
-                break;
-            }
+        } else {
+            entities = handler.getChromosomesByAssemblyAccession(accession);
         }
         return createAppropriateResponseEntity(entities);
     }
