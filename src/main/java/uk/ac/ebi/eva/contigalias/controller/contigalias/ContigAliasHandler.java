@@ -106,6 +106,16 @@ public class ContigAliasHandler {
         return chromosomeService.getChromosomesByAssemblyRefseq(refseq);
     }
 
+    public List<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession) {
+        Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
+        if (assembly.isPresent()) {
+            List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
+            if (chromosomes != null) {
+                return chromosomes;
+            }
+        }
+        return Collections.emptyList();
+    }
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             String name,
             long taxid,
