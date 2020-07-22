@@ -247,6 +247,10 @@ public class ContigAliasControllerIntegrationTest {
                     .thenReturn(chromosomeEntities);
             when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
                     .thenReturn(chromosomeEntities);
+            when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()))
+                    .thenReturn(chromosomeEntities);
+            when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()))
+                    .thenReturn(chromosomeEntities);
         }
 
         @AfterEach
@@ -292,11 +296,32 @@ public class ContigAliasControllerIntegrationTest {
 
         @Test
         void getChromosomesByAssemblyRefseq() throws Exception {
-            for (ChromosomeEntity e : chromosomeEntities) {
-                ResultActions resultActions = mockMvc.perform(
-                        get("/contig-alias/v1/assemblies/refseq/{refseq}/chromosomes", assemblyEntity.getRefseq()));
-                assertChromosomesEqualToEntities(resultActions);
-            }
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/refseq/{refseq}/chromosomes", assemblyEntity.getRefseq()));
+            assertChromosomesEqualToEntities(resultActions);
+        }
+
+        @Test
+        void getChromosomesByAssemblyAccessionNoAuthority() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank()));
+            assertChromosomesEqualToEntities(resultActions);
+        }
+
+        @Test
+        void getChromosomesByAssemblyAccessionGenbank() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank())
+                            .param("authority", "genbank"));
+            assertChromosomesEqualToEntities(resultActions);
+        }
+
+        @Test
+        void getChromosomesByAssemblyAccessionRefseq() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getRefseq())
+                            .param("authority", "refseq"));
+            assertChromosomesEqualToEntities(resultActions);
         }
 
         void assertChromosomesEqualToEntities(ResultActions actions) throws Exception {
