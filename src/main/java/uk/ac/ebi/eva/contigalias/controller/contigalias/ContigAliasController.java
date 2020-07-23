@@ -36,6 +36,8 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
@@ -82,6 +84,8 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByGenbank(genbank);
+            pagedModel.add(linkTo(methodOn(ContigAliasController.class)
+                                          .getChromosomesByAssemblyGenbank(genbank)).withRel("chromosomes"));
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
