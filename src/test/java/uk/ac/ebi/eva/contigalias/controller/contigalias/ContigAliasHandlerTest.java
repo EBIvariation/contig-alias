@@ -251,13 +251,13 @@ public class ContigAliasHandlerTest {
             Mockito.when(
                     mockChromosomeService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid, DEFAULT_PAGE_REQUEST))
                    .thenReturn(new PageImpl<>(chromosomeEntities
-                                                      .parallelStream()
+                                                      .stream()
                                                       .filter(it -> it.getName().equals(chrName) &&
                                                               it.getAssembly().getTaxid().equals(asmTaxid))
                                                       .collect(Collectors.toList())));
 
             List<ChromosomeEntity> chromosomesByNameAndAssembly = chromosomeEntities
-                    .parallelStream()
+                    .stream()
                     .filter(it -> it.getName().equals(chrName) &&
                             it.getAssembly().equals(assemblyEntity))
                     .collect(Collectors.toList());
@@ -273,7 +273,7 @@ public class ContigAliasHandlerTest {
             PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssembler = mock(PagedResourcesAssembler.class);
 
             List<EntityModel<ChromosomeEntity>> entityModels = new LinkedList<>();
-            chromosomesByNameAndAssembly.parallelStream().forEach(it -> entityModels.add(new EntityModel<>(it)));
+            chromosomesByNameAndAssembly.stream().forEach(it -> entityModels.add(new EntityModel<>(it)));
             PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = new PagedModel<>(entityModels, null);
             Mockito.when(mockChromosomeAssembler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
@@ -321,7 +321,7 @@ public class ContigAliasHandlerTest {
             Collection<EntityModel<ChromosomeEntity>> content = pagedModel.getContent();
             assertNotNull(content);
             assertFalse(content.isEmpty());
-            content.parallelStream().forEach(it -> {
+            content.stream().forEach(it -> {
                 assertNotNull(it);
                 ChromosomeEntity chx = it.getContent();
                 assertNotNull(chx);
@@ -342,14 +342,14 @@ public class ContigAliasHandlerTest {
             Collection<EntityModel<ChromosomeEntity>> content = pagedModel.getContent();
             assertNotNull(content);
             assertFalse(content.isEmpty());
-            content.parallelStream().forEach(it -> {
+            content.stream().forEach(it -> {
                 assertNotNull(it);
                 ChromosomeEntity chx = it.getContent();
                 assertNotNull(chx);
                 assertEquals(chrName, chx.getName());
                 AssemblyEntity asx = chx.getAssembly();
                 assertNotNull(asx);
-                assertTrue(asx.equals(assemblyEntity));
+                assertEquals(asx, assemblyEntity);
             });
         }
 

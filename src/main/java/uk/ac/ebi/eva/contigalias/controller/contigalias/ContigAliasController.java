@@ -182,8 +182,8 @@ public class ContigAliasController {
     @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
             "parent assemblies.",
             notes = "Given a chromosome's name and the Taxonomic ID of the assembly that it belongs to, this endpoint" +
-                    " will return a list of chromosomes that satisfy the given parameters. Each chromosome will also " +
-                    "have its parent assembly nested inside it. The endpoint will either return a list of " +
+                    " will return a non-emtpy list of chromosomes that satisfy the given parameters. Each chromosome " +
+                    "will also have its parent assembly nested inside it. The endpoint will either return a list of " +
                     "chromosomes or it will either return an HTTP error code 204 if no chromosomes are found or " +
                     "return an HTTP error code 400 if invalid parameters are found.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
