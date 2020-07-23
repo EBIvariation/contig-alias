@@ -62,8 +62,8 @@ public class AdminController {
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
-            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
-            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             List<AssemblyEntity> entities;
             try {
