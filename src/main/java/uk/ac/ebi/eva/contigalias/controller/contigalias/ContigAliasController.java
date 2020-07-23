@@ -175,19 +175,12 @@ public class ContigAliasController {
         }
         List<ChromosomeEntity> entities;
         if (authority != null && !authority.isEmpty()) {
-            switch (authority.toLowerCase()) {
-                case "genbank": {
-                    entities = handler.getChromosomesByAssemblyGenbank(accession);
-                    break;
-                }
-                case "refseq": {
-                    entities = handler.getChromosomesByAssemblyRefseq(accession);
-                    break;
-                }
-                default: {
-                    entities = handler.getChromosomesByAssemblyAccession(accession);
-                    break;
-                }
+            if ("genbank".equals(authority.toLowerCase())) {
+                entities = handler.getChromosomesByAssemblyGenbank(accession);
+            } else if ("refseq".equals(authority.toLowerCase())) {
+                entities = handler.getChromosomesByAssemblyRefseq(accession);
+            } else {
+                return BAD_REQUEST;
             }
         } else {
             entities = handler.getChromosomesByAssemblyAccession(accession);
