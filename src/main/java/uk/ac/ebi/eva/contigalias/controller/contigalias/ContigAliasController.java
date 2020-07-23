@@ -122,7 +122,7 @@ public class ContigAliasController {
             (@PathVariable String genbank) {
         Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeGenbank(genbank);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
@@ -131,7 +131,7 @@ public class ContigAliasController {
     public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
         Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeRefseq(refseq);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
     @ApiOperation(value = "Get a chromosome using its Genbank accession.",
@@ -183,7 +183,7 @@ public class ContigAliasController {
             "parent assemblies.",
             notes = "Given a chromosome's name and the Taxonomic ID of the assembly that it belongs to, this endpoint" +
                     " will return a list of chromosomes that satisfy the given parameters. Each chromosome will also " +
-                    "have it's parent assembly nested inside it. The endpoint will either return a list of " +
+                    "have its parent assembly nested inside it. The endpoint will either return a list of " +
                     "chromosomes or it will either return an HTTP error code 204 if no chromosomes are found or " +
                     "return an HTTP error code 400 if invalid parameters are found.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
@@ -205,7 +205,7 @@ public class ContigAliasController {
             " of their parent assemblies.",
             notes = "Given a chromosome's name and the GenBank or RefSeq accession of the assembly that it belongs " +
                     "to, this endpoint will return a list of chromosomes that satisfy the given parameters. Each " +
-                    "chromosome will also have it's parent assembly nested inside it. The endpoint will either return" +
+                    "chromosome will also have its parent assembly nested inside it. The endpoint will either return" +
                     " a list of chromosomes or it will either return an HTTP error code 204 if no chromosomes are " +
                     "found or return an HTTP error code 400 if invalid parameters are found.")
     @GetMapping(value = "chromosomes/name/{name}/assembly/accession/{accession}")
