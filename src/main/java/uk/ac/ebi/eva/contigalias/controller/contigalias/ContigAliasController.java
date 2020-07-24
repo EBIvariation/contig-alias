@@ -186,10 +186,10 @@ public class ContigAliasController {
                     "will also have its parent assembly nested inside it. The endpoint will either return a list of " +
                     "chromosomes or it will either return an HTTP error code 204 if no chromosomes are found or " +
                     "return an HTTP error code 400 if invalid parameters are found.")
-    @GetMapping(value = "chromosomes/name/{name}/assembly/taxid/{taxid}")
+    @GetMapping(value = "chromosomes/{name}")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             @PathVariable @ApiParam(value = "Name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
-            @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
+            @RequestParam @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
             @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (name == null || name.isEmpty()) {

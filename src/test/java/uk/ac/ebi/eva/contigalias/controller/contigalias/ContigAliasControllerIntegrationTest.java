@@ -189,8 +189,8 @@ public class ContigAliasControllerIntegrationTest {
         @Test
         void getChromosomesByChromosomeNameAndAssemblyTaxid() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/chromosomes/name/{name}/assembly/taxid/{taxid}",
-                        chromosomeEntity.getName(), assemblyEntity.getTaxid()));
+                    get("/contig-alias/v1/chromosomes/{name}",
+                        chromosomeEntity.getName()).param("taxid", assemblyEntity.getTaxid().toString()));
             assertBasicResponseValid(resultActions);
         }
 
