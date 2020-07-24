@@ -76,6 +76,11 @@ public class ChromosomeService {
         return entity.map(ChromosomeEntity::getAssembly);
     }
 
+    public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request){
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByName(name, request);
+        return stripChromosomeFromAssembly(page);
+    }
+
     public Page<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid, request);
         return stripChromosomeFromAssembly(page);

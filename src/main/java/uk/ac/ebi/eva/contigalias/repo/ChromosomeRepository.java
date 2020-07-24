@@ -43,4 +43,6 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly,
                                                                    Pageable request);
 
+    Page<ChromosomeEntity> findChromosomeEntitiesByName(String name, Pageable request);
+
 }

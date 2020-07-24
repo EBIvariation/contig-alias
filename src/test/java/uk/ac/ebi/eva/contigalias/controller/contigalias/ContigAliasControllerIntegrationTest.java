@@ -197,8 +197,8 @@ public class ContigAliasControllerIntegrationTest {
         @Test
         void getChromosomesByChromosomeNameAndAssemblyAccession() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/chromosomes/name/{name}/assembly/accession/{accession}",
-                        chromosomeEntity.getName(), assemblyEntity.getGenbank()));
+                    get("/contig-alias/v1/chromosomes/{name}",
+                        chromosomeEntity.getName()).param("accession",assemblyEntity.getGenbank()));
             assertBasicResponseValid(resultActions);
         }
 
