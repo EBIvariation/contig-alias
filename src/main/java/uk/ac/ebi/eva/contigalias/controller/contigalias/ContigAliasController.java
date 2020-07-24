@@ -50,6 +50,9 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidFor
 @RestController
 public class ContigAliasController {
 
+    public static final String AUTHORITY_GENBANK = "genbank";
+    public static final String AUTHORITY_REFSEQ = "refseq";
+
     private final ContigAliasHandler handler;
 
     @Autowired
@@ -88,7 +91,7 @@ public class ContigAliasController {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByGenbank(genbank);
             pagedModel.add(linkTo(methodOn(ContigAliasController.class)
-                                          .getChromosomesByAssemblyGenbank(genbank)).withRel(REL_CHROMOSOMES));
+                                          .getChromosomesByAssemblyAccession(genbank,AUTHORITY_GENBANK)).withRel(REL_CHROMOSOMES));
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
@@ -105,7 +108,7 @@ public class ContigAliasController {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByRefseq(refseq);
             pagedModel.add(linkTo(methodOn(ContigAliasController.class)
-                                          .getChromosomesByAssemblyRefseq(refseq)).withRel(REL_CHROMOSOMES));
+                                          .getChromosomesByAssemblyAccession(refseq, AUTHORITY_REFSEQ)).withRel(REL_CHROMOSOMES));
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }

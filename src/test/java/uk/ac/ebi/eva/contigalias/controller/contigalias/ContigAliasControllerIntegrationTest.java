@@ -54,6 +54,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_GENBANK;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
 
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
@@ -305,7 +307,7 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomesByAssemblyAccessionGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank())
-                            .param("authority", "genbank"));
+                            .param("authority", AUTHORITY_GENBANK));
             assertChromosomesEqualToEntities(resultActions);
         }
 
@@ -320,7 +322,7 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomesByAssemblyAccessionRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getRefseq())
-                            .param("authority", "refseq"));
+                            .param("authority", AUTHORITY_REFSEQ));
             assertChromosomesEqualToEntities(resultActions);
         }
 
