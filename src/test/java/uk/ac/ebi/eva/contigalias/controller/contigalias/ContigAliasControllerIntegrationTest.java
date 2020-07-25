@@ -245,14 +245,25 @@ public class ContigAliasControllerIntegrationTest {
                         .thenReturn(assemblyEntityAsOptional);
             }
             assemblyEntity.setChromosomes(null);
-            when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
-                    .thenReturn(chromosomeEntities);
-            when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
-                    .thenReturn(chromosomeEntities);
+
+            List<EntityModel<ChromosomeEntity>> entityModelList = new LinkedList<>();
+            chromosomeEntities.forEach(it -> {
+                entityModelList.add(new EntityModel<>(it));
+            });
+
+            PagedResourcesAssembler<ChromosomeEntity> assembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = new PagedModel<>(entityModelList, null);
+            Mockito.when(assembler.toModel(any()))
+                   .thenReturn(pagedModel);
+
+            when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(pagedModel);
+            when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(pagedModel);
             when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()))
-                    .thenReturn(chromosomeEntities);
+                    .thenReturn(pagedModel);
             when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()))
-                    .thenReturn(chromosomeEntities);
+                    .thenReturn(pagedModel);
         }
 
         @AfterEach
@@ -328,12 +339,13 @@ public class ContigAliasControllerIntegrationTest {
 
         void assertChromosomesEqualToEntities(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk());
+            String path = "$._embedded.chromosomeEntities";
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
                 ChromosomeEntity entity = chromosomeEntities.get(i);
-                actions.andExpect(jsonPath("$[" + i + "].id").doesNotExist())
-                       .andExpect(jsonPath("$[" + i + "].name", is(entity.getName())))
-                       .andExpect(jsonPath("$[" + i + "].genbank", is(entity.getGenbank())))
-                       .andExpect(jsonPath("$[" + i + "].refseq", is(entity.getRefseq())));
+                actions.andExpect(jsonPath(path + "[" + i + "].id").doesNotExist())
+                       .andExpect(jsonPath(path + "[" + i + "].name", is(entity.getName())))
+                       .andExpect(jsonPath(path + "[" + i + "].genbank", is(entity.getGenbank())))
+                       .andExpect(jsonPath(path + "[" + i + "].refseq", is(entity.getRefseq())));
             }
 
         }

@@ -33,6 +33,7 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -309,22 +310,26 @@ public class ContigAliasHandlerTest {
 
         @Test
         void getChromosomesByAssemblyGenbank() {
-            testChromosomeEntityResponses(handler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()));
+            testChromosomeEntityResponses(
+                    handler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         void getChromosomesByAssemblyRefseq() {
-            testChromosomeEntityResponses(handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()));
+            testChromosomeEntityResponses(
+                    handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
-        void getChromosomesByAssemblyAccessionGenbank(){
-            testChromosomeEntityResponses(handler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()));
+        void getChromosomesByAssemblyAccessionGenbank() {
+            testChromosomeEntityResponses(
+                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()));
         }
 
         @Test
-        void getChromosomesByAssemblyAccessionRefseq(){
-            testChromosomeEntityResponses(handler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()));
+        void getChromosomesByAssemblyAccessionRefseq() {
+            testChromosomeEntityResponses(
+                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()));
         }
 
         void testAssemblyEntityResponse(Optional<AssemblyEntity> assembly) {
@@ -385,10 +390,14 @@ public class ContigAliasHandlerTest {
             assertEquals(this.assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
         }
 
-        void testChromosomeEntityResponses(List<ChromosomeEntity> entities) {
-            assertNotNull(entities);
-            assertEquals(chromosomeEntities.size(), entities.size());
-            assertTrue(chromosomeEntities.containsAll(entities));
+        void testChromosomeEntityResponses(PagedModel<EntityModel<ChromosomeEntity>> entityModel) {
+            assertNotNull(entityModel);
+            Collection<EntityModel<ChromosomeEntity>> content = entityModel.getContent();
+            assertNotNull(content);
+            List<EntityModel<ChromosomeEntity>> list = new ArrayList<>(content);
+            assertEquals(chromosomeEntities.size(), list.size());
+            List<ChromosomeEntity> chxList = list.stream().map(EntityModel::getContent).collect(Collectors.toList());
+            assertTrue(chromosomeEntities.containsAll(chxList));
         }
 
     }

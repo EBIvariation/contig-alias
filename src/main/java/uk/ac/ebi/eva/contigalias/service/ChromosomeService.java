@@ -25,8 +25,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Service

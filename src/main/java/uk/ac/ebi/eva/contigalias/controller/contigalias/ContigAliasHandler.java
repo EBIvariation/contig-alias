@@ -30,7 +30,6 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,15 +105,15 @@ public class ContigAliasHandler {
         return chromosomeService.getChromosomesByAssemblyRefseq(refseq);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession) {
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyAccession(String accession) {
         Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
         if (assembly.isPresent()) {
             List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
             if (chromosomes != null) {
-                return chromosomes;
+                return assemblyPagedModelFromPage(new PageImpl<>(chromosomes), chromosomeAssembler);
             }
         }
-        return Collections.emptyList();
+        return assemblyPagedModelFromPage(Page.empty(), chromosomeAssembler);
     }
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             String name,
