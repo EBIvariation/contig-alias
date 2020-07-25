@@ -50,13 +50,13 @@ public class ChromosomeService {
         return entity;
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank) {
-        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Genbank(asmGenbank);
+    public Page<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank, Pageable request) {
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Genbank(asmGenbank, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq) {
-        List<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Refseq(asmRefseq);
+    public Page<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq, Pageable request) {
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_Refseq(asmRefseq, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
@@ -74,7 +74,7 @@ public class ChromosomeService {
         return entity.map(ChromosomeEntity::getAssembly);
     }
 
-    public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request){
+    public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByName(name, request);
         return stripChromosomeFromAssembly(page);
     }
@@ -112,12 +112,11 @@ public class ChromosomeService {
         }
     }
 
-    private List<ChromosomeEntity> stripAssembliesFromChromosomes(List<ChromosomeEntity> chromosomes) {
-        if (chromosomes == null) {
-            return Collections.emptyList();
+    private Page<ChromosomeEntity> stripAssembliesFromChromosomes(Page<ChromosomeEntity> page) {
+        if (page != null) {
+            page.forEach(this::stripAssemblyFromChromosome);
         }
-        chromosomes.forEach(this::stripAssemblyFromChromosome);
-        return chromosomes;
+        return page;
     }
 
     private void stripAssemblyFromChromosome(ChromosomeEntity chromosome) {

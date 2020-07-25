@@ -30,6 +30,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -97,12 +98,14 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(convertToPage(entity), chromosomeAssembler);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String genbank) {
-        return chromosomeService.getChromosomesByAssemblyGenbank(genbank);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyGenbank(String genbank, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByAssemblyGenbank(genbank, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String refseq) {
-        return chromosomeService.getChromosomesByAssemblyRefseq(refseq);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyRefseq(String refseq, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByAssemblyRefseq(refseq, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyAccession(String accession) {
@@ -110,11 +113,12 @@ public class ContigAliasHandler {
         if (assembly.isPresent()) {
             List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
             if (chromosomes != null) {
-                return assemblyPagedModelFromPage(new PageImpl<>(chromosomes), chromosomeAssembler);
+                return generatePagedModelFromPage(new PageImpl<>(chromosomes), chromosomeAssembler);
             }
         }
-        return assemblyPagedModelFromPage(Page.empty(), chromosomeAssembler);
+        return generatePagedModelFromPage(Page.empty(), chromosomeAssembler);
     }
+
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             String name,
             long taxid,
