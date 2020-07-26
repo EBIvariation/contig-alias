@@ -37,7 +37,6 @@ import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -77,27 +76,21 @@ public class AdminControllerIntegrationTest {
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
         ResultActions request = this.mockMvc.perform(
                 get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()));
-        assertAssemblyIdenticalToEntity(request);
+        assertAssemblyPagedModelResponseValid(request);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws Exception {
         ResultActions request = this.mockMvc.perform(
                 get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()));
-        assertAssemblyIdenticalToEntity(request);
+        assertAssemblyPagedModelResponseValid(request);
     }
 
-    private void assertAssemblyIdenticalToEntity(ResultActions request) throws Exception {
+    private void assertAssemblyPagedModelResponseValid(ResultActions request) throws Exception {
         String path = "$._embedded.assemblyEntities[0]";
         request.andExpect(status().isOk())
                .andExpect(jsonPath(path).exists())
-               .andExpect(jsonPath(path + ".id").doesNotExist())
-               .andExpect(jsonPath(path + ".name", is(entity.getName())))
-               .andExpect(jsonPath(path + ".organism", is(entity.getOrganism())))
-               .andExpect(jsonPath(path + ".taxid").value(entity.getTaxid()))
-               .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
-               .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())))
-               .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+               .andExpect(jsonPath(path + ".id").doesNotExist());
     }
 
 }
