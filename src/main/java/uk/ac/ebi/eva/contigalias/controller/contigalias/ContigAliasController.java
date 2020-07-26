@@ -204,14 +204,14 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
-            @RequestParam(required = false) String chrAuthority,
+            @RequestParam(required = false, name= "authority") String chrAuthority,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (accession == null || accession.isEmpty()) {
             return BAD_REQUEST;
         }
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
         if (chrAuthority != null && !chrAuthority.isEmpty()) {
             if (chrAuthority.toLowerCase().equals(AUTHORITY_GENBANK)) {
                 pagedModel = handler.getChromosomesByAssemblyGenbank(accession, pageRequest);
@@ -243,7 +243,6 @@ public class ContigAliasController {
         pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
-    // TODO add link to assembly
     @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.")
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyGenbank(
@@ -251,12 +250,12 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> entities
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
                 = handler.getChromosomesByAssemblyGenbank(genbank, pageRequest);
-        return createAppropriateResponseEntity(entities);
+        linkPagedModelGetAssemblyByAuthority(genbank, AUTHORITY_GENBANK, pagedModel);
+        return createAppropriateResponseEntity(pagedModel);
     }
 
-    // TODO add link to assembly
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyRefseq(
@@ -264,9 +263,25 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> entities
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
                 = handler.getChromosomesByAssemblyRefseq(refseq, pageRequest);
-        return createAppropriateResponseEntity(entities);
+        linkPagedModelGetAssemblyByAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    private void linkPagedModelGetAssemblyByAuthority(
+            String accession, String authority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
+        ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
+        if (authority.equals(AUTHORITY_GENBANK)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByGenbank(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else if (authority.equals(AUTHORITY_REFSEQ)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByRefseq(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else {
+            return;
+        }
+        pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
     @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
