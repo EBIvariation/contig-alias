@@ -115,7 +115,7 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    private void linkPagedModelGetChromosomesByAssemblyAccession(
+    public static void linkPagedModelGetChromosomesByAssemblyAccession(
             String accession, Integer pageNumber, Integer pageSize, PagedModel<EntityModel<AssemblyEntity>> pagedModel,
             String authority) {
         if (pageNumber == null) {
