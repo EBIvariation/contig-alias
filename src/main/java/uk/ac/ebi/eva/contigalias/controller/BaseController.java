@@ -44,6 +44,7 @@ public class BaseController {
     public static final ResponseEntity BAD_REQUEST = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
     public static final String REL_CHROMOSOMES = "chromosomes";
+    public static final String REL_ASSEMBLY = "assembly";
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
 
