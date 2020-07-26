@@ -83,12 +83,14 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(page, assemblyAssembler);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String genbank) {
-        return chromosomeService.getAssemblyByChromosomeGenbank(genbank);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByChromosomeGenbank(String genbank) {
+        Optional<AssemblyEntity> assembly = chromosomeService.getAssemblyByChromosomeGenbank(genbank);
+        return generatePagedModelFromPage(assembly, assemblyAssembler);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String refseq) {
-        return chromosomeService.getAssemblyByChromosomeRefseq(refseq);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByChromosomeRefseq(String refseq) {
+        Optional<AssemblyEntity> assembly = chromosomeService.getAssemblyByChromosomeRefseq(refseq);
+        return generatePagedModelFromPage(assembly, assemblyAssembler);
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByGenbank(String genbank) {

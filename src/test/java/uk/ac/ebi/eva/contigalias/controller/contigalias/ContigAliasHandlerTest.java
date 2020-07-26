@@ -281,13 +281,20 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockAssemblyService.getAssemblyByAccession(assemblyEntity.getGenbank()))
                    .thenReturn(Optional.of(assemblyEntity));
 
+            PagedResourcesAssembler<AssemblyEntity> mockAssemblyAssembler = mock(PagedResourcesAssembler.class);
+
+            PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel(
+                    Collections.singleton(new EntityModel<>(assemblyEntity)), null);
+            Mockito.when(mockAssemblyAssembler.toModel(any()))
+                   .thenReturn(assemblyPagedModel);
+
             PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssembler = mock(PagedResourcesAssembler.class);
 
             PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = PagedModel.wrap(chromosomeEntities, null);
             Mockito.when(mockChromosomeAssembler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, null, mockChromosomeAssembler);
+            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockAssemblyAssembler, mockChromosomeAssembler);
         }
 
         @AfterEach
@@ -305,8 +312,7 @@ public class ContigAliasHandlerTest {
         @Test
         void getAssemblyByChromosomeRefseq() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                Optional<AssemblyEntity> assembly = handler.getAssemblyByChromosomeRefseq(chromosomeEntity.getRefseq());
-                testAssemblyEntityResponse(assembly);
+                testAssemblyEntityResponse(handler.getAssemblyByChromosomeRefseq(chromosomeEntity.getRefseq()));
             }
         }
 
@@ -334,10 +340,17 @@ public class ContigAliasHandlerTest {
                     handler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()));
         }
 
-        void testAssemblyEntityResponse(Optional<AssemblyEntity> assembly) {
-            assertNotNull(assembly);
-            assertTrue(assembly.isPresent());
-            testAssemblyEntityResponse(assembly.get());
+        void testAssemblyEntityResponse(PagedModel<EntityModel<AssemblyEntity>> pagedModel) {
+            assertNotNull(pagedModel);
+            Collection<EntityModel<AssemblyEntity>> content = pagedModel.getContent();
+            assertNotNull(content);
+            assertTrue(content.size() > 0);
+            List<AssemblyEntity> assemblyEntities = content
+                    .stream()
+                    .map(EntityModel::getContent)
+                    .collect(Collectors.toList());
+            assertNotNull(assemblyEntities);
+            assemblyEntities.forEach(this::testAssemblyEntityResponse);
         }
 
         @Test

@@ -42,7 +42,6 @@ import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -235,35 +234,37 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setup() {
+
+            PagedResourcesAssembler<AssemblyEntity> assemblyAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(assemblyEntity)), null
+            );
+            Mockito.when(assemblyAssembler.toModel(any()))
+                   .thenReturn(assemblyPagedModel);
+
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
-                Optional<AssemblyEntity> assemblyEntityAsOptional = Optional.of(this.assemblyEntity);
                 when(mockHandler.getAssemblyByChromosomeGenbank(generate.getGenbank()))
-                        .thenReturn(assemblyEntityAsOptional);
+                        .thenReturn(assemblyPagedModel);
                 when(mockHandler.getAssemblyByChromosomeRefseq(generate.getRefseq()))
-                        .thenReturn(assemblyEntityAsOptional);
+                        .thenReturn(assemblyPagedModel);
             }
             assemblyEntity.setChromosomes(null);
 
-            List<EntityModel<ChromosomeEntity>> entityModelList = new LinkedList<>();
-            chromosomeEntities.forEach(it -> {
-                entityModelList.add(new EntityModel<>(it));
-            });
-
-            PagedResourcesAssembler<ChromosomeEntity> assembler = mock(PagedResourcesAssembler.class);
-            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = new PagedModel<>(entityModelList, null);
-            Mockito.when(assembler.toModel(any()))
-                   .thenReturn(pagedModel);
+            PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = PagedModel.wrap(chromosomeEntities, null);
+            Mockito.when(chromosomeAssembler.toModel(any()))
+                   .thenReturn(chromosomePagedModel);
 
             when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(pagedModel);
+                    .thenReturn(chromosomePagedModel);
             when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                    .thenReturn(pagedModel);
+                    .thenReturn(chromosomePagedModel);
             when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()))
-                    .thenReturn(pagedModel);
+                    .thenReturn(chromosomePagedModel);
             when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()))
-                    .thenReturn(pagedModel);
+                    .thenReturn(chromosomePagedModel);
         }
 
         @AfterEach
@@ -290,14 +291,15 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
+            String path = "$._embedded.assemblyEntities[0]";
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(assemblyEntity.getName())))
-                   .andExpect(jsonPath("$.organism", is(assemblyEntity.getOrganism())))
-                   .andExpect(jsonPath("$.taxid").value(assemblyEntity.getTaxid()))
-                   .andExpect(jsonPath("$.genbank", is(assemblyEntity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(assemblyEntity.getRefseq())))
-                   .andExpect(jsonPath("$.genbankRefseqIdentical", is(assemblyEntity.isGenbankRefseqIdentical())));
+                   .andExpect(jsonPath(path + ".id").doesNotExist())
+                   .andExpect(jsonPath(path + ".name", is(assemblyEntity.getName())))
+                   .andExpect(jsonPath(path + ".organism", is(assemblyEntity.getOrganism())))
+                   .andExpect(jsonPath(path + ".taxid").value(assemblyEntity.getTaxid()))
+                   .andExpect(jsonPath(path + ".genbank", is(assemblyEntity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(assemblyEntity.getRefseq())))
+                   .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(assemblyEntity.isGenbankRefseqIdentical())));
         }
 
         @Test

@@ -144,25 +144,32 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    // TODO add hateoas and replace nested child objects with json links
+    // TODO multiple chromosomes have same genbank :/
     @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +
             "chromosomes.")
     @GetMapping(value = "assemblies/chromosome/genbank/{genbank}")
-    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank
-    (@PathVariable String genbank) {
-        Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeGenbank(genbank);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByChromosomeGenbank
+    (@PathVariable String genbank,
+     @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+     @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByChromosomeGenbank(genbank);
+            return createAppropriateResponseEntity(pagedModel);
+        } else return BAD_REQUEST;
     }
 
-    // TODO add hateoas and replace nested child objects with json links
+    // TODO multiple chromosomes have same genbank :/
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
             "chromosomes.")
     @GetMapping(value = "assemblies/chromosome/refseq/{refseq}")
-    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
-        Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeRefseq(refseq);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByChromosomeRefseq(
+            @PathVariable String refseq,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByChromosomeRefseq(refseq);
+            return createAppropriateResponseEntity(pagedModel);
+        } else return BAD_REQUEST;
     }
 
     // TODO Handle issue were result is not unique (Eg: with CM000663.1)
@@ -204,7 +211,7 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
-            @RequestParam(required = false, name= "authority") String chrAuthority,
+            @RequestParam(required = false, name = "authority") String chrAuthority,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (accession == null || accession.isEmpty()) {
@@ -230,13 +237,13 @@ public class ContigAliasController {
 
     private void linkPagedModelGetAssemblyByChromosomeAuthority(
             String accession, String authority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
-        ResponseEntity<AssemblyEntity> method;
+        ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
         if (authority.equals(AUTHORITY_GENBANK)) {
             method = methodOn(ContigAliasController.class)
-                    .getAssemblyByChromosomeGenbank(accession);
+                    .getAssemblyByChromosomeGenbank(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
         } else if (authority.equals(AUTHORITY_REFSEQ)) {
             method = methodOn(ContigAliasController.class)
-                    .getAssemblyByChromosomeRefseq(accession);
+                    .getAssemblyByChromosomeRefseq(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
         } else {
             return;
         }

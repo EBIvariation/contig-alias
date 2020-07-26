@@ -43,6 +43,14 @@ public class BaseHandler {
     }
 
     public static <T> PagedModel<EntityModel<T>> generatePagedModelFromPage(
+            Optional<T> optional,
+            PagedResourcesAssembler<T> assembler) {
+        Page<T> page = optional.isPresent() ? new PageImpl<>(Collections.singletonList(optional.get())) : Page.empty();
+        return generatePagedModelFromPage(page, assembler);
+    }
+
+
+    public static <T> PagedModel<EntityModel<T>> generatePagedModelFromPage(
             Page<T> page,
             PagedResourcesAssembler<T> assembler) {
         return assembler.toModel(page);
