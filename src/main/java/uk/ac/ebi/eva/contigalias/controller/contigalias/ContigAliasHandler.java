@@ -61,16 +61,19 @@ public class ContigAliasHandler {
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
+        entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByGenbank(String genbank) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
+        entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByRefseq(String refseq) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
+        entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
 
     }

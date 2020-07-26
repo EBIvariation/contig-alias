@@ -63,7 +63,6 @@ public class ContigAliasController {
         this.handler = handler;
     }
 
-    // TODO remove nested chromosomes
     @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
             notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
                     ". The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
@@ -82,7 +81,6 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    // TODO remove nested chromosomes
     @ApiOperation(value = "Get an assembly using its GenBank accession.",
             notes = "Given an assembly's GenBank accession, this endpoint will return an assembly that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
@@ -100,7 +98,6 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    // TODO remove nested chromosomes
     @ApiOperation(value = "Get an assembly using its RefSeq accession.",
             notes = "Given an assembly's RefSeq accession, this endpoint will return an assembly that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
