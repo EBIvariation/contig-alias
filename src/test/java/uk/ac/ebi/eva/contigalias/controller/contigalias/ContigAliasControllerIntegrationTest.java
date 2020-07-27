@@ -42,7 +42,6 @@ import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,6 +53,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_GENBANK;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
 
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
@@ -198,7 +199,7 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomesByChromosomeNameAndAssemblyAccession() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/chromosomes/{name}",
-                        chromosomeEntity.getName()).param("accession",assemblyEntity.getGenbank()));
+                        chromosomeEntity.getName()).param("accession", assemblyEntity.getGenbank()));
             assertBasicResponseValid(resultActions);
         }
 
@@ -233,24 +234,37 @@ public class ContigAliasControllerIntegrationTest {
 
         @BeforeEach
         void setup() {
+
+            PagedResourcesAssembler<AssemblyEntity> assemblyAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(assemblyEntity)), null
+            );
+            Mockito.when(assemblyAssembler.toModel(any()))
+                   .thenReturn(assemblyPagedModel);
+
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
-                Optional<AssemblyEntity> assemblyEntityAsOptional = Optional.of(this.assemblyEntity);
                 when(mockHandler.getAssemblyByChromosomeGenbank(generate.getGenbank()))
-                        .thenReturn(assemblyEntityAsOptional);
+                        .thenReturn(assemblyPagedModel);
                 when(mockHandler.getAssemblyByChromosomeRefseq(generate.getRefseq()))
-                        .thenReturn(assemblyEntityAsOptional);
+                        .thenReturn(assemblyPagedModel);
             }
             assemblyEntity.setChromosomes(null);
-            when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank()))
-                    .thenReturn(chromosomeEntities);
-            when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq()))
-                    .thenReturn(chromosomeEntities);
+
+            PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = PagedModel.wrap(chromosomeEntities, null);
+            Mockito.when(chromosomeAssembler.toModel(any()))
+                   .thenReturn(chromosomePagedModel);
+
+            when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(chromosomePagedModel);
+            when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                    .thenReturn(chromosomePagedModel);
             when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()))
-                    .thenReturn(chromosomeEntities);
+                    .thenReturn(chromosomePagedModel);
             when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()))
-                    .thenReturn(chromosomeEntities);
+                    .thenReturn(chromosomePagedModel);
         }
 
         @AfterEach
@@ -277,14 +291,15 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         void assertAssemblyIdenticalToEntity(ResultActions actions) throws Exception {
+            String path = "$._embedded.assemblyEntities[0]";
             actions.andExpect(status().isOk())
-                   .andExpect(jsonPath("$.id").doesNotExist())
-                   .andExpect(jsonPath("$.name", is(assemblyEntity.getName())))
-                   .andExpect(jsonPath("$.organism", is(assemblyEntity.getOrganism())))
-                   .andExpect(jsonPath("$.taxid").value(assemblyEntity.getTaxid()))
-                   .andExpect(jsonPath("$.genbank", is(assemblyEntity.getGenbank())))
-                   .andExpect(jsonPath("$.refseq", is(assemblyEntity.getRefseq())))
-                   .andExpect(jsonPath("$.genbankRefseqIdentical", is(assemblyEntity.isGenbankRefseqIdentical())));
+                   .andExpect(jsonPath(path + ".id").doesNotExist())
+                   .andExpect(jsonPath(path + ".name", is(assemblyEntity.getName())))
+                   .andExpect(jsonPath(path + ".organism", is(assemblyEntity.getOrganism())))
+                   .andExpect(jsonPath(path + ".taxid").value(assemblyEntity.getTaxid()))
+                   .andExpect(jsonPath(path + ".genbank", is(assemblyEntity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(assemblyEntity.getRefseq())))
+                   .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(assemblyEntity.isGenbankRefseqIdentical())));
         }
 
         @Test
@@ -295,10 +310,24 @@ public class ContigAliasControllerIntegrationTest {
         }
 
         @Test
+        void getChromosomesByAssemblyGenbank() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
+            assertChromosomesEqualToEntities(resultActions);
+        }
+
+        @Test
         void getChromosomesByAssemblyAccessionGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank())
-                            .param("authority", "genbank"));
+                            .param("authority", AUTHORITY_GENBANK));
+            assertChromosomesEqualToEntities(resultActions);
+        }
+
+        @Test
+        void getChromosomesByAssemblyRefseq() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/refseq/{refseq}/chromosomes", assemblyEntity.getRefseq()));
             assertChromosomesEqualToEntities(resultActions);
         }
 
@@ -306,18 +335,19 @@ public class ContigAliasControllerIntegrationTest {
         void getChromosomesByAssemblyAccessionRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
                     get("/contig-alias/v1/assemblies/{accession}/chromosomes", assemblyEntity.getRefseq())
-                            .param("authority", "refseq"));
+                            .param("authority", AUTHORITY_REFSEQ));
             assertChromosomesEqualToEntities(resultActions);
         }
 
         void assertChromosomesEqualToEntities(ResultActions actions) throws Exception {
             actions.andExpect(status().isOk());
+            String path = "$._embedded.chromosomeEntities";
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
                 ChromosomeEntity entity = chromosomeEntities.get(i);
-                actions.andExpect(jsonPath("$[" + i + "].id").doesNotExist())
-                       .andExpect(jsonPath("$[" + i + "].name", is(entity.getName())))
-                       .andExpect(jsonPath("$[" + i + "].genbank", is(entity.getGenbank())))
-                       .andExpect(jsonPath("$[" + i + "].refseq", is(entity.getRefseq())));
+                actions.andExpect(jsonPath(path + "[" + i + "].id").doesNotExist())
+                       .andExpect(jsonPath(path + "[" + i + "].name", is(entity.getName())))
+                       .andExpect(jsonPath(path + "[" + i + "].genbank", is(entity.getGenbank())))
+                       .andExpect(jsonPath(path + "[" + i + "].refseq", is(entity.getRefseq())));
             }
 
         }

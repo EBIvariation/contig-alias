@@ -18,6 +18,8 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,6 +41,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DE
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.linkPagedModelGetChromosomesByAssemblyAccession;
 
 @RequestMapping("contig-alias-admin/v1")
 @RestController
@@ -60,18 +63,14 @@ public class AdminController {
                     "source, it will fetch and add it to the local database and also return the result to the user. " +
                     "This endpoint will either return a list containing a single result or an HTTP status code of 404.")
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<List<AssemblyEntity>> getAssemblyOrFetchByAccession(
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            List<AssemblyEntity> entities;
-            try {
-                entities = handler.getAssemblyOrFetchByAccession(accession);
-            } catch (IllegalArgumentException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            return createAppropriateResponseEntity(entities);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(accession);
+            linkPagedModelGetChromosomesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
+            return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
 

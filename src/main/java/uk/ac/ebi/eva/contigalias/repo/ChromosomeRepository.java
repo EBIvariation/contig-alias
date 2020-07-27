@@ -24,7 +24,6 @@ import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,9 +33,9 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     Optional<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq);
 
-    List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank, Pageable request);
 
-    List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid, Pageable request);
 

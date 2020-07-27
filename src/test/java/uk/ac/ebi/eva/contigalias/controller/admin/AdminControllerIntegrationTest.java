@@ -18,10 +18,14 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -32,9 +36,10 @@ import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,18 +58,19 @@ public class AdminControllerIntegrationTest {
     @MockBean
     private AdminHandler mockHandler;
 
-    @Test
-    void contextLoads() {
-
-    }
-
     @BeforeEach
     void setUp() throws IOException {
-        List<AssemblyEntity> entityAsList = Collections.singletonList(entity);
+        PagedResourcesAssembler<AssemblyEntity> mockAssemblyAssembler = mock(PagedResourcesAssembler.class);
+
+        PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel(
+                Collections.singleton(new EntityModel<>(entity)), null);
+        Mockito.when(mockAssemblyAssembler.toModel(any()))
+               .thenReturn(assemblyPagedModel);
+
         when(mockHandler.getAssemblyOrFetchByAccession(entity.getGenbank()))
-                .thenReturn(entityAsList);
+                .thenReturn(assemblyPagedModel);
         when(mockHandler.getAssemblyOrFetchByAccession(entity.getRefseq()))
-                .thenReturn(entityAsList);
+                .thenReturn(assemblyPagedModel);
     }
 
     @Test
@@ -82,20 +88,16 @@ public class AdminControllerIntegrationTest {
     }
 
     private void assertAssemblyIdenticalToEntity(ResultActions request) throws Exception {
+        String path = "$._embedded.assemblyEntities[0]";
         request.andExpect(status().isOk())
-               .andExpect(jsonPath("$[0]").exists())
-               .andExpect(jsonPath("$[0].id").doesNotExist())
-               .andExpect(jsonPath("$[0].name", is(entity.getName())))
-               .andExpect(jsonPath("$[0].organism", is(entity.getOrganism())))
-               .andExpect(jsonPath("$[0].taxid").value(entity.getTaxid()))
-               .andExpect(jsonPath("$[0].genbank", is(entity.getGenbank())))
-               .andExpect(jsonPath("$[0].refseq", is(entity.getRefseq())))
-               .andExpect(jsonPath("$[0].genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
+               .andExpect(jsonPath(path).exists())
+               .andExpect(jsonPath(path + ".id").doesNotExist())
+               .andExpect(jsonPath(path + ".name", is(entity.getName())))
+               .andExpect(jsonPath(path + ".organism", is(entity.getOrganism())))
+               .andExpect(jsonPath(path + ".taxid").value(entity.getTaxid()))
+               .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
+               .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())))
+               .andExpect(jsonPath(path + ".genbankRefseqIdentical", is(entity.isGenbankRefseqIdentical())));
     }
 
-    @Test
-    public void test404NotFound() throws Exception {
-        this.mockMvc.perform(get("/contig-alias-admin/v1/assemblies/{accession}", "##INVALID##"))
-                    .andExpect(status().isNotFound());
-    }
 }

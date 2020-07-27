@@ -61,16 +61,19 @@ public class ContigAliasHandler {
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByAccession(accession);
+        entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByGenbank(String genbank) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
+        entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByRefseq(String refseq) {
         Optional<AssemblyEntity> entity = assemblyService.getAssemblyByRefseq(refseq);
+        entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
 
     }
@@ -80,12 +83,14 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(page, assemblyAssembler);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String genbank) {
-        return chromosomeService.getAssemblyByChromosomeGenbank(genbank);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByChromosomeGenbank(String genbank) {
+        Optional<AssemblyEntity> assembly = chromosomeService.getAssemblyByChromosomeGenbank(genbank);
+        return generatePagedModelFromPage(assembly, assemblyAssembler);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String refseq) {
-        return chromosomeService.getAssemblyByChromosomeRefseq(refseq);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByChromosomeRefseq(String refseq) {
+        Optional<AssemblyEntity> assembly = chromosomeService.getAssemblyByChromosomeRefseq(refseq);
+        return generatePagedModelFromPage(assembly, assemblyAssembler);
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByGenbank(String genbank) {
@@ -98,24 +103,27 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(convertToPage(entity), chromosomeAssembler);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyGenbank(String genbank) {
-        return chromosomeService.getChromosomesByAssemblyGenbank(genbank);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyGenbank(String genbank, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByAssemblyGenbank(genbank, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyRefseq(String refseq) {
-        return chromosomeService.getChromosomesByAssemblyRefseq(refseq);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyRefseq(String refseq, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByAssemblyRefseq(refseq, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
-    public List<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession) {
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyAccession(String accession) {
         Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
         if (assembly.isPresent()) {
             List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
             if (chromosomes != null) {
-                return chromosomes;
+                return generatePagedModelFromPage(new PageImpl<>(chromosomes), chromosomeAssembler);
             }
         }
-        return Collections.emptyList();
+        return generatePagedModelFromPage(Page.empty(), chromosomeAssembler);
     }
+
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             String name,
             long taxid,

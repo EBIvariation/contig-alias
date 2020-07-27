@@ -19,18 +19,25 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
 public class AdminHandlerTest {
@@ -47,30 +54,35 @@ public class AdminHandlerTest {
                .thenReturn(entityAsList);
         Mockito.when(mockAssemblyService.getAssemblyOrFetchByAccession(entity.getRefseq()))
                .thenReturn(entityAsList);
-        handler = new AdminHandler(mockAssemblyService);
+
+        PagedResourcesAssembler<AssemblyEntity> mockAssemblyAssembler = mock(PagedResourcesAssembler.class);
+
+        PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel(
+                Collections.singleton(new EntityModel<>(entity)), null);
+        Mockito.when(mockAssemblyAssembler.toModel(any()))
+               .thenReturn(assemblyPagedModel);
+
+        handler = new AdminHandler(mockAssemblyService, mockAssemblyAssembler);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws IOException {
-        List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession(entity.getGenbank());
-        assertFirstIdenticalToEntity(assemblyByAccession);
+        PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(
+                entity.getGenbank());
+        assertFirstIdenticalToEntity(pagedModel);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws IOException {
-        List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession(entity.getRefseq());
-        assertFirstIdenticalToEntity(assemblyByAccession);
+        PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(entity.getRefseq());
+        assertFirstIdenticalToEntity(pagedModel);
     }
 
-    @Test
-    public void testAssemblyByInvalidAccessionNotFound() throws IOException {
-        List<AssemblyEntity> assemblyByAccession = handler.getAssemblyOrFetchByAccession("##INVALID##");
-        assertNotNull(assemblyByAccession);
-        assertTrue(assemblyByAccession.isEmpty());
-    }
-
-    private void assertFirstIdenticalToEntity(List<AssemblyEntity> list) {
-        assertNotNull(list);
+    private void assertFirstIdenticalToEntity(PagedModel<EntityModel<AssemblyEntity>> pagedModel) {
+        assertNotNull(pagedModel);
+        Collection<EntityModel<AssemblyEntity>> content = pagedModel.getContent();
+        assertNotNull(content);
+        List<AssemblyEntity> list = content.stream().map(EntityModel::getContent).collect(Collectors.toList());
         assertTrue(list.size() > 0);
         AssemblyEntity assembly = list.get(0);
         assertEquals(entity.getName(), assembly.getName());

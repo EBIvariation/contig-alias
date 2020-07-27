@@ -33,12 +33,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
-import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.REL_ASSEMBLY;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.REL_CHROMOSOMES;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
@@ -46,6 +51,10 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidFor
 @RequestMapping("contig-alias/v1")
 @RestController
 public class ContigAliasController {
+
+    public static final String AUTHORITY_GENBANK = "genbank";
+
+    public static final String AUTHORITY_REFSEQ = "refseq";
 
     private final ContigAliasHandler handler;
 
@@ -67,6 +76,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByAccession(accession);
+            linkPagedModelGetChromosomesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
@@ -82,6 +92,8 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByGenbank(genbank);
+            linkPagedModelGetChromosomesByAssemblyAccession(
+                    genbank, pageNumber, pageSize, pagedModel, AUTHORITY_GENBANK);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
@@ -97,8 +109,25 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByRefseq(refseq);
+            linkPagedModelGetChromosomesByAssemblyAccession(
+                    refseq, pageNumber, pageSize, pagedModel, AUTHORITY_REFSEQ);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
+    }
+
+    public static void linkPagedModelGetChromosomesByAssemblyAccession(
+            String accession, Integer pageNumber, Integer pageSize, PagedModel<EntityModel<AssemblyEntity>> pagedModel,
+            String authority) {
+        if (pageNumber == null) {
+            pageNumber = DEFAULT_PAGE_NUMBER;
+        }
+        if (pageSize == null) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+        pagedModel.add(linkTo(methodOn(ContigAliasController.class)
+                                      .getChromosomesByAssemblyAccession(
+                                              accession, authority, pageNumber, pageSize))
+                               .withRel(REL_CHROMOSOMES));
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
@@ -115,25 +144,35 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
+    // TODO multiple chromosomes have same genbank :/
     @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +
             "chromosomes.")
     @GetMapping(value = "assemblies/chromosome/genbank/{genbank}")
-    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeGenbank
-            (@PathVariable String genbank) {
-        Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeGenbank(genbank);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByChromosomeGenbank
+    (@PathVariable String genbank,
+     @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+     @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByChromosomeGenbank(genbank);
+            return createAppropriateResponseEntity(pagedModel);
+        } else return BAD_REQUEST;
     }
 
+    // TODO multiple chromosomes have same genbank :/
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
             "chromosomes.")
     @GetMapping(value = "assemblies/chromosome/refseq/{refseq}")
-    public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
-        Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeRefseq(refseq);
-        return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByChromosomeRefseq(
+            @PathVariable String refseq,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByChromosomeRefseq(refseq);
+            return createAppropriateResponseEntity(pagedModel);
+        } else return BAD_REQUEST;
     }
 
+    // TODO Handle issue were result is not unique (Eg: with CM000663.1)
     @ApiOperation(value = "Get a chromosome using its Genbank accession.",
             notes = "Given a chromosome's genbank accession this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP " +
@@ -145,10 +184,12 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomeByGenbank(genbank);
+            linkPagedModelGetAssemblyByChromosomeAuthority(genbank, AUTHORITY_GENBANK, pagedModel);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
 
+    // TODO again Non unique result NW_004070884.1 server error no result http 500
     @ApiOperation(value = "Get a chromosome using its RefSeq accession.",
             notes = "Given a chromosome's RefSeq accession, this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
@@ -161,45 +202,93 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomeByRefseq(refseq);
+            linkPagedModelGetAssemblyByChromosomeAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
 
     @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.")
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
-    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyAccession(
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
-            @RequestParam(required = false) String authority) {
+            @RequestParam(required = false, name = "authority") String chrAuthority,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (accession == null || accession.isEmpty()) {
             return BAD_REQUEST;
         }
-        List<ChromosomeEntity> entities;
-        if (authority != null && !authority.isEmpty()) {
-            if ("genbank".equals(authority.toLowerCase())) {
-                entities = handler.getChromosomesByAssemblyGenbank(accession);
-            } else if ("refseq".equals(authority.toLowerCase())) {
-                entities = handler.getChromosomesByAssemblyRefseq(accession);
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        if (chrAuthority != null && !chrAuthority.isEmpty()) {
+            if (chrAuthority.toLowerCase().equals(AUTHORITY_GENBANK)) {
+                pagedModel = handler.getChromosomesByAssemblyGenbank(accession, pageRequest);
+                linkPagedModelGetAssemblyByChromosomeAuthority(accession, AUTHORITY_GENBANK, pagedModel);
+            } else if (chrAuthority.toLowerCase().equals(AUTHORITY_REFSEQ)) {
+                pagedModel = handler.getChromosomesByAssemblyRefseq(accession, pageRequest);
+                linkPagedModelGetAssemblyByChromosomeAuthority(accession, AUTHORITY_REFSEQ, pagedModel);
             } else {
                 return BAD_REQUEST;
             }
         } else {
-            entities = handler.getChromosomesByAssemblyAccession(accession);
+            pagedModel = handler.getChromosomesByAssemblyAccession(accession);
         }
-        return createAppropriateResponseEntity(entities);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    private void linkPagedModelGetAssemblyByChromosomeAuthority(
+            String accession, String authority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
+        ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
+        if (authority.equals(AUTHORITY_GENBANK)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByChromosomeGenbank(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else if (authority.equals(AUTHORITY_REFSEQ)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByChromosomeRefseq(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else {
+            return;
+        }
+        pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
     @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.")
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
-    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyGenbank(@PathVariable String genbank) {
-        List<ChromosomeEntity> entities = handler.getChromosomesByAssemblyGenbank(genbank);
-        return createAppropriateResponseEntity(entities);
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyGenbank(
+            @PathVariable String genbank,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
+                = handler.getChromosomesByAssemblyGenbank(genbank, pageRequest);
+        linkPagedModelGetAssemblyByAuthority(genbank, AUTHORITY_GENBANK, pagedModel);
+        return createAppropriateResponseEntity(pagedModel);
     }
 
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
-    public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyRefseq(@PathVariable String refseq) {
-        List<ChromosomeEntity> entities = handler.getChromosomesByAssemblyRefseq(refseq);
-        return createAppropriateResponseEntity(entities);
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyRefseq(
+            @PathVariable String refseq,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
+                = handler.getChromosomesByAssemblyRefseq(refseq, pageRequest);
+        linkPagedModelGetAssemblyByAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    private void linkPagedModelGetAssemblyByAuthority(
+            String accession, String authority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
+        ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
+        if (authority.equals(AUTHORITY_GENBANK)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByGenbank(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else if (authority.equals(AUTHORITY_REFSEQ)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByRefseq(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else {
+            return;
+        }
+        pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
     @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
@@ -217,8 +306,8 @@ public class ContigAliasController {
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
             @RequestParam(required = false) @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
                     "GCA_000001405.10") Optional<String> accession,
-            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
-            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         boolean isNameValid = name != null && !name.isEmpty();
         boolean isTaxidValid = taxid.isPresent();
         boolean isAccessionValid = accession.isPresent() && !accession.get().isEmpty();

@@ -17,6 +17,9 @@
 package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -24,21 +27,29 @@ import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToList;
+import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToPage;
+import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.generatePagedModelFromPage;
 
 @Service
 public class AdminHandler {
 
     private final AssemblyService service;
 
+    private final PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
+
     @Autowired
-    public AdminHandler(AssemblyService service) {
+    public AdminHandler(AssemblyService service,
+                        PagedResourcesAssembler<AssemblyEntity> assemblyAssembler) {
         this.service = service;
+        this.assemblyAssembler = assemblyAssembler;
     }
 
-    public List<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
-        return convertToList(service.getAssemblyOrFetchByAccession(accession));
+    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyOrFetchByAccession(String accession) throws IOException {
+        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession(accession);
+        entity.ifPresent(it -> it.setChromosomes(null));
+        return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {
