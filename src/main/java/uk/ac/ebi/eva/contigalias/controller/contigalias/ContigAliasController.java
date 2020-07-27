@@ -122,7 +122,7 @@ public class ContigAliasController {
             (@PathVariable String genbank) {
         Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeGenbank(genbank);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
@@ -131,10 +131,10 @@ public class ContigAliasController {
     public ResponseEntity<AssemblyEntity> getAssemblyByChromosomeRefseq(@PathVariable String refseq) {
         Optional<AssemblyEntity> entity = handler.getAssemblyByChromosomeRefseq(refseq);
         return entity.map(assemblyEntity -> new ResponseEntity<>(assemblyEntity, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
     }
 
-    @ApiOperation(value = "Get an chromosome using its Genbank accession.",
+    @ApiOperation(value = "Get a chromosome using its Genbank accession.",
             notes = "Given a chromosome's genbank accession this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP " +
                     "Response with error code 404.")
@@ -149,7 +149,7 @@ public class ContigAliasController {
         } else return BAD_REQUEST;
     }
 
-    @ApiOperation(value = "Get an chromosome using its RefSeq accession.",
+    @ApiOperation(value = "Get a chromosome using its RefSeq accession.",
             notes = "Given a chromosome's RefSeq accession, this endpoint will return a chromosome that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
                     "code of 400 in case the user is trying to insert an assembly that already exists in the local " +
@@ -169,22 +169,49 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyGenbank(@PathVariable String genbank) {
         List<ChromosomeEntity> entities = handler.getChromosomesByAssemblyGenbank(genbank);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return createAppropriateResponseEntity(entities);
     }
 
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<List<ChromosomeEntity>> getChromosomesByAssemblyRefseq(@PathVariable String refseq) {
         List<ChromosomeEntity> entities = handler.getChromosomesByAssemblyRefseq(refseq);
-        if (entities != null && !entities.isEmpty()) {
-            return new ResponseEntity<>(entities, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return createAppropriateResponseEntity(entities);
+    }
+
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
+            "parent assemblies.",
+            notes = "Given a chromosome's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
+                    "that it belongs to, this endpoint will return a non-emtpy list of chromosomes that satisfy the " +
+                    "given parameters.If no Taxonomic ID or accession are provided then the endpoint returns a list " +
+                    "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
+                    "nested inside it. The endpoint will either return a list of chromosomes or it will either return" +
+                    " an HTTP error code 204 if no chromosomes are found or return an HTTP error code 400 if invalid " +
+                    "parameters are found.")
+    @GetMapping(value = "chromosomes/{name}")
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
+            @PathVariable @ApiParam(value = "Name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
+            @RequestParam(required = false) @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
+                    "GCA_000001405.10") Optional<String> accession,
+            @RequestParam(required = false) @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false) @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        boolean isNameValid = name != null && !name.isEmpty();
+        boolean isTaxidValid = taxid.isPresent();
+        boolean isAccessionValid = accession.isPresent() && !accession.get().isEmpty();
+        if (!isNameValid || (isTaxidValid && isAccessionValid)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        if (!isTaxidValid && !isAccessionValid) {
+            pagedModel = handler.getChromosomesByName(name, pageRequest);
+        } else if (isTaxidValid) {
+            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(name, taxid.get(), pageRequest);
+        } else {
+            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(name, accession.get(), pageRequest);
+        }
+        return createAppropriateResponseEntity(pagedModel);
 
     }
 

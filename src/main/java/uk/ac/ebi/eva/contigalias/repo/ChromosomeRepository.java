@@ -16,9 +16,12 @@
 
 package uk.ac.ebi.eva.contigalias.repo;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.util.List;
@@ -34,5 +37,12 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank);
 
     List<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
+
+    Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid, Pageable request);
+
+    Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly,
+                                                                   Pageable request);
+
+    Page<ChromosomeEntity> findChromosomeEntitiesByName(String name, Pageable request);
 
 }

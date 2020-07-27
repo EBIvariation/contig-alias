@@ -52,6 +52,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 
 /**
@@ -138,38 +139,74 @@ public class ContigAliasControllerIntegrationTest {
     @Nested
     class ChromosomeServiceTests {
 
-        private final ChromosomeEntity entity = ChromosomeGenerator.generate();
+        private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
+
+        private ChromosomeEntity chromosomeEntity;
 
         @BeforeEach
         void setUp() {
-            PageImpl<ChromosomeEntity> page = new PageImpl<>(Collections.singletonList(this.entity));
+            chromosomeEntity = ChromosomeGenerator.generate(assemblyEntity);
+            assemblyEntity.setChromosomes(null);
+
+            PageImpl<ChromosomeEntity> page = new PageImpl<>(Collections.singletonList(this.chromosomeEntity));
 
             PagedResourcesAssembler<ChromosomeEntity> assembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = new PagedModel<>(
-                    Collections.singletonList(new EntityModel<>(entity)), null);
+                    Collections.singletonList(new EntityModel<>(chromosomeEntity)), null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
 
             PagedModel<EntityModel<ChromosomeEntity>> assembledModel = assembler.toModel(page);
 
-            when(mockHandler.getChromosomeByGenbank(this.entity.getGenbank()))
+            when(mockHandler.getChromosomeByGenbank(this.chromosomeEntity.getGenbank()))
                     .thenReturn(assembledModel);
-            when(mockHandler.getChromosomeByRefseq(this.entity.getRefseq()))
+            when(mockHandler.getChromosomeByRefseq(this.chromosomeEntity.getRefseq()))
+                    .thenReturn(assembledModel);
+            when(mockHandler.getChromosomesByChromosomeNameAndAssemblyAccession(chromosomeEntity.getName(),
+                                                                                assemblyEntity.getGenbank(),
+                                                                                DEFAULT_PAGE_REQUEST))
+                    .thenReturn(assembledModel);
+            when(mockHandler.getChromosomesByChromosomeNameAndAssemblyTaxid(chromosomeEntity.getName(),
+                                                                            assemblyEntity.getTaxid(),
+                                                                            DEFAULT_PAGE_REQUEST))
                     .thenReturn(assembledModel);
         }
 
         @Test
         void getChromosomeByGenbank() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/chromosomes/genbank/{genbank}", entity.getGenbank()));
+                    get("/contig-alias/v1/chromosomes/genbank/{genbank}", chromosomeEntity.getGenbank()));
             assertChromosomeIdenticalToEntity(resultActions);
         }
 
         @Test
         void getChromosomeByRefseq() throws Exception {
             ResultActions resultActions = mockMvc.perform(
-                    get("/contig-alias/v1/chromosomes/refseq/{refseq}", entity.getRefseq()));
+                    get("/contig-alias/v1/chromosomes/refseq/{refseq}", chromosomeEntity.getRefseq()));
             assertChromosomeIdenticalToEntity(resultActions);
+        }
+
+        @Test
+        void getChromosomesByChromosomeNameAndAssemblyTaxid() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/chromosomes/{name}",
+                        chromosomeEntity.getName()).param("taxid", assemblyEntity.getTaxid().toString()));
+            assertBasicResponseValid(resultActions);
+        }
+
+        @Test
+        void getChromosomesByChromosomeNameAndAssemblyAccession() throws Exception {
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/chromosomes/{name}",
+                        chromosomeEntity.getName()).param("accession",assemblyEntity.getGenbank()));
+            assertBasicResponseValid(resultActions);
+        }
+
+        void assertBasicResponseValid(ResultActions actions) throws Exception {
+            String path = "$._embedded.chromosomeEntities[0]";
+            actions.andExpect(status().isOk())
+                   .andExpect(jsonPath(path).exists())
+                   .andExpect(jsonPath(path + ".id").doesNotExist());
         }
 
         void assertChromosomeIdenticalToEntity(ResultActions actions) throws Exception {
@@ -177,16 +214,16 @@ public class ContigAliasControllerIntegrationTest {
             actions.andExpect(status().isOk())
                    .andExpect(jsonPath(path).exists())
                    .andExpect(jsonPath(path + ".id").doesNotExist())
-                   .andExpect(jsonPath(path + ".name", is(entity.getName())))
-                   .andExpect(jsonPath(path + ".genbank", is(entity.getGenbank())))
-                   .andExpect(jsonPath(path + ".refseq", is(entity.getRefseq())));
+                   .andExpect(jsonPath(path + ".name", is(chromosomeEntity.getName())))
+                   .andExpect(jsonPath(path + ".genbank", is(chromosomeEntity.getGenbank())))
+                   .andExpect(jsonPath(path + ".refseq", is(chromosomeEntity.getRefseq())));
         }
 
     }
 
 
     @Nested
-    class AliasServiceTests {
+    class ChromosomeServiceTests2 {
 
         private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
 
@@ -248,9 +285,9 @@ public class ContigAliasControllerIntegrationTest {
 
         @Test
         void getChromosomesByAssemblyGenbank() throws Exception {
-                ResultActions resultActions = mockMvc.perform(
-                        get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
-                assertChromosomesEqualToEntities(resultActions);
+            ResultActions resultActions = mockMvc.perform(
+                    get("/contig-alias/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
+            assertChromosomesEqualToEntities(resultActions);
         }
 
         @Test
