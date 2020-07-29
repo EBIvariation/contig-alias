@@ -25,7 +25,8 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
-import java.util.Optional;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class ChromosomeService {
@@ -38,16 +39,14 @@ public class ChromosomeService {
     }
 
 
-    public Optional<ChromosomeEntity> getChromosomeByGenbank(String genbank) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByGenbank(genbank);
-        entity.ifPresent(this::stripChromosomeFromAssembly);
-        return entity;
+    public Page<ChromosomeEntity> getChromosomesByGenbank(String genbank, Pageable request) {
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByGenbank(genbank, request);
+        return stripChromosomeFromAssembly(chromosomes);
     }
 
-    public Optional<ChromosomeEntity> getChromosomeByRefseq(String refseq) {
-        Optional<ChromosomeEntity> entity = repository.findChromosomeEntityByRefseq(refseq);
-        entity.ifPresent(this::stripChromosomeFromAssembly);
-        return entity;
+    public Page<ChromosomeEntity> getChromosomesByRefseq(String refseq, Pageable request) {
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByRefseq(refseq, request);
+        return stripChromosomeFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank, Pageable request) {
@@ -60,18 +59,26 @@ public class ChromosomeService {
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByChromosomeGenbank(String chrGenbank) {
-        Optional<ChromosomeEntity> entity = getChromosomeByGenbank(chrGenbank);
-        return extractAssemblyFromChromosome(entity);
+    public List<AssemblyEntity> getAssembliesByChromosomeGenbank(String chrGenbank) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbank(chrGenbank, Pageable.unpaged());
+        return extractAssembliesFromChromosomes(page);
     }
 
-    public Optional<AssemblyEntity> getAssemblyByChromosomeRefseq(String chrRefseq) {
-        Optional<ChromosomeEntity> entity = getChromosomeByRefseq(chrRefseq);
-        return extractAssemblyFromChromosome(entity);
+    public List<AssemblyEntity> getAssembliesByChromosomeRefseq(String chrRefseq) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByRefseq(chrRefseq, Pageable.unpaged());
+        return extractAssembliesFromChromosomes(page);
     }
 
-    public Optional<AssemblyEntity> extractAssemblyFromChromosome(Optional<ChromosomeEntity> entity) {
-        return entity.map(ChromosomeEntity::getAssembly);
+    public List<AssemblyEntity> extractAssembliesFromChromosomes(Page<ChromosomeEntity> page) {
+        List<AssemblyEntity> list = new LinkedList<>();
+        if (page != null && page.getTotalElements() > 0) {
+            for (ChromosomeEntity chromosomeEntity : page) {
+                AssemblyEntity assembly = chromosomeEntity.getAssembly();
+                assembly.setChromosomes(null);
+                list.add(assembly);
+            }
+        }
+        return list;
     }
 
     public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request) {
@@ -138,7 +145,7 @@ public class ChromosomeService {
     }
 
     private Page<ChromosomeEntity> stripAssembliesFromChromosomes(Page<ChromosomeEntity> page) {
-        if (page != null) {
+        if (page != null && page.getTotalElements() > 0) {
             page.forEach(this::stripAssemblyFromChromosome);
         }
         return page;

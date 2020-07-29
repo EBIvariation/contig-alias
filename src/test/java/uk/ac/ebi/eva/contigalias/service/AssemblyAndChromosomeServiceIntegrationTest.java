@@ -32,7 +32,6 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,7 +82,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         @Test
         void getAssemblyByChromosomeGenbank() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                Optional<AssemblyEntity> entity = service.getAssemblyByChromosomeGenbank(
+                List<AssemblyEntity> entity = service.getAssembliesByChromosomeGenbank(
                         chromosomeEntity.getGenbank());
                 testAssemblyIdenticalToEntity(entity);
             }
@@ -92,7 +91,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         @Test
         void getAssemblyByChromosomeRefseq() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                Optional<AssemblyEntity> entity = service.getAssemblyByChromosomeRefseq(
+                List<AssemblyEntity> entity = service.getAssembliesByChromosomeRefseq(
                         chromosomeEntity.getRefseq());
                 testAssemblyIdenticalToEntity(entity);
             }
@@ -100,15 +99,15 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
 
         @Test
         void getChromosomesByAssemblyGenbank() {
-            Page<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(),
-                                                                                         DEFAULT_PAGE_REQUEST);
+            Page<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyGenbank(
+                    assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST);
             assertPageEntitiesIdentical(chromosomes);
         }
 
         @Test
         void getChromosomesByAssemblyRefseq() {
-            Page<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(),
-                                                                                        DEFAULT_PAGE_REQUEST);
+            Page<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyRefseq(
+                    assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST);
             assertPageEntitiesIdentical(chromosomes);
         }
 
@@ -121,9 +120,14 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
             }
         }
 
-        void testAssemblyIdenticalToEntity(Optional<AssemblyEntity> optional) {
-            assertTrue(optional.isPresent());
-            AssemblyEntity assembly = optional.get();
+        void testAssemblyIdenticalToEntity(List<AssemblyEntity> list) {
+            assertNotNull(list);
+            assertTrue(list.size() > 0);
+            list.forEach(this::testAssemblyIdenticalToEntity);
+        }
+
+        void testAssemblyIdenticalToEntity(AssemblyEntity assembly) {
+            assertNotNull(assembly);
             assertEquals(assemblyEntity.getName(), assembly.getName());
             assertEquals(assemblyEntity.getOrganism(), assembly.getOrganism());
             assertEquals(assemblyEntity.getGenbank(), assembly.getGenbank());

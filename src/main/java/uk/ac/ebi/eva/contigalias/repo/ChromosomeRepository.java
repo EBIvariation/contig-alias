@@ -24,14 +24,12 @@ import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
-import java.util.Optional;
-
 @Repository
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
 
-    Optional<ChromosomeEntity> findChromosomeEntityByGenbank(String genbank);
+    Page<ChromosomeEntity> findChromosomeEntitiesByGenbank(String genbank, Pageable request);
 
-    Optional<ChromosomeEntity> findChromosomeEntityByRefseq(String refseq);
+    Page<ChromosomeEntity> findChromosomeEntitiesByRefseq(String refseq, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank, Pageable request);
 
