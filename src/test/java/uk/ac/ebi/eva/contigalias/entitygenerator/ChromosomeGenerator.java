@@ -38,6 +38,7 @@ public class ChromosomeGenerator {
                 .setName(PREFIX_NAME + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
+                .setUcscName("ucsc" + id)
                 .setAssembly(null);
     }
 
@@ -75,6 +76,7 @@ public class ChromosomeGenerator {
         assertTrue(name.endsWith(sId));
         assertTrue(entity.getGenbank().endsWith(sId));
         assertTrue(entity.getRefseq().endsWith(sId));
+        assertTrue(entity.getUcscName().endsWith(sId));
         assertNull(entity.getAssembly());
     }
 

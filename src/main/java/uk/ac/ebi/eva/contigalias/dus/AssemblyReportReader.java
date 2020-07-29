@@ -142,6 +142,10 @@ public class AssemblyReportReader {
         chromosomeEntity.setGenbank(columns[4]);
         chromosomeEntity.setRefseq(columns[6]);
 
+        if (columns.length > 8 && !columns[9].equals("na")){
+            chromosomeEntity.setUcscName(columns[9]);
+        }
+
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();
         }

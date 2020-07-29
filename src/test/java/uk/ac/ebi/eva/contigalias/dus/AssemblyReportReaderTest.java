@@ -33,6 +33,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AssemblyReportReaderTest {
@@ -111,6 +112,7 @@ class AssemblyReportReaderTest {
         assertEquals(CHROMOSOME_CHR1_SEQUENCE_NAME, chromosome.getName());
         assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getGenbank());
         assertEquals(CHROMOSOME_CHR1_REFSEQ_ACCESSION, chromosome.getRefseq());
+        assertNull(chromosome.getUcscName());
     }
 
 }

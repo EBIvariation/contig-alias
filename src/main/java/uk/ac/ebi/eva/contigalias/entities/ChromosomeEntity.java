@@ -44,11 +44,14 @@ public class ChromosomeEntity {
     @ApiModelProperty(value = "The name of the chromosome.")
     private String name;
 
-    @ApiModelProperty(value = "Chromosome's Genbank accession.")
+    @ApiModelProperty(value = "Chromosome's GenBank accession.")
     private String genbank;
 
-    @ApiModelProperty(value = "Refseq's Genbank accession.")
+    @ApiModelProperty(value = "Chromosome's RefSeq accession.")
     private String refseq;
+
+    @ApiModelProperty(value = "Chromosome's UCSC style name")
+    private String ucscName;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this chromosome belongs to.")
@@ -86,6 +89,15 @@ public class ChromosomeEntity {
 
     public ChromosomeEntity setRefseq(String refseq) {
         this.refseq = refseq;
+        return this;
+    }
+
+    public String getUcscName() {
+        return ucscName;
+    }
+
+    public ChromosomeEntity setUcscName(String ucscName) {
+        this.ucscName = ucscName;
         return this;
     }
 
