@@ -311,7 +311,7 @@ public class ContigAliasController {
             @RequestParam(required = false) @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
                     "GCA_000001405.10") Optional<String> accession,
             @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
-                    "sequence name or a UCSC style name. Ih this parameter is omitted then the name is assumed to be " +
+                    "sequence name or a UCSC style name. If this parameter is omitted then the name is assumed to be " +
                     "a sequence name by default.") Optional<String> nameTypeOpt,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
