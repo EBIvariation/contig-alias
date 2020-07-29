@@ -215,14 +215,14 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getAssemblyByChromosomeGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/contig-alias/v1/assemblies/chromosome/genbank/{genbank}", assemblyEntity.getGenbank()));
+                get("/contig-alias/v1/chromosomes/genbank/{genbank}/assemblies", assemblyEntity.getGenbank()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
     @Test
     void getAssemblyByChromosomeRefseq() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/contig-alias/v1/assemblies/chromosome/refseq/{refseq}", assemblyEntity.getRefseq()));
+                get("/contig-alias/v1/chromosomes/refseq/{refseq}/assemblies", assemblyEntity.getRefseq()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 

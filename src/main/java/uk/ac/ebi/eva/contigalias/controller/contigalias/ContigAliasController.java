@@ -152,7 +152,7 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get an assembly using the genbank accession of one of its " +
             "chromosomes.")
-    @GetMapping(value = "assemblies/chromosome/genbank/{genbank}")
+    @GetMapping(value = "chromosomes/genbank/{genbank}/assemblies")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByChromosomeGenbank
     (@PathVariable String genbank,
      @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
@@ -165,7 +165,7 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
             "chromosomes.")
-    @GetMapping(value = "assemblies/chromosome/refseq/{refseq}")
+    @GetMapping(value = "chromosomes/refseq/{refseq}/assemblies")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByChromosomeRefseq(
             @PathVariable String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
