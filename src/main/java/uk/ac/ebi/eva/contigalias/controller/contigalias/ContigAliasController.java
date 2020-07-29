@@ -56,6 +56,10 @@ public class ContigAliasController {
 
     public static final String AUTHORITY_REFSEQ = "refseq";
 
+    public static final String NAME_SEQUENCE_TYPE = "sequence";
+
+    public static final String NAME_UCSC_TYPE = "ucsc";
+
     private final ContigAliasHandler handler;
 
     @Autowired
@@ -300,12 +304,15 @@ public class ContigAliasController {
                     "nested inside it. The endpoint will either return a list of chromosomes or it will either return" +
                     " an HTTP error code 204 if no chromosomes are found or return an HTTP error code 400 if invalid " +
                     "parameters are found.")
-    @GetMapping(value = "chromosomes/{name}")
+    @GetMapping(value = "chromosomes/name/{name}")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
-            @PathVariable @ApiParam(value = "Name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
             @RequestParam(required = false) @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
                     "GCA_000001405.10") Optional<String> accession,
+            @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
+                    "sequence name or a UCSC style name. Ih this parameter is omitted then the name is assumed to be " +
+                    "a sequence name by default.") Optional<String> nameTypeOpt,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         boolean isNameValid = name != null && !name.isEmpty();
@@ -316,12 +323,15 @@ public class ContigAliasController {
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        String nameType = nameTypeOpt.orElse(NAME_SEQUENCE_TYPE);
         if (!isTaxidValid && !isAccessionValid) {
-            pagedModel = handler.getChromosomesByName(name, pageRequest);
+            pagedModel = handler.getChromosomesByName(name, nameType, pageRequest);
         } else if (isTaxidValid) {
-            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(name, taxid.get(), pageRequest);
+            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(
+                    name, taxid.get(), nameType, pageRequest);
         } else {
-            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(name, accession.get(), pageRequest);
+            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(
+                    name, accession.get(), nameType, pageRequest);
         }
         return createAppropriateResponseEntity(pagedModel);
 

@@ -84,8 +84,8 @@ public class ChromosomeService {
         return stripChromosomeFromAssembly(page);
     }
 
-    public Page<ChromosomeEntity> getChromosomesByNameAndAssembly(String name, AssemblyEntity assembly,
-                                                                  Pageable request) {
+    public Page<ChromosomeEntity> getChromosomesByNameAndAssembly(
+            String name, AssemblyEntity assembly, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByNameAndAssembly(name, assembly, request);
         assembly.setChromosomes(null);
         return injectAssemblyIntoChromosomes(page, assembly);
@@ -94,6 +94,26 @@ public class ChromosomeService {
     public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request){
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(accession, accession, request);
         return stripAssembliesFromChromosomes(chromosomes);
+    }
+
+    public Page<ChromosomeEntity> getChromosomesByUcscName(String ucscName, Pageable request) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByUcscName(ucscName, request);
+        return stripChromosomeFromAssembly(page);
+    }
+
+    public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssemblyTaxid(
+            String ucscName, long asmTaxid, Pageable request) {
+        Page<ChromosomeEntity> page
+                = repository.findChromosomeEntitiesByUcscNameAndAssembly_Taxid(ucscName, asmTaxid, request);
+        return stripChromosomeFromAssembly(page);
+    }
+
+    public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
+                                                                      Pageable request) {
+        Page<ChromosomeEntity> page
+                = repository.findChromosomeEntitiesByUcscNameAndAssembly(ucscName, assembly, request);
+        assembly.setChromosomes(null);
+        return injectAssemblyIntoChromosomes(page, assembly);
     }
 
     private Page<ChromosomeEntity> injectAssemblyIntoChromosomes(Page<ChromosomeEntity> page, AssemblyEntity assembly) {

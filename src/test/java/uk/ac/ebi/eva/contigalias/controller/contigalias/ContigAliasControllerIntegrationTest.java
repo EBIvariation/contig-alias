@@ -48,6 +48,8 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_R
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_GENBANK;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_SEQUENCE_TYPE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_UCSC_TYPE;
 
 /**
  * See https://spring.io/guides/gs/testing-web/ for an explanation of the particular combination of Spring
@@ -95,10 +97,16 @@ public class ContigAliasControllerIntegrationTest {
         when(mockHandler.getChromosomeByRefseq(chromosomeEntity.getRefseq()))
                 .thenReturn(chromosomePagedModel);
         when(mockHandler.getChromosomesByChromosomeNameAndAssemblyAccession(
-                chromosomeEntity.getName(), assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                chromosomeEntity.getName(), assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
         when(mockHandler.getChromosomesByChromosomeNameAndAssemblyTaxid(
-                chromosomeEntity.getName(), assemblyEntity.getTaxid(), DEFAULT_PAGE_REQUEST))
+                chromosomeEntity.getName(), assemblyEntity.getTaxid(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST))
+                .thenReturn(chromosomePagedModel);
+        when(mockHandler.getChromosomesByChromosomeNameAndAssemblyAccession(
+                chromosomeEntity.getUcscName(), assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST))
+                .thenReturn(chromosomePagedModel);
+        when(mockHandler.getChromosomesByChromosomeNameAndAssemblyTaxid(
+                chromosomeEntity.getUcscName(), assemblyEntity.getTaxid(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
 
         when(mockHandler.getAssemblyByChromosomeGenbank(assemblyEntity.getGenbank()))
@@ -171,7 +179,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getChromosomesByChromosomeNameAndAssemblyTaxid() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/contig-alias/v1/chromosomes/{name}",
+                get("/contig-alias/v1/chromosomes/name/{name}",
                     chromosomeEntity.getName()).param("taxid", assemblyEntity.getTaxid().toString()));
         ContigAliasControllerIntegrationTest.this.assertChromosomePagedModelResponseValid(resultActions);
     }
@@ -179,8 +187,28 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getChromosomesByChromosomeNameAndAssemblyAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/contig-alias/v1/chromosomes/{name}",
+                get("/contig-alias/v1/chromosomes/name/{name}",
                     chromosomeEntity.getName()).param("accession", assemblyEntity.getGenbank()));
+        ContigAliasControllerIntegrationTest.this.assertChromosomePagedModelResponseValid(resultActions);
+    }
+
+    @Test
+    void getChromosomesByChromosomeUcscNameAndAssemblyTaxid() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/contig-alias/v1/chromosomes/name/{name}",
+                    chromosomeEntity.getUcscName())
+                        .param("taxid", assemblyEntity.getTaxid().toString())
+                        .param("name", NAME_UCSC_TYPE));
+        ContigAliasControllerIntegrationTest.this.assertChromosomePagedModelResponseValid(resultActions);
+    }
+
+    @Test
+    void getChromosomesByChromosomeUcscNameAndAssemblyAccession() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/contig-alias/v1/chromosomes/name/{name}",
+                    chromosomeEntity.getUcscName())
+                        .param("accession", assemblyEntity.getGenbank())
+                        .param("name", NAME_UCSC_TYPE));
         ContigAliasControllerIntegrationTest.this.assertChromosomePagedModelResponseValid(resultActions);
     }
 

@@ -119,28 +119,38 @@ public class ContigAliasHandler {
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
-            String name,
-            long taxid,
-            Pageable request) {
-        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid, request);
-        return generatePagedModelFromPage(page, chromosomeAssembler);
-    }
-
-    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
-            String name,
-            String accession,
-            Pageable request) {
-        Page<ChromosomeEntity> page = new PageImpl<>(Collections.emptyList());
-        Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
-        if (assembly.isPresent()) {
-            page = chromosomeService.getChromosomesByNameAndAssembly(name, assembly.get(), request);
-
+            String name, long taxid, String nameType, Pageable request) {
+        Page<ChromosomeEntity> page;
+        if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
+            page = chromosomeService.getChromosomesByUcscNameAndAssemblyTaxid(name, taxid, request);
+        } else {
+            page = chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid, request);
         }
         return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
-    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByName(String name, Pageable request) {
-        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByName(name, request);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
+            String name, String accession, String nameType, Pageable request) {
+        Page<ChromosomeEntity> page = new PageImpl<>(Collections.emptyList());
+        Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
+        if (assembly.isPresent()) {
+            if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
+                page = chromosomeService.getChromosomesByUcscNameAndAssembly(name, assembly.get(), request);
+            } else {
+                page = chromosomeService.getChromosomesByNameAndAssembly(name, assembly.get(), request);
+            }
+        }
+        return generatePagedModelFromPage(page, chromosomeAssembler);
+    }
+
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByName(
+            String name, String nameType, Pageable request) {
+        Page<ChromosomeEntity> page;
+        if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
+            page = chromosomeService.getChromosomesByUcscName(name, request);
+        } else {
+            page = chromosomeService.getChromosomesByName(name, request);
+        }
         return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 }
