@@ -68,23 +68,18 @@ public class BaseController {
         if (entities != null && !entities.isEmpty()) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
     }
 
     public static <T> ResponseEntity<T> createAppropriateResponseEntity(Optional<T> entities) {
-        if (entities.isPresent()) {
-            return new ResponseEntity<T>(entities.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return entities.map(t -> new ResponseEntity<>(t, HttpStatus.OK)).orElseGet(
+                () -> new ResponseEntity<>(HttpStatus.OK));
     }
 
     public static <T> ResponseEntity<PagedModel<EntityModel<T>>> createAppropriateResponseEntity(
             PagedModel<EntityModel<T>> entityModels) {
-        return new ResponseEntity<>(
-                entityModels,
-                entityModels.getContent().isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
+        return new ResponseEntity<>(entityModels, HttpStatus.OK);
     }
 
     public static boolean paramsValidForSingleResponseQuery(Integer page, Integer size) {
