@@ -37,7 +37,6 @@ import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
@@ -99,7 +98,7 @@ public class ContigAliasController {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByAccession(accession);
             linkPagedModelGetChromosomesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
-        } else return BAD_REQUEST;
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Get an assembly using its GenBank accession.",
@@ -116,7 +115,7 @@ public class ContigAliasController {
             linkPagedModelGetChromosomesByAssemblyAccession(
                     genbank, pageNumber, pageSize, pagedModel, AUTHORITY_GENBANK);
             return createAppropriateResponseEntity(pagedModel);
-        } else return BAD_REQUEST;
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Get an assembly using its RefSeq accession.",
@@ -133,7 +132,7 @@ public class ContigAliasController {
             linkPagedModelGetChromosomesByAssemblyAccession(
                     refseq, pageNumber, pageSize, pagedModel, AUTHORITY_REFSEQ);
             return createAppropriateResponseEntity(pagedModel);
-        } else return BAD_REQUEST;
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
@@ -160,7 +159,7 @@ public class ContigAliasController {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesByChromosomeGenbank(genbank);
             return createAppropriateResponseEntity(pagedModel);
-        } else return BAD_REQUEST;
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Get an assembly using the refseq accession of one of its " +
@@ -173,7 +172,7 @@ public class ContigAliasController {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesByChromosomeRefseq(refseq);
             return createAppropriateResponseEntity(pagedModel);
-        } else return BAD_REQUEST;
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Get a chromosome using its Genbank accession.",
@@ -217,7 +216,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (accession == null || accession.isEmpty()) {
-            return BAD_REQUEST;
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
@@ -229,7 +228,7 @@ public class ContigAliasController {
                 pagedModel = handler.getChromosomesByAssemblyRefseq(accession, pageRequest);
                 linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_REFSEQ, pagedModel);
             } else {
-                return BAD_REQUEST;
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         } else {
             pagedModel = handler.getChromosomesByAssemblyAccession(accession, pageRequest);

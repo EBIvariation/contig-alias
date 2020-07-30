@@ -38,12 +38,11 @@ public class BaseController {
             + " the data. Page size should be greater than 0 and if not specified then default page size is 10 " +
             "results per page.";
 
-    public static final PageRequest DEFAULT_PAGE_REQUEST = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER,
-                                                                                            DEFAULT_PAGE_SIZE);
-
-    public static final ResponseEntity BAD_REQUEST = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public static final PageRequest DEFAULT_PAGE_REQUEST
+            = BaseController.createPageRequest(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
 
     public static final String REL_CHROMOSOMES = "chromosomes";
+
     public static final String REL_ASSEMBLY = "assembly";
 
     public static PageRequest createPageRequest(Integer page, Integer size) {
