@@ -215,7 +215,10 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
-            @RequestParam(required = false, name = "authority") String chrAuthority,
+            @RequestParam(required = false, name = "authority") @ApiParam("Specify if the provided accession is a " +
+                    "GenBank or a RefSeq accession. The acceptable param values are " + AUTHORITY_GENBANK + " " +
+                    "and " + AUTHORITY_REFSEQ + " respectively. If this parameter is omitted then the accession is " +
+                    "assumed to have an authority of " + AUTHORITY_GENBANK + " by default.") String chrAuthority,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (accession == null || accession.isEmpty()) {
@@ -308,16 +311,17 @@ public class ContigAliasController {
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
             @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
-            @RequestParam(required = false) @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
-                    "GCA_000001405.10") Optional<String> accession,
+            @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
+                    "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
             @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
-                    "sequence name or a UCSC style name. If this parameter is omitted then the name is assumed to be " +
-                    "a sequence name by default.") Optional<String> nameTypeOpt,
+                    "sequence name or a UCSC style name. The acceptable param values are " + NAME_SEQUENCE_TYPE + " " +
+                    "and " + NAME_UCSC_TYPE + " respectively. If this parameter is omitted then the name is assumed " +
+                    "to be a " + NAME_SEQUENCE_TYPE + " name by default.") Optional<String> nameTypeOpt,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         boolean isNameValid = name != null && !name.isEmpty();
         boolean isTaxidValid = taxid.isPresent();
-        boolean isAccessionValid = accession.isPresent() && !accession.get().isEmpty();
+        boolean isAccessionValid = asmAccession.isPresent() && !asmAccession.get().isEmpty();
         if (!isNameValid || (isTaxidValid && isAccessionValid)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -331,7 +335,7 @@ public class ContigAliasController {
                     name, taxid.get(), nameType, pageRequest);
         } else {
             pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(
-                    name, accession.get(), nameType, pageRequest);
+                    name, asmAccession.get(), nameType, pageRequest);
         }
         return createAppropriateResponseEntity(pagedModel);
 
