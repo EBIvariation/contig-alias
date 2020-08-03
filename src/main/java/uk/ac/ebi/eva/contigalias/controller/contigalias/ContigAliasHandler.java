@@ -124,6 +124,11 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(Page.empty(), chromosomeAssembler);
     }
 
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyAccession(String accession, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByAssemblyAccession(accession, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
+    }
+
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             String name,
             long taxid,

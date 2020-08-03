@@ -63,6 +63,21 @@ public class ContigAliasController {
         this.handler = handler;
     }
 
+    public static void linkPagedModelGetChromosomesByAssemblyAccession(
+            String accession, Integer pageNumber, Integer pageSize, PagedModel<EntityModel<AssemblyEntity>> pagedModel,
+            String authority) {
+        if (pageNumber == null) {
+            pageNumber = DEFAULT_PAGE_NUMBER;
+        }
+        if (pageSize == null) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+        pagedModel.add(linkTo(methodOn(ContigAliasController.class)
+                                      .getChromosomesByAssemblyAccession(
+                                              accession, authority, pageNumber, pageSize))
+                               .withRel(REL_CHROMOSOMES));
+    }
+
     @ApiOperation(value = "Get an assembly using its GenBank or RefSeq accession. ",
             notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
                     ". The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
@@ -113,21 +128,6 @@ public class ContigAliasController {
                     refseq, pageNumber, pageSize, pagedModel, AUTHORITY_REFSEQ);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
-    }
-
-    public static void linkPagedModelGetChromosomesByAssemblyAccession(
-            String accession, Integer pageNumber, Integer pageSize, PagedModel<EntityModel<AssemblyEntity>> pagedModel,
-            String authority) {
-        if (pageNumber == null) {
-            pageNumber = DEFAULT_PAGE_NUMBER;
-        }
-        if (pageSize == null) {
-            pageSize = DEFAULT_PAGE_SIZE;
-        }
-        pagedModel.add(linkTo(methodOn(ContigAliasController.class)
-                                      .getChromosomesByAssemblyAccession(
-                                              accession, authority, pageNumber, pageSize))
-                               .withRel(REL_CHROMOSOMES));
     }
 
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
@@ -230,7 +230,7 @@ public class ContigAliasController {
                 return BAD_REQUEST;
             }
         } else {
-            pagedModel = handler.getChromosomesByAssemblyAccession(accession);
+            pagedModel = handler.getChromosomesByAssemblyAccession(accession, pageRequest);
         }
         return createAppropriateResponseEntity(pagedModel);
     }
