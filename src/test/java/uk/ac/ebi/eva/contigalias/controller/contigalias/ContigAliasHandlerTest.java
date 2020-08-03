@@ -331,13 +331,13 @@ public class ContigAliasHandlerTest {
         @Test
         void getChromosomesByAssemblyAccessionGenbank() {
             testChromosomeEntityResponses(
-                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()));
+                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         void getChromosomesByAssemblyAccessionRefseq() {
             testChromosomeEntityResponses(
-                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()));
+                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
         void testAssemblyEntityResponse(PagedModel<EntityModel<AssemblyEntity>> pagedModel) {

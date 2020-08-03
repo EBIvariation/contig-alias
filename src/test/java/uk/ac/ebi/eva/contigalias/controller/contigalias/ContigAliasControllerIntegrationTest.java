@@ -110,9 +110,9 @@ public class ContigAliasControllerIntegrationTest {
                 .thenReturn(chromosomePagedModel);
         when(mockHandler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
-        when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank()))
+        when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
-        when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq()))
+        when(mockHandler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
     }
 
