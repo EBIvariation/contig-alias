@@ -91,6 +91,11 @@ public class ChromosomeService {
         return injectAssemblyIntoChromosomes(page, assembly);
     }
 
+    public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request){
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(accession, accession, request);
+        return stripAssembliesFromChromosomes(chromosomes);
+    }
+
     private Page<ChromosomeEntity> injectAssemblyIntoChromosomes(Page<ChromosomeEntity> page, AssemblyEntity assembly) {
         if (page != null && page.getTotalElements() > 0) {
             page.forEach(it -> it.setAssembly(assembly));
