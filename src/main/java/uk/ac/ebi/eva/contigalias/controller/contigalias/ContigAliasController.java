@@ -56,6 +56,8 @@ public class ContigAliasController {
 
     public static final String AUTHORITY_REFSEQ = "refseq";
 
+    public static final String AUTHORITY_NONE = "none";
+
     public static final String NAME_SEQUENCE_TYPE = "sequence";
 
     public static final String NAME_UCSC_TYPE = "ucsc";
@@ -188,7 +190,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomeByGenbank(genbank);
-            linkPagedModelGetAssemblyByChromosomeAuthority(genbank, AUTHORITY_GENBANK, pagedModel);
+            linkPagedModelGetAssemblyByAccession(genbank, AUTHORITY_GENBANK, pagedModel);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
     }
@@ -206,9 +208,24 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomeByRefseq(refseq);
-            linkPagedModelGetAssemblyByChromosomeAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
+            linkPagedModelGetAssemblyByAccession(refseq, AUTHORITY_REFSEQ, pagedModel);
             return createAppropriateResponseEntity(pagedModel);
         } else return BAD_REQUEST;
+    }
+
+    private void linkPagedModelGetAssemblyByAccession(
+            String chrAccession, String asmAuthority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
+        ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
+        if (asmAuthority.equals(AUTHORITY_GENBANK)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByChromosomeGenbank(chrAccession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else if (asmAuthority.equals(AUTHORITY_REFSEQ)) {
+            method = methodOn(ContigAliasController.class)
+                    .getAssemblyByChromosomeRefseq(chrAccession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+        } else {
+            return;
+        }
+        pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
     @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.")
@@ -217,8 +234,9 @@ public class ContigAliasController {
             @PathVariable String accession,
             @RequestParam(required = false, name = "authority") @ApiParam("Specify if the provided accession is a " +
                     "GenBank or a RefSeq accession. The acceptable param values are " + AUTHORITY_GENBANK + " " +
-                    "and " + AUTHORITY_REFSEQ + " respectively. If this parameter is omitted then the accession is " +
-                    "assumed to have an authority of " + AUTHORITY_GENBANK + " by default.") String chrAuthority,
+                    "and " + AUTHORITY_REFSEQ + " respectively. If this parameter is omitted then the results having " +
+                    "the given accession as either their GenBank or RefSeq accession are returned. This includes " +
+                    "cases where the GenBank and RefSeq accessions are the same.") String asmAuthority,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (accession == null || accession.isEmpty()) {
@@ -226,35 +244,21 @@ public class ContigAliasController {
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
-        if (chrAuthority != null && !chrAuthority.isEmpty()) {
-            if (chrAuthority.toLowerCase().equals(AUTHORITY_GENBANK)) {
+        if (asmAuthority != null && !asmAuthority.isEmpty()) {
+            if (asmAuthority.toLowerCase().equals(AUTHORITY_GENBANK)) {
                 pagedModel = handler.getChromosomesByAssemblyGenbank(accession, pageRequest);
-                linkPagedModelGetAssemblyByChromosomeAuthority(accession, AUTHORITY_GENBANK, pagedModel);
-            } else if (chrAuthority.toLowerCase().equals(AUTHORITY_REFSEQ)) {
+                linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_GENBANK, pagedModel);
+            } else if (asmAuthority.toLowerCase().equals(AUTHORITY_REFSEQ)) {
                 pagedModel = handler.getChromosomesByAssemblyRefseq(accession, pageRequest);
-                linkPagedModelGetAssemblyByChromosomeAuthority(accession, AUTHORITY_REFSEQ, pagedModel);
+                linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_REFSEQ, pagedModel);
             } else {
                 return BAD_REQUEST;
             }
         } else {
             pagedModel = handler.getChromosomesByAssemblyAccession(accession, pageRequest);
+            linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_NONE, pagedModel);
         }
         return createAppropriateResponseEntity(pagedModel);
-    }
-
-    private void linkPagedModelGetAssemblyByChromosomeAuthority(
-            String accession, String authority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
-        ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
-        if (authority.equals(AUTHORITY_GENBANK)) {
-            method = methodOn(ContigAliasController.class)
-                    .getAssemblyByChromosomeGenbank(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-        } else if (authority.equals(AUTHORITY_REFSEQ)) {
-            method = methodOn(ContigAliasController.class)
-                    .getAssemblyByChromosomeRefseq(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
-        } else {
-            return;
-        }
-        pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
     @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.")
