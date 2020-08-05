@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +57,8 @@ class AssemblyReportReaderTest {
 
     private static final String CHROMOSOME_CHR1_REFSEQ_ACCESSION = "AC_000158.1";
 
+    private ScaffoldEntity scaffoldEntity;
+
     private InputStreamReader streamReader;
 
     private InputStream stream;
@@ -68,6 +71,11 @@ class AssemblyReportReaderTest {
                 new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
         streamReader = new InputStreamReader(stream);
         reader = new AssemblyReportReader(streamReader);
+        scaffoldEntity = new ScaffoldEntity()
+                .setName("ChrU_1")
+                .setGenbank("GJ057137.1")
+                .setRefseq("NW_003097882.1")
+                .setUcscName(null);
     }
 
     @AfterEach
@@ -113,6 +121,27 @@ class AssemblyReportReaderTest {
         assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getGenbank());
         assertEquals(CHROMOSOME_CHR1_REFSEQ_ACCESSION, chromosome.getRefseq());
         assertNull(chromosome.getUcscName());
+    }
+
+    @Test
+    void verifyAssemblyHasScaffolds() throws IOException {
+        AssemblyEntity assembly = getAssemblyEntity();
+        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        assertNotNull(scaffolds);
+        assertEquals(3286, scaffolds.size());
+    }
+
+    @Test
+    void assertParsedScaffoldValid() throws IOException {
+        List<ScaffoldEntity> scaffolds = getAssemblyEntity().getScaffolds();
+        assertNotNull(scaffolds);
+        assertTrue(scaffolds.size() > 0);
+        ScaffoldEntity scaffold = scaffolds.get(0);
+        assertNotNull(scaffold);
+        assertEquals(scaffoldEntity.getName(), scaffold.getName());
+        assertEquals(scaffoldEntity.getGenbank(), scaffold.getGenbank());
+        assertEquals(scaffoldEntity.getRefseq(), scaffold.getRefseq());
+        assertEquals(scaffoldEntity.getUcscName(), scaffold.getUcscName());
     }
 
 }
