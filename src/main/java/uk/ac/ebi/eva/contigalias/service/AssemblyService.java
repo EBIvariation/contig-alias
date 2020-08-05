@@ -27,10 +27,11 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.datasource.AssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -72,13 +73,13 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
-        stripAssemblyFromChromosomes(entity);
+        stripAssemblyFromChromosomesAndScaffolds(entity);
         return entity;
     }
 
     public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByRefseq(refseq);
-        stripAssemblyFromChromosomes(entity);
+        stripAssemblyFromChromosomesAndScaffolds(entity);
         return entity;
     }
 
@@ -111,23 +112,33 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
-        stripAssemblyFromChromosomes(entity);
+        stripAssemblyFromChromosomesAndScaffolds(entity);
         return entity;
     }
 
-    public void stripAssemblyFromChromosomes(Optional<AssemblyEntity> optional) {
+    public void stripAssemblyFromChromosomesAndScaffolds(Optional<AssemblyEntity> optional) {
         if (optional.isPresent()) {
             AssemblyEntity entity = optional.get();
             stripAssemblyFromChromosomes(entity);
+            stripAssemblyFromScaffolds(entity);
         }
     }
 
     private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         if (chromosomes != null && chromosomes.size() > 0) {
-            chromosomes.forEach(chr -> chr.setAssembly(null));
+            chromosomes.forEach(it -> it.setAssembly(null));
         } else {
-            assembly.setChromosomes(new LinkedList<>());
+            assembly.setChromosomes(Collections.emptyList());
+        }
+    }
+
+    private void stripAssemblyFromScaffolds(AssemblyEntity assembly) {
+        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        if (scaffolds != null && scaffolds.size() > 0) {
+            scaffolds.forEach(it -> it.setAssembly(null));
+        } else {
+            assembly.setScaffolds(Collections.emptyList());
         }
     }
 
