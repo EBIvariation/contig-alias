@@ -83,12 +83,12 @@ public class ChromosomeService {
 
     public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByName(name, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByNameAndAssembly(
@@ -131,11 +131,21 @@ public class ChromosomeService {
         return page;
     }
 
-    private Page<ChromosomeEntity> stripChromosomeFromAssembly(Page<ChromosomeEntity> page) {
+    private Page<ChromosomeEntity> stripChromosomesAndScaffoldsFromAssembly(Page<ChromosomeEntity> page) {
         if (page != null && page.getTotalElements() > 0) {
-            page.forEach(this::stripChromosomeFromAssembly);
+            page.forEach(it -> {
+                stripChromosomeFromAssembly(it);
+                stripScaffoldFromAssembly(it);
+            });
         }
         return page;
+    }
+
+    private void stripScaffoldFromAssembly(ChromosomeEntity chromosome) {
+        AssemblyEntity assembly = chromosome.getAssembly();
+        if (assembly != null) {
+            assembly.setScaffolds(null);
+        }
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
