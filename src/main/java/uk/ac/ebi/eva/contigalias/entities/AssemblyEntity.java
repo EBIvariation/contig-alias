@@ -71,6 +71,11 @@ public class AssemblyEntity {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ApiModelProperty(value = "List of all scaffolds of the assembly present in the database.")
+    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
+    private List<ScaffoldEntity> scaffolds;
+
     public AssemblyEntity() {
     }
 
@@ -156,6 +161,15 @@ public class AssemblyEntity {
 
     public AssemblyEntity setChromosomes(List<ChromosomeEntity> chromosomes) {
         this.chromosomes = chromosomes;
+        return this;
+    }
+
+    public List<ScaffoldEntity> getScaffolds() {
+        return scaffolds;
+    }
+
+    public AssemblyEntity setScaffolds(List<ScaffoldEntity> scaffolds) {
+        this.scaffolds = scaffolds;
         return this;
     }
 
