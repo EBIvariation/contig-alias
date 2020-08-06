@@ -57,6 +57,7 @@ public class AssemblyServiceIntegrationTest {
     @Autowired
     AssemblyRepository repository;
 
+    @Autowired
     private AssemblyService service;
 
     @BeforeEach
@@ -92,6 +93,7 @@ public class AssemblyServiceIntegrationTest {
     void cacheLimitTest() throws IOException {
         int cacheSize = service.getCacheSize();
         service.setCacheSize(10);
+        service.setEnableCacheLimit(true);
 
         String targetGenbank = entities[0].getGenbank();
         service.fetchAndInsertAssembly(targetGenbank);
@@ -113,6 +115,40 @@ public class AssemblyServiceIntegrationTest {
         assertFalse(targetGenbankEntity.isPresent());
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
+            String genbank = entities[i].getGenbank();
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
+            assertOptionalValid(accession);
+            service.deleteAssembly(accession.get());
+        }
+
+        service.setCacheSize(cacheSize);
+    }
+
+    @Test
+    void disableCacheLimitTest() throws IOException {
+        int cacheSize = service.getCacheSize();
+        service.setCacheSize(10);
+
+        String targetGenbank = entities[0].getGenbank();
+        service.fetchAndInsertAssembly(targetGenbank);
+        Optional<AssemblyEntity> assemblyEntities = service.getAssemblyByAccession(targetGenbank);
+        assertOptionalValid(assemblyEntities);
+        AssemblyEntity first = assemblyEntities.get();
+        List<ChromosomeEntity> chromosomes = first.getChromosomes();
+        assertNotNull(chromosomes);
+
+        for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
+            String genbank = entities[i].getGenbank();
+            service.fetchAndInsertAssembly(genbank);
+            Optional<AssemblyEntity> assembly = service.getAssemblyByAccession(genbank);
+            assertOptionalValid(assembly);
+        }
+
+        Optional<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
+        assertNotNull(targetGenbankEntity);
+        assertTrue(targetGenbankEntity.isPresent());
+
+        for (int i = 0; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();
             Optional<AssemblyEntity> accession = service.getAssemblyByAccession(genbank);
             assertOptionalValid(accession);

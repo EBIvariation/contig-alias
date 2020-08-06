@@ -49,6 +49,9 @@ public class AssemblyService {
 
     private int CACHE_SIZE = 10;
 
+    // TODO allow configuring this from application.properties, or remove cache limit feature
+    private boolean enableCacheLimit = false;
+
     @Autowired
     public AssemblyService(AssemblyRepository repository, @Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
         this.repository = repository;
@@ -140,8 +143,10 @@ public class AssemblyService {
      * </p>
      */
     private void setCacheSizeLimit() {
-        while (repository.count() >= CACHE_SIZE) {
-            repository.findTopByIdNotNullOrderById().ifPresent(it -> repository.deleteById(it.getId()));
+        if (enableCacheLimit) {
+            while (repository.count() >= CACHE_SIZE) {
+                repository.findTopByIdNotNullOrderById().ifPresent(it -> repository.deleteById(it.getId()));
+            }
         }
     }
 
@@ -210,4 +215,11 @@ public class AssemblyService {
         this.CACHE_SIZE = CACHE_SIZE;
     }
 
+    public boolean isEnableCacheLimit() {
+        return enableCacheLimit;
+    }
+
+    public void setEnableCacheLimit(boolean enableCacheLimit) {
+        this.enableCacheLimit = enableCacheLimit;
+    }
 }
