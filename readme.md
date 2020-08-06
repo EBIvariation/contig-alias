@@ -17,10 +17,10 @@ Copy this text, replace manually the values enclosed in ${} and put it all in yo
             <properties>
                 <contig-alias.admin-user>${your_user}</contig-alias.admin-user>
                 <contig-alias.admin-password>${your_password}</contig-alias.admin-password>
-                <contig-alias-dbUrl>jdbc:postgresql://${server_ip}:${db_port}/${db_name}</contig-alias-dbUrl>
-                <contig-alias-dbUsername>${db_username}</contig-alias-dbUsername>
-                <contig-alias-dbPassword>${db-password}</contig-alias-dbPassword>
-                <contig-alias-ddlBehaviour>${preferred_behaviour}</contig-alias-ddlBehaviour>
+                <contig-alias.db-url>jdbc:postgresql://${server_ip}:${db_port}/${db_name}</contig-alias.db-url>
+                <contig-alias.db-username>${db_username}</contig-alias.db-username>
+                <contig-alias.db-password>${db-password}</contig-alias.db-password>
+                <contig-alias.ddl-behaviour>${preferred_behaviour}</contig-alias.ddl-behaviour>
             </properties>
         </profile>
     </profiles>
