@@ -54,6 +54,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         assertEquals(expected.getName(), actual.getName());
         assertEquals(expected.getGenbank(), actual.getGenbank());
         assertEquals(expected.getRefseq(), actual.getRefseq());
+        assertEquals(expected.getUcscName(), actual.getUcscName());
     }
 
     @Nested

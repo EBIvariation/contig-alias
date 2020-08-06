@@ -48,6 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_SEQUENCE_TYPE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_UCSC_TYPE;
 
 public class ContigAliasHandlerTest {
 
@@ -217,6 +219,7 @@ public class ContigAliasHandlerTest {
             assertEquals(entity.getName(), chromosome.getName());
             assertEquals(entity.getGenbank(), chromosome.getGenbank());
             assertEquals(entity.getRefseq(), chromosome.getRefseq());
+            assertEquals(entity.getUcscName(), chromosome.getUcscName());
         }
 
     }
@@ -294,7 +297,8 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeAssembler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockAssemblyAssembler, mockChromosomeAssembler);
+            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockAssemblyAssembler,
+                                             mockChromosomeAssembler);
         }
 
         @AfterEach
@@ -358,20 +362,40 @@ public class ContigAliasHandlerTest {
             String chrName = chromosomeEntities.get(0).getName();
             Long asmTaxid = assemblyEntity.getTaxid();
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
-                    .getChromosomesByChromosomeNameAndAssemblyTaxid(chrName, asmTaxid, DEFAULT_PAGE_REQUEST);
-            assertPagelModelIndticalToChromosomeEntities(pagedModel);
+                    .getChromosomesByChromosomeNameAndAssemblyTaxid(
+                            chrName, asmTaxid, NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 
         @Test
         void getChromosomesByChromosomeNameAndAssemblyAccession() {
             String chrName = chromosomeEntities.get(0).getName();
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
-                    .getChromosomesByChromosomeNameAndAssemblyAccession(chrName, assemblyEntity.getGenbank(),
-                                                                        DEFAULT_PAGE_REQUEST);
-            assertPagelModelIndticalToChromosomeEntities(pagedModel);
+                    .getChromosomesByChromosomeNameAndAssemblyAccession(
+                            chrName, assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 
-        private void assertPagelModelIndticalToChromosomeEntities(
+        @Test
+        void getChromosomesByChromosomeUcscNameAndAssemblyTaxid() {
+            String chrName = chromosomeEntities.get(0).getUcscName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
+                    .getChromosomesByChromosomeNameAndAssemblyTaxid(
+                            chrName, asmTaxid, NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToChromosomeEntities(pagedModel);
+        }
+
+        @Test
+        void getChromosomesByChromosomeUcscNameAndAssemblyAccession() {
+            String chrName = chromosomeEntities.get(0).getUcscName();
+            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
+                    .getChromosomesByChromosomeNameAndAssemblyAccession(
+                            chrName, assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToChromosomeEntities(pagedModel);
+        }
+
+        private void assertPagedModelIdenticalToChromosomeEntities(
                 PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
             assertNotNull(pagedModel);
             Collection<EntityModel<ChromosomeEntity>> content = pagedModel.getContent();
