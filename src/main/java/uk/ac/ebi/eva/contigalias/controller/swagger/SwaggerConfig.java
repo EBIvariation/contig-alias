@@ -17,16 +17,20 @@
 package uk.ac.ebi.eva.contigalias.controller.swagger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.util.UriComponentsBuilder;
+import springfox.documentation.PathProvider;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.paths.Paths;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
@@ -34,12 +38,30 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 @EnableSwagger2WebMvc
 public class SwaggerConfig implements WebMvcConfigurer {
 
+    @Value("${server.servlet.context-path:/}")
+    private String contextPath;
+
     @Autowired
     SwaggerInterceptAdapter interceptAdapter;
 
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .pathProvider(new PathProvider() {
+                    @Override
+                    public String getOperationPath(String operationPath) {
+                        if (operationPath.startsWith(contextPath)) {
+                            operationPath = operationPath.substring(contextPath.length());
+                        }
+                        return Paths.removeAdjacentForwardSlashes(
+                                UriComponentsBuilder.newInstance().replacePath(operationPath).build().toString());
+                    }
+
+                    @Override
+                    public String getResourceListingPath(String groupName, String apiDeclaration) {
+                        return null;
+                    }
+                })
                 .apiInfo(getApiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("uk.ac.ebi.eva.contigalias.controller"))
