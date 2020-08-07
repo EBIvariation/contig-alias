@@ -42,7 +42,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropri
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.linkPagedModelGetChromosomesByAssemblyAccession;
 
-@RequestMapping("contig-alias-admin/v1")
+@RequestMapping("/v1/admin")
 @RestController
 public class AdminController {
 

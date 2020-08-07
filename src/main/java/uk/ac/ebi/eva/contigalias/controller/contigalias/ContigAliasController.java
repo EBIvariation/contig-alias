@@ -47,7 +47,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropri
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
 
-@RequestMapping("contig-alias/v1")
+@RequestMapping("/v1")
 @RestController
 public class ContigAliasController {
 
