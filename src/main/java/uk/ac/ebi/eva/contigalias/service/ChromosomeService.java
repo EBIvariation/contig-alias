@@ -41,12 +41,12 @@ public class ChromosomeService {
 
     public Page<ChromosomeEntity> getChromosomesByGenbank(String genbank, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByGenbank(genbank, request);
-        return stripChromosomeFromAssembly(chromosomes);
+        return stripChromosomesAndScaffoldsFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByRefseq(String refseq, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByRefseq(refseq, request);
-        return stripChromosomeFromAssembly(chromosomes);
+        return stripChromosomesAndScaffoldsFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank, Pageable request) {
@@ -106,14 +106,14 @@ public class ChromosomeService {
 
     public Page<ChromosomeEntity> getChromosomesByUcscName(String ucscName, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByUcscName(ucscName, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssemblyTaxid(
             String ucscName, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page
                 = repository.findChromosomeEntitiesByUcscNameAndAssembly_Taxid(ucscName, asmTaxid, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
