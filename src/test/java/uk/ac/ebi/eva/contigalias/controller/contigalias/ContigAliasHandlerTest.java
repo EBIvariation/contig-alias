@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -182,11 +183,11 @@ public class ContigAliasHandlerTest {
         void setUp() {
             ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
 
-            Optional<ChromosomeEntity> entityListAsPage = Optional.of(entity);
-            Mockito.when(mockChromosomeService.getChromosomeByGenbank(entity.getGenbank()))
-                   .thenReturn(entityListAsPage);
-            Mockito.when(mockChromosomeService.getChromosomeByRefseq(entity.getRefseq()))
-                   .thenReturn(entityListAsPage);
+            Page<ChromosomeEntity> pageOfEntity = new PageImpl<>(Collections.singletonList(entity));
+            Mockito.when(mockChromosomeService.getChromosomesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockChromosomeService.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
 
             PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = new PagedModel<>(
@@ -199,12 +200,12 @@ public class ContigAliasHandlerTest {
 
         @Test
         public void getChromosomeByGenbank() {
-            testChromosomeEntityResponse(handler.getChromosomeByGenbank(entity.getGenbank()));
+            testChromosomeEntityResponse(handler.getChromosomesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         public void getChromosomeByRefseq() {
-            testChromosomeEntityResponse(handler.getChromosomeByRefseq(entity.getRefseq()));
+            testChromosomeEntityResponse(handler.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
         void testChromosomeEntityResponse(PagedModel<EntityModel<ChromosomeEntity>> body) {
@@ -239,11 +240,11 @@ public class ContigAliasHandlerTest {
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
-                Optional<AssemblyEntity> entityOptional = Optional.of(this.assemblyEntity);
-                Mockito.when(mockChromosomeService.getAssemblyByChromosomeGenbank(generate.getGenbank()))
-                       .thenReturn(entityOptional);
-                Mockito.when(mockChromosomeService.getAssemblyByChromosomeRefseq(generate.getRefseq()))
-                       .thenReturn(entityOptional);
+                List<AssemblyEntity> listOfEntity = Collections.singletonList(this.assemblyEntity);
+                Mockito.when(mockChromosomeService.getAssembliesByChromosomeGenbank(generate.getGenbank()))
+                       .thenReturn(listOfEntity);
+                Mockito.when(mockChromosomeService.getAssembliesByChromosomeRefseq(generate.getRefseq()))
+                       .thenReturn(listOfEntity);
             }
             PageImpl<ChromosomeEntity> pageOfChromosomeEntities = new PageImpl<>(chromosomeEntities);
             Mockito.when(mockChromosomeService
@@ -309,14 +310,14 @@ public class ContigAliasHandlerTest {
         @Test
         void getAssemblyByChromosomeGenbank() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                testAssemblyEntityResponse(handler.getAssemblyByChromosomeGenbank(chromosomeEntity.getGenbank()));
+                testAssemblyEntityResponse(handler.getAssembliesByChromosomeGenbank(chromosomeEntity.getGenbank()));
             }
         }
 
         @Test
         void getAssemblyByChromosomeRefseq() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                testAssemblyEntityResponse(handler.getAssemblyByChromosomeRefseq(chromosomeEntity.getRefseq()));
+                testAssemblyEntityResponse(handler.getAssembliesByChromosomeRefseq(chromosomeEntity.getRefseq()));
             }
         }
 

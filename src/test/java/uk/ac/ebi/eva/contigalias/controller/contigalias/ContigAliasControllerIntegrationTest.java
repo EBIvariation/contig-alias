@@ -92,9 +92,9 @@ public class ContigAliasControllerIntegrationTest {
         when(mockHandler.getAssemblyByRefseq(assemblyEntity.getRefseq()))
                 .thenReturn(assemblyPagedModel);
 
-        when(mockHandler.getChromosomeByGenbank(chromosomeEntity.getGenbank()))
+        when(mockHandler.getChromosomesByGenbank(chromosomeEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
-        when(mockHandler.getChromosomeByRefseq(chromosomeEntity.getRefseq()))
+        when(mockHandler.getChromosomesByRefseq(chromosomeEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
         when(mockHandler.getChromosomesByChromosomeNameAndAssemblyAccession(
                 chromosomeEntity.getName(), assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST))
@@ -109,9 +109,9 @@ public class ContigAliasControllerIntegrationTest {
                 chromosomeEntity.getUcscName(), assemblyEntity.getTaxid(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
 
-        when(mockHandler.getAssemblyByChromosomeGenbank(assemblyEntity.getGenbank()))
+        when(mockHandler.getAssembliesByChromosomeGenbank(assemblyEntity.getGenbank()))
                 .thenReturn(assemblyPagedModel);
-        when(mockHandler.getAssemblyByChromosomeRefseq(assemblyEntity.getRefseq()))
+        when(mockHandler.getAssembliesByChromosomeRefseq(assemblyEntity.getRefseq()))
                 .thenReturn(assemblyPagedModel);
 
         when(mockHandler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
@@ -215,14 +215,14 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getAssemblyByChromosomeGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/contig-alias/v1/assemblies/chromosome/genbank/{genbank}", assemblyEntity.getGenbank()));
+                get("/contig-alias/v1/chromosomes/genbank/{genbank}/assemblies", assemblyEntity.getGenbank()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
     @Test
     void getAssemblyByChromosomeRefseq() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/contig-alias/v1/assemblies/chromosome/refseq/{refseq}", assemblyEntity.getRefseq()));
+                get("/contig-alias/v1/chromosomes/refseq/{refseq}/assemblies", assemblyEntity.getRefseq()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 

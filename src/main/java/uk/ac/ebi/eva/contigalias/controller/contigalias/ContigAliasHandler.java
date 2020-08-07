@@ -83,24 +83,24 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(page, assemblyAssembler);
     }
 
-    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByChromosomeGenbank(String genbank) {
-        Optional<AssemblyEntity> assembly = chromosomeService.getAssemblyByChromosomeGenbank(genbank);
-        return generatePagedModelFromPage(assembly, assemblyAssembler);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssembliesByChromosomeGenbank(String genbank) {
+        List<AssemblyEntity> assemblies = chromosomeService.getAssembliesByChromosomeGenbank(genbank);
+        return generatePagedModelFromPage(new PageImpl<>(assemblies), assemblyAssembler);
     }
 
-    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByChromosomeRefseq(String refseq) {
-        Optional<AssemblyEntity> assembly = chromosomeService.getAssemblyByChromosomeRefseq(refseq);
-        return generatePagedModelFromPage(assembly, assemblyAssembler);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssembliesByChromosomeRefseq(String refseq) {
+        List<AssemblyEntity> assemblies = chromosomeService.getAssembliesByChromosomeRefseq(refseq);
+        return generatePagedModelFromPage(new PageImpl<>(assemblies), assemblyAssembler);
     }
 
-    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByGenbank(String genbank) {
-        Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByGenbank(genbank);
-        return generatePagedModelFromPage(convertToPage(entity), chromosomeAssembler);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByGenbank(String genbank, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByGenbank(genbank, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
-    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomeByRefseq(String refseq) {
-        Optional<ChromosomeEntity> entity = chromosomeService.getChromosomeByRefseq(refseq);
-        return generatePagedModelFromPage(convertToPage(entity), chromosomeAssembler);
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByRefseq(String refseq, Pageable request) {
+        Page<ChromosomeEntity> page = chromosomeService.getChromosomesByRefseq(refseq, request);
+        return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
     public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyGenbank(String genbank, Pageable request) {

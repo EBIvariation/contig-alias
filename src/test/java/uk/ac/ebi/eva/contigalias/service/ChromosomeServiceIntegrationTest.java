@@ -21,16 +21,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -53,20 +53,22 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByGenbank() {
-        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByGenbank(entity.getGenbank());
-        assertChromosomePageIdenticalToEntity(chromosomes);
+        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(
+                entity.getGenbank(), DEFAULT_PAGE_REQUEST);
+        assertChromosomePageIdenticalToEntity(page);
     }
 
     @Test
     void getChromosomeByRefseq() {
-        Optional<ChromosomeEntity> chromosomes = service.getChromosomeByRefseq(entity.getRefseq());
-        assertChromosomePageIdenticalToEntity(chromosomes);
+        Page<ChromosomeEntity> page = service.getChromosomesByRefseq(
+                entity.getRefseq(), DEFAULT_PAGE_REQUEST);
+        assertChromosomePageIdenticalToEntity(page);
     }
 
-    void assertChromosomePageIdenticalToEntity(Optional<ChromosomeEntity> entity) {
-        assertNotNull(entity);
-        assertTrue(entity.isPresent());
-        assertChromosomeIdenticalToEntity(entity.get());
+    void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
+        assertNotNull(page);
+        assertTrue(page.getTotalElements() > 0);
+        page.forEach(this::assertChromosomeIdenticalToEntity);
     }
 
     void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {

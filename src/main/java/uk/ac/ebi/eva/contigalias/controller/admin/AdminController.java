@@ -36,7 +36,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import java.io.IOException;
 import java.util.List;
 
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.BAD_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
@@ -71,7 +70,7 @@ public class AdminController {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(accession);
             linkPagedModelGetChromosomesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
-        } else return BAD_REQUEST;
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Fetch an assembly from remote server using its GenBank or RefSeq accession and insert " +
