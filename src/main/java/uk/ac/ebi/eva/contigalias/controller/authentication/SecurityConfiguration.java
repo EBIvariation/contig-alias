@@ -55,8 +55,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeRequests()
-            .antMatchers("/contig-alias/**").permitAll()
-            .antMatchers("/contig-alias-admin/**").hasRole(ROLE_ADMIN)
+            .antMatchers("/v1/assemblies/**").permitAll()
+            .antMatchers("/v1/chromosomes/**").permitAll()
+            .antMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
             .and().httpBasic().realmName(REALM)
             .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
