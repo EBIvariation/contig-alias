@@ -75,14 +75,14 @@ public class AdminControllerIntegrationTest {
     @Test
     public void getAssemblyOrFetchByAccessionGCA() throws Exception {
         ResultActions request = this.mockMvc.perform(
-                get("/contig-alias-admin/v1/assemblies/{accession}", entity.getGenbank()));
+                get("/v1/admin/assemblies/{accession}", entity.getGenbank()));
         assertAssemblyPagedModelResponseValid(request);
     }
 
     @Test
     public void getAssemblyOrFetchByAccessionGCF() throws Exception {
         ResultActions request = this.mockMvc.perform(
-                get("/contig-alias-admin/v1/assemblies/{accession}", entity.getRefseq()));
+                get("/v1/admin/assemblies/{accession}", entity.getRefseq()));
         assertAssemblyPagedModelResponseValid(request);
     }
 
