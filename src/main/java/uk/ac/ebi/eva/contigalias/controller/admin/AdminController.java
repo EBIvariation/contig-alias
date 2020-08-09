@@ -36,6 +36,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import java.io.IOException;
 import java.util.List;
 
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.HATEOAS_EXPLANATION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGINATION_EXPLANATION;
@@ -62,7 +63,7 @@ public class AdminController {
                     "assembly at a remote source (NCBI by default). If the desired assembly is found at the remote " +
                     "source, it will fetch and add it to the local database and also return the result to the user. " +
                     "This endpoint will either return a list containing a single result or an HTTP status code of 404. "
-                    + PAGINATION_EXPLANATION)
+                    + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyOrFetchByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,

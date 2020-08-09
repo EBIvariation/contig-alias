@@ -39,6 +39,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.HATEOAS_EXPLANATION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGINATION_EXPLANATION;
@@ -89,7 +90,7 @@ public class ContigAliasController {
                     ". The accession can be either a GenBank or RefSeq accession and the endpoint will automatically " +
                     "fetch a result from the database for any assembly having the accession as its GenBank or RefSeq " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
-                    "code of 404. " + PAGINATION_EXPLANATION)
+                    "code of 404. " + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByAccession(
             @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
@@ -105,7 +106,7 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its GenBank accession.",
             notes = "Given an assembly's GenBank accession, this endpoint will return an assembly that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
-                    "code of 404. " + PAGINATION_EXPLANATION)
+                    "code of 404. " + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByGenbank(
             @PathVariable @ApiParam(value = "Genbank assembly accession. Eg: GCA_000001405.10") String genbank,
@@ -122,7 +123,7 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its RefSeq accession.",
             notes = "Given an assembly's RefSeq accession, this endpoint will return an assembly that matches that " +
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
-                    "code of 404. " + PAGINATION_EXPLANATION)
+                    "code of 404. " + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByRefseq(
             @PathVariable @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String refseq,
@@ -139,7 +140,7 @@ public class ContigAliasController {
     @ApiOperation(value = "Get an assembly using its Taxonomic ID.",
             notes = "Given an assembly's Taxonomic ID, this endpoint will return all assemblies that match the given " +
                     "Taxonomic ID. This endpoint will either return a list containing one or more assemblies or an " +
-                    "HTTP status code of 404. " + PAGINATION_EXPLANATION)
+                    "HTTP status code of 404. " + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/taxid/{taxid}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByTaxid(
             @PathVariable @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") long taxid,
@@ -156,7 +157,7 @@ public class ContigAliasController {
                     "associated with a chromosome having the same GenBank accession as the one provided. This " +
                     "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
                     "parameters (page and size) to control pagination of results. If the page number and/or page size" +
-                    " are invalid then an HTTP status code of 416 is returned by this endpoint. " + PAGINATION_EXPLANATION)
+                    " are invalid then an HTTP status code of 416 is returned by this endpoint. " + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "chromosomes/genbank/{genbank}/assemblies")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByChromosomeGenbank
             (@PathVariable @ApiParam(value = "GenBank accession of the chromosomes.") String genbank,
@@ -174,7 +175,8 @@ public class ContigAliasController {
                     "associated with a chromosome having the same RefSeq accession as the one provided. This " +
                     "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
                     "parameters (page and size) to control pagination of results. If the page number and/or page size" +
-                    " are invalid then an HTTP status code of 416 is returned by this endpoint. " + PAGINATION_EXPLANATION)
+                    " are invalid then an HTTP status code of 416 is returned by this endpoint. " + PAGINATION_EXPLANATION
+                    + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "chromosomes/refseq/{refseq}/assemblies")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByChromosomeRefseq(
             @PathVariable @ApiParam(value = "RefSeq accession of the chromosomes.") String refseq,
@@ -188,7 +190,8 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get a list of chromosomes using their common GenBank accession.",
             notes = "Given a chromosome's GenBank accession, this endpoint will return a list of all chromosomes that" +
-                    " match that accession. This endpoint will either return a list of chromosomes. " + PAGINATION_EXPLANATION)
+                    " match that accession. This endpoint will either return a list of chromosomes. " + PAGINATION_EXPLANATION
+                    + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "chromosomes/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByGenbank(
             @PathVariable @ApiParam(value = "Genbank chromosome accession. Eg: CM000663.2") String genbank,
@@ -201,7 +204,8 @@ public class ContigAliasController {
 
     @ApiOperation(value = "Get a list of chromosomes using their common RefSeq accession.",
             notes = "Given a chromosome's RefSeq accession, this endpoint will return a list of all chromosomes that " +
-                    "match that accession. This endpoint will either return a list of chromosomes. " + PAGINATION_EXPLANATION)
+                    "match that accession. This endpoint will either return a list of chromosomes. " + PAGINATION_EXPLANATION
+                    + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "chromosomes/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByRefseq(
             @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
@@ -213,7 +217,7 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.",
-            notes = PAGINATION_EXPLANATION)
+            notes = PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
@@ -247,7 +251,7 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.",
-            notes = PAGINATION_EXPLANATION)
+            notes = PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyGenbank(
             @PathVariable String genbank,
@@ -261,7 +265,7 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.",
-            notes = PAGINATION_EXPLANATION)
+            notes = PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyRefseq(
             @PathVariable String refseq,
@@ -296,7 +300,7 @@ public class ContigAliasController {
                     "given parameters. If no Taxonomic ID or accession are provided then the endpoint returns a list " +
                     "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
                     "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
-                    "HTTP error code 400 if invalid parameters are found. " + PAGINATION_EXPLANATION)
+                    "HTTP error code 400 if invalid parameters are found. " + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "chromosomes/name/{name}")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
             @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
