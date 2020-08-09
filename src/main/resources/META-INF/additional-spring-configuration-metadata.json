@@ -9,6 +9,16 @@
       "name": "controller.auth.admin.password",
       "type": "java.lang.String",
       "description": "Password used for AdminController's security configuration."
+    },
+    {
+      "name": "server.ncbibrowser.ftp.url",
+      "type": "java.lang.String",
+      "description": "The URL of NCBI's FTP server."
+    },
+    {
+      "name": "server.ncbibrowser.ftp.port",
+      "type": "java.lang.Integer",
+      "description": "The port number of NCBI's FTP server."
     }
   ]
 }

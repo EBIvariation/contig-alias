@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.dus;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,12 +27,16 @@ import java.util.stream.Stream;
 
 public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
-    public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
-
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
+    @Value("${server.ncbibrowser.ftp.url}")
+    private String ncbiFtpServerUrl;
+
+    @Value("${server.ncbibrowser.ftp.port}")
+    private int ncbiFtpServerPort;
+
     public void connect() throws IOException {
-        super.connect(NCBI_FTP_SERVER);
+        super.connect(ncbiFtpServerUrl, ncbiFtpServerPort);
     }
 
     /**
