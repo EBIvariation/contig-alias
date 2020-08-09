@@ -219,7 +219,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.",
-            notes = PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
+            notes = "Given an assembly's GenBank or RefSeq accession, this endpoint will return a list of all the " +
+                    "chromosomes that are associated with the assembly uniquely identified by the given accession. " +
+                    PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable(name = "accession") @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
@@ -254,7 +256,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.",
-            notes = PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
+            notes = "Given an assembly's GenBank accession, this endpoint will return a list of all the " +
+                    "chromosomes that are associated with the assembly uniquely identified by the given accession. " +
+                    PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyGenbank(
             @PathVariable(name = "genbank") @ApiParam(value = "Genbank assembly accession. Eg: GCA_000001405.10") String asmGenbank,
@@ -268,7 +272,9 @@ public class ContigAliasController {
     }
 
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.",
-            notes = PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
+            notes = "Given an assembly's RefSeq accession, this endpoint will return a list of all the " +
+                    "chromosomes that are associated with the assembly uniquely identified by the given accession. " +
+                    PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyRefseq(
             @PathVariable(name = "refseq") @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String asmRefseq,
