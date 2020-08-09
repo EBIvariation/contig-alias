@@ -38,15 +38,14 @@ public class ChromosomeService {
         this.repository = repository;
     }
 
-
     public Page<ChromosomeEntity> getChromosomesByGenbank(String genbank, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByGenbank(genbank, request);
-        return stripChromosomeFromAssembly(chromosomes);
+        return stripAssembliesFromChromosomes(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByRefseq(String refseq, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByRefseq(refseq, request);
-        return stripChromosomeFromAssembly(chromosomes);
+        return stripAssembliesFromChromosomes(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank, Pageable request) {
@@ -98,8 +97,9 @@ public class ChromosomeService {
         return injectAssemblyIntoChromosomes(page, assembly);
     }
 
-    public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request){
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(accession, accession, request);
+    public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request) {
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(
+                accession, accession, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
