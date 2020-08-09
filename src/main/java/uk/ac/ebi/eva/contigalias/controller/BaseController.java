@@ -38,6 +38,11 @@ public class BaseController {
             + " the data. Page size should be greater than 0 and if not specified then default page size is 10 " +
             "results per page.";
 
+    public static final String PAGINATION_EXPLANATION = "This endpoint is paginated which means that all results are " +
+            "not returned at once, instead a small subset is returned in the form of a page and the result needs to " +
+            "be traversed through this set of pages. You can control pagination by specifying the index and size of " +
+            "the page you want using the two optional parameters \"page\" and \"size\".";
+
     public static final PageRequest DEFAULT_PAGE_REQUEST = PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
 
     public static final String REL_CHROMOSOMES = "chromosomes";
