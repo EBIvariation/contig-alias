@@ -43,6 +43,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DE
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.REL_ASSEMBLY;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.REL_CHROMOSOMES;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.SINGLE_ITEM_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createPageRequest;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
@@ -195,7 +196,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomesByGenbank(
-                    genbank, PageRequest.of(0, 1));
+                    genbank, SINGLE_ITEM_PAGE_REQUEST);
             linkPagedModelGetAssemblyByChromosomeAccession(genbank, AUTHORITY_GENBANK, pagedModel);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
@@ -211,7 +212,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
             PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomesByRefseq(
-                    refseq, PageRequest.of(0, 1));
+                    refseq, SINGLE_ITEM_PAGE_REQUEST);
             linkPagedModelGetAssemblyByChromosomeAccession(refseq, AUTHORITY_REFSEQ, pagedModel);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);

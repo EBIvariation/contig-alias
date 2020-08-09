@@ -40,6 +40,8 @@ public class BaseController {
 
     public static final PageRequest DEFAULT_PAGE_REQUEST = PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
 
+    public static final PageRequest SINGLE_ITEM_PAGE_REQUEST = PageRequest.of(0, 1);
+
     public static final String REL_CHROMOSOMES = "chromosomes";
 
     public static final String REL_ASSEMBLY = "assembly";

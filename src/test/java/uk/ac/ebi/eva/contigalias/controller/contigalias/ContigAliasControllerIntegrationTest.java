@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
+import static uk.ac.ebi.eva.contigalias.controller.BaseController.SINGLE_ITEM_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_GENBANK;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_SEQUENCE_TYPE;
@@ -92,10 +93,11 @@ public class ContigAliasControllerIntegrationTest {
         when(mockHandler.getAssemblyByRefseq(assemblyEntity.getRefseq()))
                 .thenReturn(assemblyPagedModel);
 
-        when(mockHandler.getChromosomesByGenbank(chromosomeEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+        when(mockHandler.getChromosomesByGenbank(chromosomeEntity.getGenbank(), SINGLE_ITEM_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
-        when(mockHandler.getChromosomesByRefseq(chromosomeEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+        when(mockHandler.getChromosomesByRefseq(chromosomeEntity.getRefseq(), SINGLE_ITEM_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
+
         when(mockHandler.getChromosomesByChromosomeNameAndAssemblyAccession(
                 chromosomeEntity.getName(), assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
