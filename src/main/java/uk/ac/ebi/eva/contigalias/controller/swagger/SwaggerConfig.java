@@ -64,7 +64,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 })
                 .apiInfo(getApiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("uk.ac.ebi.eva.contigalias.controller"))
+                .apis(RequestHandlerSelectors.basePackage("uk.ac.ebi.eva.contigalias.controller.contigalias"))
                 .paths(PathSelectors.any())
                 .build();
     }
