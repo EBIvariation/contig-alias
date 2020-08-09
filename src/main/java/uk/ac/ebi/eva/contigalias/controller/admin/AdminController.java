@@ -66,12 +66,13 @@ public class AdminController {
                     + PAGINATION_EXPLANATION + " " + HATEOAS_EXPLANATION)
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyOrFetchByAccession(
-            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+            @PathVariable(name = "accession") @ApiParam(value = "Genbank or Refseq assembly accession. Eg: " +
+                    "GCA_000001405.10") String asmAccession,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(accession);
-            linkPagedModelGetChromosomesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(asmAccession);
+            linkPagedModelGetChromosomesByAssemblyAccession(asmAccession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -89,9 +90,10 @@ public class AdminController {
                     "already exists in the local database.")
     @PutMapping(value = "assemblies/{accession}")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
-            @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
+            @PathVariable(name = "accession") @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: " +
+                    "GCA_000001405.10") String asmAccession) throws IOException {
         try {
-            handler.fetchAndInsertAssemblyByAccession(accession);
+            handler.fetchAndInsertAssemblyByAccession(asmAccession);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -128,8 +130,9 @@ public class AdminController {
                     " not return any data.")
     @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(
-            @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) {
-        handler.deleteAssemblyByAccession(accession);
+            @PathVariable(name = "accession") @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: " +
+                    "GCA_000001405.10") String asmAccession) {
+        handler.deleteAssemblyByAccession(asmAccession);
     }
 
 }
