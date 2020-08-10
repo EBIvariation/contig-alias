@@ -19,11 +19,12 @@ package uk.ac.ebi.eva.contigalias.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -68,11 +69,13 @@ public class AssemblyEntity {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "assembly", cascade = CascadeType.ALL)
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ChromosomeEntity> chromosomes;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all scaffolds of the assembly present in the database.")
+    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
     private List<ScaffoldEntity> scaffolds;
 
