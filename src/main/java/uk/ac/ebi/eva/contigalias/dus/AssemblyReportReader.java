@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
@@ -30,6 +32,9 @@ import java.util.List;
 public class AssemblyReportReader {
 
     private final BufferedReader reader;
+
+    @Value("${config.scaffolds.enabled:false}")
+    private boolean SCAFFOLDS_ENABLED;
 
     private AssemblyEntity assemblyEntity;
 
@@ -77,7 +82,7 @@ public class AssemblyReportReader {
                 if (columns.length >= 6) {
                     if (columns[3].equals("Chromosome")) {
                         parseChromosomeLine(columns);
-                    } else if (columns[1].equals("unplaced-scaffold")) {
+                    } else if (SCAFFOLDS_ENABLED && columns[1].equals("unplaced-scaffold")) {
                         parseScaffoldLine(columns);
                     }
                 }
@@ -143,7 +148,7 @@ public class AssemblyReportReader {
         chromosomeEntity.setGenbank(columns[4]);
         chromosomeEntity.setRefseq(columns[6]);
 
-        if (columns.length > 8 && !columns[9].equals("na")){
+        if (columns.length > 8 && !columns[9].equals("na")) {
             chromosomeEntity.setUcscName(columns[9]);
         }
 
@@ -175,7 +180,7 @@ public class AssemblyReportReader {
 
         if (columns.length >= 9) {
             String ucscName = columns[9];
-            if (!ucscName.equals("na")){
+            if (!ucscName.equals("na")) {
                 scaffoldEntity.setUcscName(ucscName);
             }
         }
