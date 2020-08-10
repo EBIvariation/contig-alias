@@ -29,10 +29,10 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
-    @Value("${server.ncbibrowser.ftp.url}")
+    @Value("${server.ncbibrowser.ftp.url:ftp.ncbi.nlm.nih.gov}")
     private String ncbiFtpServerUrl;
 
-    @Value("${server.ncbibrowser.ftp.port}")
+    @Value("${server.ncbibrowser.ftp.port:21}")
     private int ncbiFtpServerPort;
 
     public void connect() throws IOException {
