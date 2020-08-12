@@ -38,11 +38,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 @EnableSwagger2WebMvc
 public class SwaggerConfig implements WebMvcConfigurer {
 
-    @Value("${server.servlet.context-path:/}")
-    private String contextPath;
-
     @Autowired
     SwaggerInterceptAdapter interceptAdapter;
+
+    @Value("${server.servlet.context-path:/}")
+    private String contextPath;
 
     @Bean
     public Docket api() {
@@ -72,7 +72,22 @@ public class SwaggerConfig implements WebMvcConfigurer {
     private ApiInfo getApiInfo() {
         return new ApiInfoBuilder()
                 .title("Contig-Alias API")
-                .description("Service to provide synonyms of chromosome/contig identifiers")
+                .description(
+                        "Service to provide synonyms of chromosome/contig identifiers." +
+                                "\nThe endpoints in the following controllers are paginated, which means that all " +
+                                "results aren't returned at once, instead a small subset is returned. This small " +
+                                "subset in the form of a page and the result need to be traversed through this set of" +
+                                " pages." +
+                                "\nYou can control pagination by specifying the index and size of the page you want " +
+                                "using the two optional parameters \"page\" and \"size\" while querying the desired " +
+                                "endpoint." +
+                                "\nThe endpoints in the following controllers also provided hyperlinks to other " +
+                                "relevant endpoints to help the user navigate the API with ease. These links are " +
+                                "embedded inside an object called \"_links\" which is present at the root level of " +
+                                "the response." +
+                                "\nSome information about pagination is also similarly included in a root level " +
+                                "object called \"page\". Due to this, the actual result is not available at the root " +
+                                "level but is actually embedded in another root level element.")
                 .version("1.0")
                 .contact(new Contact("GitHub Repository", "https://github.com/EBIvariation/contig-alias", null))
                 .license("Apache-2.0")
