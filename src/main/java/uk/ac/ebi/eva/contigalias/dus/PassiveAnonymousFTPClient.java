@@ -25,7 +25,7 @@ import java.io.IOException;
 
 public class PassiveAnonymousFTPClient extends FTPClient {
 
-    private static final int DEFAULT_FTP_PORT = 21;
+    public static final int DEFAULT_FTP_PORT = 21;
 
     private final Logger logger = LoggerFactory.getLogger(PassiveAnonymousFTPClient.class);
 

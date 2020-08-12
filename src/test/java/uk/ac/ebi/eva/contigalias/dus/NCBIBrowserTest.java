@@ -19,6 +19,8 @@ package uk.ac.ebi.eva.contigalias.dus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,13 +29,14 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
 public class NCBIBrowserTest {
 
+    @Autowired
     private NCBIBrowser ncbiBrowser;
 
     @BeforeEach
     void setUp() throws IOException {
-        ncbiBrowser = new NCBIBrowser();
         ncbiBrowser.connect();
     }
 
