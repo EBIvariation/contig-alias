@@ -38,6 +38,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 @EnableSwagger2WebMvc
 public class SwaggerConfig implements WebMvcConfigurer {
 
+    private final String CONTROLLER_BASE_PATH = "uk.ac.ebi.eva.contigalias.controller";
+
     @Autowired
     SwaggerInterceptAdapter interceptAdapter;
 
@@ -45,28 +47,45 @@ public class SwaggerConfig implements WebMvcConfigurer {
     private String contextPath;
 
     @Bean
-    public Docket api() {
+    public Docket publicApi() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .pathProvider(new PathProvider() {
-                    @Override
-                    public String getOperationPath(String operationPath) {
-                        if (operationPath.startsWith(contextPath)) {
-                            operationPath = operationPath.substring(contextPath.length());
-                        }
-                        return Paths.removeAdjacentForwardSlashes(
-                                UriComponentsBuilder.newInstance().replacePath(operationPath).build().toString());
-                    }
-
-                    @Override
-                    public String getResourceListingPath(String groupName, String apiDeclaration) {
-                        return null;
-                    }
-                })
+                .groupName("v1/contig-alias")
+                .pathProvider(getPathProvider())
                 .apiInfo(getApiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("uk.ac.ebi.eva.contigalias.controller.contigalias"))
+                .apis(RequestHandlerSelectors.basePackage(CONTROLLER_BASE_PATH + ".contigalias"))
                 .paths(PathSelectors.any())
                 .build();
+    }
+
+    @Bean
+    public Docket adminApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("v1/only-admins")
+                .pathProvider(getPathProvider())
+                .apiInfo(getApiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage(CONTROLLER_BASE_PATH + ".controller.admin"))
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+    private PathProvider getPathProvider() {
+        return new PathProvider() {
+            @Override
+            public String getOperationPath(String operationPath) {
+                if (operationPath.startsWith(contextPath)) {
+                    operationPath = operationPath.substring(contextPath.length());
+                }
+                return Paths.removeAdjacentForwardSlashes(
+                        UriComponentsBuilder.newInstance().replacePath(operationPath).build().toString());
+            }
+
+            @Override
+            public String getResourceListingPath(String groupName, String apiDeclaration) {
+                return null;
+            }
+        };
     }
 
     private ApiInfo getApiInfo() {
