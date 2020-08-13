@@ -19,10 +19,15 @@ package uk.ac.ebi.eva.contigalias.dus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
+@ActiveProfiles("test")
 class AssemblyReportReaderTest {
 
     private static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
@@ -63,6 +70,7 @@ class AssemblyReportReaderTest {
 
     private InputStream stream;
 
+    @Autowired
     private AssemblyReportReader reader;
 
     @BeforeEach
@@ -70,7 +78,7 @@ class AssemblyReportReaderTest {
         stream = new FileInputStream(
                 new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
         streamReader = new InputStreamReader(stream);
-        reader = new AssemblyReportReader(streamReader);
+        reader.setInputStreamReader(streamReader);
         scaffoldEntity = new ScaffoldEntity()
                 .setName("ChrU_1")
                 .setGenbank("GJ057137.1")

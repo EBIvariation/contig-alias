@@ -30,7 +30,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-@ConditionalOnBean
 @Entity
 @Table(name = "scaffold")
 public class ScaffoldEntity {

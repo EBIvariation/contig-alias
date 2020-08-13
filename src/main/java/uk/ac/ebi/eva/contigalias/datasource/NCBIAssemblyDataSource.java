@@ -49,7 +49,7 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         }
         AssemblyEntity assemblyEntity;
         try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(directory.get())) {
-            AssemblyReportReader reader = new AssemblyReportReader(stream);
+            reader.setInputStream(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
             ncbiBrowser.disconnect();

@@ -17,6 +17,7 @@
 package uk.ac.ebi.eva.contigalias.dus;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
@@ -29,9 +30,10 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
+@Component
 public class AssemblyReportReader {
 
-    private final BufferedReader reader;
+    private BufferedReader reader;
 
     @Value("${config.scaffolds.enabled:false}")
     private boolean SCAFFOLDS_ENABLED;
@@ -40,12 +42,12 @@ public class AssemblyReportReader {
 
     private boolean reportParsed = false;
 
-    public AssemblyReportReader(InputStreamReader inputStreamReader) {
-        reader = new BufferedReader(inputStreamReader);
+    public void setInputStream(InputStream inputStream) {
+        setInputStreamReader(new InputStreamReader(inputStream));
     }
 
-    public AssemblyReportReader(InputStream inputStream) {
-        reader = new BufferedReader(new InputStreamReader(inputStream));
+    public void setInputStreamReader(InputStreamReader inputStreamReader) {
+        reader = new BufferedReader(inputStreamReader);
     }
 
     /**
@@ -69,7 +71,10 @@ public class AssemblyReportReader {
      *
      * @throws IOException Passes IOException thrown by {@link BufferedReader#readLine()}
      */
-    private void parseReport() throws IOException {
+    private void parseReport() throws IOException, NullPointerException {
+        if (reader == null) {
+            throw new NullPointerException("Cannot use AssemblyReportReader without having a valid InputStreamReader.");
+        }
         String line = reader.readLine();
         while (line != null) {
             if (line.startsWith("# ")) {
