@@ -1,3 +1,4 @@
+
 # contig-alias #
 Reference sequences are files that are used as a reference to describe variants that are present in analyzed sequences and play a central role in defining a baseline of knowledge against which our understanding of biological systems, phenotypes and variation are based upon. Reference sequence files often use different naming schemes to refer to the same sequence and thus there is a strong need to be able to cross reference chromosomes/contigs using different nomenclatures. Thus there is a need for a centralized database with a alias resolution service that can cross reference accessions easily and reliably. Also a web service is required that allows users to access these services from any client and has a mechanism for manually or periodically ingesting new aliases from a remote datasource.
 
@@ -9,6 +10,7 @@ This web service has some authenticated endpoints. The current approach to secur
 The application also requires to be connected to an external database (PostgreSQL by default) to function. The credentials for this database need to be provided at compilation time using the same maven profiles. 
 
 Copy this text, replace manually the values enclosed in ${} and put it all in your ~/.m2/settings.xml (or just add the profile if the file exists).
+Use ```<contig-alias.ncbi.proxy-url>``` and ```<contig-alias.ncbi.proxy-port>``` to configure proxy settings for accessing NCBI's FTP server. Set them to ```null``` and ```0``` to prevent overriding default the proxy configuration.
 ```
 <settings>
     <profiles>
@@ -21,6 +23,8 @@ Copy this text, replace manually the values enclosed in ${} and put it all in yo
                 <contig-alias.db-username>${db_username}</contig-alias.db-username>
                 <contig-alias.db-password>${db-password}</contig-alias.db-password>
                 <contig-alias.ddl-behaviour>${preferred_behaviour}</contig-alias.ddl-behaviour>
+                <contig-alias.ncbi.proxy-url>${optional default=null}</contig-alias.ncbi.proxy-url>
+                <contig-alias.ncbi.proxy-port>${optional default=0}</contig-alias.ncbi.proxy-port>
             </properties>
         </profile>
     </profiles>
