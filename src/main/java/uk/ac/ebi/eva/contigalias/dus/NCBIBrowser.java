@@ -31,6 +31,8 @@ import java.util.stream.Stream;
 @Component
 public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
+    public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
+
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
     @Value("${server.ncbibrowser.ftp.url}")
@@ -45,7 +47,7 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
             super.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ncbiFtpServerUrl, ncbiFtpServerPort)));
             super.connect(ncbiFtpServerUrl, ncbiFtpServerPort);
         } else {
-            super.connect("ftp.ncbi.nlm.nih.gov");
+            super.connect(NCBI_FTP_SERVER);
         }
     }
 
