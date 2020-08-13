@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_NUMBER;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
-import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_GENBANK;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_INSDC;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_SEQUENCE_TYPE;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_UCSC_TYPE;
@@ -151,7 +151,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getAssemblyByGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/genbank/{genbank}", assemblyEntity.getGenbank()));
+                get("/v1/assemblies/insdc/{insdc}", assemblyEntity.getGenbank()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
@@ -165,7 +165,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getChromosomeByGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/chromosomes/genbank/{genbank}", chromosomeEntity.getGenbank()));
+                get("/v1/chromosomes/insdc/{insdc}", chromosomeEntity.getGenbank()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
@@ -215,7 +215,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getAssemblyByChromosomeGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/chromosomes/genbank/{genbank}/assemblies", assemblyEntity.getGenbank()));
+                get("/v1/chromosomes/insdc/{insdc}/assemblies", assemblyEntity.getGenbank()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
@@ -236,7 +236,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getChromosomesByAssemblyGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
+                get("/v1/assemblies/insdc/{insdc}/chromosomes", assemblyEntity.getGenbank()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
@@ -244,7 +244,7 @@ public class ContigAliasControllerIntegrationTest {
     void getChromosomesByAssemblyAccessionGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank())
-                        .param("authority", AUTHORITY_GENBANK));
+                        .param("authority", AUTHORITY_INSDC));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
