@@ -10,7 +10,7 @@ This web service has some authenticated endpoints. The current approach to secur
 The application also requires to be connected to an external database (PostgreSQL by default) to function. The credentials for this database need to be provided at compilation time using the same maven profiles. 
 
 Copy this text, replace manually the values enclosed in ${} and put it all in your ~/.m2/settings.xml (or just add the profile if the file exists).
-Use ```<contig-alias.ncbi.proxy-url>``` and ```<contig-alias.ncbi.proxy-port>``` to configure proxy settings for accessing NCBI's FTP server. Set them to ```null``` and ```0``` to prevent overriding default the proxy configuration.
+Use `<contig-alias.ncbi.proxy-url>` and `<contig-alias.ncbi.proxy-port>` to configure proxy settings for accessing NCBI's FTP server. Set them to `null` and `0` to prevent overriding default the proxy configuration.
 ```
 <settings>
     <profiles>
