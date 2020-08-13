@@ -203,7 +203,6 @@ public class AssemblyReportReader {
         scaffolds.add(scaffoldEntity);
     }
 
-
     public boolean ready() throws IOException {
         return reader.ready();
     }

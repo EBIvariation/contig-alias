@@ -33,6 +33,8 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
     private final NCBIBrowserFactory factory;
 
+    private final AssemblyReportReader reader;
+
     @Autowired
     public NCBIAssemblyDataSource(NCBIBrowserFactory factory) {
         this.factory = factory;
