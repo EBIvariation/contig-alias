@@ -33,20 +33,20 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
-    @Value("${server.ncbibrowser.ftp.url:ftp.ncbi.nlm.nih.gov}")
+    @Value("${server.ncbibrowser.ftp.url}")
     private String ncbiFtpServerUrl;
 
-    @Value("${server.ncbibrowser.ftp.port:21}")
+    @Value("${server.ncbibrowser.ftp.port}")
     private Integer ncbiFtpServerPort;
 
     public void connect() throws IOException {
-        if (ncbiFtpServerPort == null) {
-            ncbiFtpServerPort = DEFAULT_FTP_PORT;
-        }
-        if (ncbiFtpServerUrl != null) {
+        if (ncbiFtpServerUrl != null && !ncbiFtpServerUrl.equals("null") &&
+                ncbiFtpServerPort != null && ncbiFtpServerPort != 0) {
             super.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ncbiFtpServerUrl, ncbiFtpServerPort)));
+            super.connect(ncbiFtpServerUrl, ncbiFtpServerPort);
+        } else {
+            super.connect("ftp.ncbi.nlm.nih.gov");
         }
-        super.connect(ncbiFtpServerUrl, ncbiFtpServerPort);
     }
 
     /**
