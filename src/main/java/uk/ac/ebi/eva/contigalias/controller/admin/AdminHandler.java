@@ -64,4 +64,7 @@ public class AdminHandler {
         service.deleteAssemblyByAccession(accession);
     }
 
+    public void putAssemblyChecksumsByAccession(String accession, String md5, String trunc512) {
+        service.putAssemblyChecksumsByAccession(accession, md5, trunc512);
+    }
 }

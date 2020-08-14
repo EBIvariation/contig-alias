@@ -75,7 +75,7 @@ public class AssemblyServiceIntegrationTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         for (AssemblyEntity entity : entities) {
             service.deleteAssembly(entity);
         }
@@ -226,9 +226,21 @@ public class AssemblyServiceIntegrationTest {
             }
         }
 
-        void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> page) {
-            assertOptionalValid(page);
-            assertAssemblyEntityIdenticalToEntity(page.get());
+        @Test
+        void putAssemblyChecksumsByAccession() {
+            String md5 = "md5checksum";
+            String trunc512 = "trunc512checksum";
+            service.putAssemblyChecksumsByAccession(entity.getGenbank(), md5, trunc512);
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
+            assertAssemblyOptionalIdenticalToEntity(accession);
+            AssemblyEntity assemblyEntity = accession.get();
+            assertEquals(md5, assemblyEntity.getMd5checksum());
+            assertEquals(trunc512, assemblyEntity.getTrunc512checksum());
+        }
+
+        void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> optional) {
+            assertOptionalValid(optional);
+            assertAssemblyEntityIdenticalToEntity(optional.get());
         }
 
         void assertAssemblyEntityIdenticalToEntity(AssemblyEntity actual) {

@@ -85,7 +85,7 @@ public class AdminController {
                     "any data except an HTTP status code of 400 in case the user tries to insert an assembly that " +
                     "already exists in the local database.")
     @PutMapping(value = "assemblies/{accession}")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
+    public ResponseEntity<Void> fetchAndInsertAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
         try {
             handler.fetchAndInsertAssemblyByAccession(accession);
@@ -107,7 +107,7 @@ public class AdminController {
                     " endpoint does not return any data and processes elements in the given list in an asynchronous " +
                     "parallel manner.")
     @PutMapping(value = "assemblies")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
+    public ResponseEntity<Void> fetchAndInsertAssemblyByAccession(
             @RequestBody(required = false) @ApiParam(value = "A JSON array of GenBank or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
@@ -115,6 +115,14 @@ public class AdminController {
         }
         handler.fetchAndInsertAssemblyByAccession(accessions);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping(value = "assemblies/{accession}/checksum")
+    public void putAssemblyChecksumsByAccession(
+            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the assembly.") String md5,
+            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the assembly.") String trunc512) {
+        handler.putAssemblyChecksumsByAccession(accession, md5, trunc512);
     }
 
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
