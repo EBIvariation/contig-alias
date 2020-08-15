@@ -45,10 +45,8 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         if (ncbiFtpServerUrl != null && !ncbiFtpServerUrl.equals("null") &&
                 ncbiFtpServerPort != null && ncbiFtpServerPort != 0) {
             super.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ncbiFtpServerUrl, ncbiFtpServerPort)));
-            super.connect(ncbiFtpServerUrl, ncbiFtpServerPort);
-        } else {
-            super.connect(NCBI_FTP_SERVER);
         }
+        super.connect(NCBI_FTP_SERVER);
     }
 
     /**
