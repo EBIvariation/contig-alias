@@ -9,6 +9,16 @@
       "name": "controller.auth.admin.password",
       "type": "java.lang.String",
       "description": "Password used for AdminController's security configuration."
+    },
+    {
+      "name": "ftp.proxy.host",
+      "type": "java.lang.String",
+      "description": "The URL of the proxy for FTP connections."
+    },
+    {
+      "name": "ftp.proxy.port",
+      "type": "java.lang.Integer",
+      "description": "The port of the proxy for FTP connections."
     }
   ]
 }
