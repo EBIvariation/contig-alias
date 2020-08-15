@@ -122,6 +122,12 @@
             <version>2.10.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
         <!-- https://search.maven.org/artifact/org.springframework.boot/spring-boot-starter-hateoas -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
