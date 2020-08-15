@@ -11,14 +11,14 @@
       "description": "Password used for AdminController's security configuration."
     },
     {
-      "name": "server.ncbibrowser.ftp.url",
+      "name": "ftp.proxy.host",
       "type": "java.lang.String",
-      "description": "The URL of NCBI's FTP server."
+      "description": "The URL of the proxy for FTP connections."
     },
     {
-      "name": "server.ncbibrowser.ftp.port",
+      "name": "ftp.proxy.port",
       "type": "java.lang.Integer",
-      "description": "The port number of NCBI's FTP server."
+      "description": "The port of the proxy for FTP connections."
     }
   ]
 }
