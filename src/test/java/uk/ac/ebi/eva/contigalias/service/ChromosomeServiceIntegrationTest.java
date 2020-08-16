@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
@@ -65,10 +66,25 @@ public class ChromosomeServiceIntegrationTest {
         assertChromosomePageIdenticalToEntity(page);
     }
 
+    @Test
+    void putChromosomeChecksumsByAccession() {
+        service.putChromosomeChecksumsByAccession(entity.getGenbank(),entity.getMd5checksum(), entity.getTrunc512checksum());
+        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(entity.getGenbank(),
+                                                                                      Pageable.unpaged());
+        assertChromosomePageWithChecksumsIdenticalToEntity(page);
+    }
+
     void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
         assertNotNull(page);
         assertTrue(page.getTotalElements() > 0);
         page.forEach(this::assertChromosomeIdenticalToEntity);
+    }
+
+    void assertChromosomePageWithChecksumsIdenticalToEntity(Page<ChromosomeEntity> page){
+        assertNotNull(page);
+        assertTrue(page.getTotalElements() > 0);
+        page.forEach(this::assertChromosomeIdenticalToEntity);
+        page.forEach(this::assertChromosomePageWithChecksumsIdenticalToEntity);
     }
 
     void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
@@ -76,6 +92,11 @@ public class ChromosomeServiceIntegrationTest {
         assertEquals(entity.getGenbank(), chromosomeEntity.getGenbank());
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
         assertEquals(entity.getUcscName(), chromosomeEntity.getUcscName());
+    }
+
+    void assertChromosomePageWithChecksumsIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
+        assertEquals(entity.getMd5checksum(), chromosomeEntity.getMd5checksum());
+        assertEquals(entity.getTrunc512checksum(), chromosomeEntity.getTrunc512checksum());
     }
 
 }
