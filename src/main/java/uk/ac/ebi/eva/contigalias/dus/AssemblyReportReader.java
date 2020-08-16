@@ -183,7 +183,7 @@ public class AssemblyReportReader {
         scaffoldEntity.setGenbank(columns[4]);
         scaffoldEntity.setRefseq(columns[6]);
 
-        if (columns.length >= 9) {
+        if (columns.length >= 10) {
             String ucscName = columns[9];
             if (!ucscName.equals("na")) {
                 scaffoldEntity.setUcscName(ucscName);
