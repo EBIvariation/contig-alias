@@ -28,18 +28,20 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@Component
 public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
-    @Value("${ftp.proxy.host}")
     private String ftpProxyHost;
 
-    @Value("${ftp.proxy.port}")
     private Integer ftpProxyPort;
+
+    public NCBIBrowser(String ftpProxyHost, Integer ftpProxyPort) {
+        this.ftpProxyHost = ftpProxyHost;
+        this.ftpProxyPort = ftpProxyPort;
+    }
 
     public void connect() throws IOException {
         if (ftpProxyHost != null && !ftpProxyHost.equals("null") &&
