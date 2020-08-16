@@ -117,13 +117,14 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(value = "assemblies/{accession}/checksum")
-    public void putAssemblyChecksumsByAccession(
-            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
-            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the assembly.") String md5,
-            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the assembly.") String trunc512) {
-        handler.putAssemblyChecksumsByAccession(accession, md5, trunc512);
-    }
+//    This endpoint can be enabled in the future when checksums for assemblies are added to the project.
+//    @PutMapping(value = "assemblies/{accession}/checksum")
+//    public void putAssemblyChecksumsByAccession(
+//            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+//            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the assembly.") String md5,
+//            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the assembly.") String trunc512) {
+//        handler.putAssemblyChecksumsByAccession(accession, md5, trunc512);
+//    }
 
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
             notes = "Given an assembly's accession this endpoint will delete the assembly that matches that " +
