@@ -228,14 +228,13 @@ public class AssemblyServiceIntegrationTest {
 
         @Test
         void putAssemblyChecksumsByAccession() {
-            String md5 = "md5checksum";
-            String trunc512 = "trunc512checksum";
-            service.putAssemblyChecksumsByAccession(entity.getGenbank(), md5, trunc512);
+            service.putAssemblyChecksumsByAccession(
+                    entity.getGenbank(), entity.getMd5checksum(), entity.getTrunc512checksum());
             Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
             assertAssemblyOptionalIdenticalToEntity(accession);
             AssemblyEntity assemblyEntity = accession.get();
-            assertEquals(md5, assemblyEntity.getMd5checksum());
-            assertEquals(trunc512, assemblyEntity.getTrunc512checksum());
+            assertEquals(entity.getMd5checksum(), assemblyEntity.getMd5checksum());
+            assertEquals(entity.getTrunc512checksum(), assemblyEntity.getTrunc512checksum());
         }
 
         void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> optional) {
