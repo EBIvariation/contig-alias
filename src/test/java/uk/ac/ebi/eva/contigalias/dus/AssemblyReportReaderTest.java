@@ -71,6 +71,8 @@ class AssemblyReportReaderTest {
     private InputStream stream;
 
     @Autowired
+    private AssemblyReportReaderFactory readerFactory;
+
     private AssemblyReportReader reader;
 
     @BeforeEach
@@ -78,7 +80,7 @@ class AssemblyReportReaderTest {
         stream = new FileInputStream(
                 new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
         streamReader = new InputStreamReader(stream);
-        reader.setInputStreamReader(streamReader);
+        reader = readerFactory.build(streamReader);
         scaffoldEntity = new ScaffoldEntity()
                 .setName("ChrU_1")
                 .setGenbank("GJ057137.1")

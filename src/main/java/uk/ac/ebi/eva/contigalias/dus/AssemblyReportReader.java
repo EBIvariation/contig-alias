@@ -16,38 +16,29 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 
-@Component
 public class AssemblyReportReader {
 
-    private BufferedReader reader;
-
-    @Value("${config.scaffolds.enabled:false}")
-    private boolean SCAFFOLDS_ENABLED;
+    private final BufferedReader reader;
 
     private AssemblyEntity assemblyEntity;
 
+    private final boolean isScaffoldsEnabled;
+
     private boolean reportParsed = false;
 
-    public void setInputStream(InputStream inputStream) {
-        setInputStreamReader(new InputStreamReader(inputStream));
-    }
-
-    public void setInputStreamReader(InputStreamReader inputStreamReader) {
-        reader = new BufferedReader(inputStreamReader);
+    public AssemblyReportReader(InputStreamReader inputStreamReader, boolean isScaffoldsEnabled) {
+        this.reader = new BufferedReader(inputStreamReader);
+        this.isScaffoldsEnabled = isScaffoldsEnabled;
     }
 
     /**
@@ -87,7 +78,7 @@ public class AssemblyReportReader {
                 if (columns.length >= 6) {
                     if (columns[3].equals("Chromosome")) {
                         parseChromosomeLine(columns);
-                    } else if (SCAFFOLDS_ENABLED && columns[1].equals("unplaced-scaffold")) {
+                    } else if (isScaffoldsEnabled && columns[1].equals("unplaced-scaffold")) {
                         parseScaffoldLine(columns);
                     }
                 }
