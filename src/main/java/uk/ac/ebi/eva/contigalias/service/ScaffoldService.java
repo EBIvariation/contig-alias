@@ -22,8 +22,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.repo.ScaffoldRepository;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class ScaffoldService {
@@ -96,6 +100,28 @@ public class ScaffoldService {
                 = repository.findScaffoldEntitiesByUcscNameAndAssembly(ucscName, assembly, request);
         assembly.setScaffolds(null);
         return injectAssemblyIntoScaffolds(page, assembly);
+    }
+
+    public List<AssemblyEntity> getAssembliesByScaffoldGenbank(String chrGenbank) {
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByGenbank(chrGenbank, Pageable.unpaged());
+        return extractAssembliesFromScaffolds(page);
+    }
+
+    public List<AssemblyEntity> getAssembliesByScaffoldRefseq(String chrRefseq) {
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByRefseq(chrRefseq, Pageable.unpaged());
+        return extractAssembliesFromScaffolds(page);
+    }
+
+    public List<AssemblyEntity> extractAssembliesFromScaffolds(Page<ScaffoldEntity> page) {
+        List<AssemblyEntity> list = new LinkedList<>();
+        if (page != null && page.getTotalElements() > 0) {
+            for (ScaffoldEntity scaffoldEntity : page) {
+                AssemblyEntity assembly = scaffoldEntity.getAssembly();
+                assembly.setChromosomes(null);
+                list.add(assembly);
+            }
+        }
+        return list;
     }
 
     private Page<ScaffoldEntity> injectAssemblyIntoScaffolds(Page<ScaffoldEntity> page, AssemblyEntity assembly) {

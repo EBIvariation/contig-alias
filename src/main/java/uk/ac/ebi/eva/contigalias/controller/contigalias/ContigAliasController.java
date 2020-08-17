@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.util.Optional;
 
@@ -278,8 +279,171 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
+            "parent assemblies.",
+            notes = "Given a chromosome's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
+                    "that it belongs to, this endpoint will return a non-emtpy list of chromosomes that satisfy the " +
+                    "given parameters. If no Taxonomic ID or accession are provided then the endpoint returns a list " +
+                    "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
+                    "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
+                    "HTTP error code 400 if invalid parameters are found.")
+    @GetMapping(value = "chromosomes/name/{name}")
+    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
+            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
+            @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
+                    "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
+            @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
+                    "sequence name or a UCSC style name. The acceptable param values are " + NAME_SEQUENCE_TYPE + " " +
+                    "and " + NAME_UCSC_TYPE + " respectively. If this parameter is omitted then the name is assumed " +
+                    "to be a " + NAME_SEQUENCE_TYPE + " name by default.") Optional<String> nameTypeOpt,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        boolean isNameValid = name != null && !name.isEmpty();
+        boolean isTaxidValid = taxid.isPresent();
+        boolean isAccessionValid = asmAccession.isPresent() && !asmAccession.get().isEmpty();
+        if (!isNameValid || (isTaxidValid && isAccessionValid)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        String nameType = nameTypeOpt.orElse(NAME_SEQUENCE_TYPE);
+        if (!isTaxidValid && !isAccessionValid) {
+            pagedModel = handler.getChromosomesByName(name, nameType, pageRequest);
+        } else if (isTaxidValid) {
+            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(
+                    name, taxid.get(), nameType, pageRequest);
+        } else {
+            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(
+                    name, asmAccession.get(), nameType, pageRequest);
+        }
+        return createAppropriateResponseEntity(pagedModel);
+
+    }
+
+    @ApiOperation(value = "Get a list of assemblies using the INSDC accession of one of the scaffolds they have " +
+            "in common.",
+            notes = "Given a scaffold's INSDC accession, this endpoint will return a list of assemblies that are " +
+                    "associated with a scaffold having the same INSDC accession as the one provided. This " +
+                    "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
+                    "parameters (page and size) to control pagination of results. If the page number and/or page size" +
+                    " are invalid then an HTTP status code of 416 is returned by this endpoint.")
+    @GetMapping(value = "scaffolds/insdc/{insdc}/assemblies")
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByScaffoldGenbank
+            (@PathVariable @ApiParam(value = "INSDC accession of the scaffolds.") String insdc,
+             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesByScaffoldGenbank(insdc);
+            return createAppropriateResponseEntity(pagedModel);
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+    }
+
+    @ApiOperation(value = "Get a list of assemblies using the RefSeq accession of one of the scaffolds they have " +
+            "in common.",
+            notes = "Given a scaffold's RefSeq accession, this endpoint will return a list of assemblies that are " +
+                    "associated with a scaffold having the same RefSeq accession as the one provided. This " +
+                    "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
+                    "parameters (page and size) to control pagination of results. If the page number and/or page size" +
+                    " are invalid then an HTTP status code of 416 is returned by this endpoint.")
+    @GetMapping(value = "scaffolds/refseq/{refseq}/assemblies")
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByScaffoldRefseq(
+            @PathVariable @ApiParam(value = "RefSeq accession of the scaffolds.") String refseq,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesByScaffoldRefseq(refseq);
+            return createAppropriateResponseEntity(pagedModel);
+        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+    }
+
+    @ApiOperation(value = "Get a list of scaffolds using their common INSDC accession.",
+            notes = "Given a scaffold's INSDC accession, this endpoint will return a list of all scaffolds that" +
+                    " match that accession. This endpoint will either return a list of scaffolds.")
+    @GetMapping(value = "scaffolds/insdc/{insdc}", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<ScaffoldEntity>>> getScaffoldsByGenbank(
+            @PathVariable @ApiParam(value = "Genbank scaffold accession. Eg: CM000663.2") String insdc,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ScaffoldEntity>> pagedModel = handler.getScaffoldsByGenbank(insdc, pageRequest);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    @ApiOperation(value = "Get a list of scaffolds using their common RefSeq accession.",
+            notes = "Given a scaffold's RefSeq accession, this endpoint will return a list of all scaffolds that " +
+                    "match that accession. This endpoint will either return a list of scaffolds.")
+    @GetMapping(value = "scaffolds/refseq/{refseq}", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<ScaffoldEntity>>> getScaffoldsByRefseq(
+            @PathVariable @ApiParam(value = "Refseq scaffold accession. Eg: NC_000001.11") String refseq,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ScaffoldEntity>> pagedModel = handler.getScaffoldsByRefseq(refseq, pageRequest);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    @ApiOperation(value = "Get scaffolds using the accession of its parent assembly.")
+    @GetMapping(value = "assemblies/{accession}/scaffolds", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<ScaffoldEntity>>> getScaffoldsByAssemblyAccession(
+            @PathVariable String accession,
+            @RequestParam(required = false, name = "authority") @ApiParam("Specify if the provided accession is a " +
+                    "INSDC or a RefSeq accession. The acceptable param values are " + AUTHORITY_GENBANK + " " +
+                    "and " + AUTHORITY_REFSEQ + " respectively. If this parameter is omitted then the results having " +
+                    "the given accession as either their INSDC or RefSeq accession are returned. This includes " +
+                    "cases where the INSDC and RefSeq accessions are the same.") String asmAuthority,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        if (accession == null || accession.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ScaffoldEntity>> pagedModel;
+        if (asmAuthority != null && !asmAuthority.isEmpty()) {
+            if (asmAuthority.toLowerCase().equals(AUTHORITY_GENBANK)) {
+                pagedModel = handler.getScaffoldsByAssemblyGenbank(accession, pageRequest);
+                linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_GENBANK, pagedModel);
+            } else if (asmAuthority.toLowerCase().equals(AUTHORITY_REFSEQ)) {
+                pagedModel = handler.getScaffoldsByAssemblyRefseq(accession, pageRequest);
+                linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_REFSEQ, pagedModel);
+            } else {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            pagedModel = handler.getScaffoldsByAssemblyAccession(accession, pageRequest);
+            linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_NONE, pagedModel);
+        }
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    @ApiOperation(value = "Get scaffolds using the insdc accession of its parent assembly.")
+    @GetMapping(value = "assemblies/insdc/{insdc}/scaffolds", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<ScaffoldEntity>>> getScaffoldsByAssemblyGenbank(
+            @PathVariable String insdc,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ScaffoldEntity>> pagedModel
+                = handler.getScaffoldsByAssemblyGenbank(insdc, pageRequest);
+        linkPagedModelGetAssemblyByAuthority(insdc, AUTHORITY_GENBANK, pagedModel);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
+    @ApiOperation(value = "Get scaffolds using the refseq accession of its parent assembly.")
+    @GetMapping(value = "assemblies/refseq/{refseq}/scaffolds", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<ScaffoldEntity>>> getScaffoldsByAssemblyRefseq(
+            @PathVariable String refseq,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<ScaffoldEntity>> pagedModel
+                = handler.getScaffoldsByAssemblyRefseq(refseq, pageRequest);
+        linkPagedModelGetAssemblyByAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
     private void linkPagedModelGetAssemblyByAuthority(
-            String accession, String authority, PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
+            String accession, String authority, PagedModel pagedModel) {
         ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
         if (authority.equals(AUTHORITY_INSDC)) {
             method = methodOn(ContigAliasController.class)
@@ -293,21 +457,19 @@ public class ContigAliasController {
         pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
     }
 
-    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
+    @ApiOperation(value = "Get scaffolds using a combination of their own name and the Taxonomic ID's of their " +
             "parent assemblies.",
-            notes = "Given a chromosome's name and the Taxonomic ID or the INSDC/RefSeq accession of the assembly " +
-                    "that it belongs to, this endpoint will return a non-emtpy list of chromosomes that satisfy the " +
+            notes = "Given a scaffold's name and the Taxonomic ID or the INSDC/RefSeq accession of the assembly " +
+                    "that it belongs to, this endpoint will return a non-emtpy list of scaffolds that satisfy the " +
                     "given parameters. If no Taxonomic ID or accession are provided then the endpoint returns a list " +
-                    "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
-                    "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
-                    "HTTP error code 400 if invalid parameters are found. ")
-    @GetMapping(value = "chromosomes/name/{name}")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
-            @PathVariable(name = "name") @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: " +
-                    "HSCHR1_RANDOM_CTG5") String chrName,
-            @RequestParam(name = "taxid", required = false) @ApiParam(value = "Taxonomic ID of a group of accessions." +
-                    " Eg: 9606") Optional<Long> asmTaxid,
-            @RequestParam(required = false, name = "accession") @ApiParam(value = "INSDC or Refseq assembly " +
+                    "of scaffolds which have the given name. Each scaffold will also have its parent assembly " +
+                    "nested inside it. The endpoint will either return a list of scaffolds or it will return an " +
+                    "HTTP error code 400 if invalid parameters are found.")
+    @GetMapping(value = "scaffolds/name/{name}")
+    public ResponseEntity<PagedModel<EntityModel<ScaffoldEntity>>> getScaffoldsByScaffoldNameAndAssemblyTaxidOrAccession(
+            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of scaffold. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
+            @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
                     "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
             @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
                     "sequence name or a UCSC style name. The acceptable param values are " + NAME_SEQUENCE_TYPE + " " +
@@ -322,16 +484,16 @@ public class ContigAliasController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        PagedModel<EntityModel<ScaffoldEntity>> pagedModel;
         String nameType = nameTypeOpt.orElse(NAME_SEQUENCE_TYPE);
         if (!isTaxidValid && !isAccessionValid) {
-            pagedModel = handler.getChromosomesByName(chrName, nameType, pageRequest);
+            pagedModel = handler.getScaffoldsByName(name, nameType, pageRequest);
         } else if (isTaxidValid) {
-            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(
-                    chrName, asmTaxid.get(), nameType, pageRequest);
+            pagedModel = handler.getScaffoldsByScaffoldNameAndAssemblyTaxid(
+                    name, taxid.get(), nameType, pageRequest);
         } else {
-            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(
-                    chrName, asmAccession.get(), nameType, pageRequest);
+            pagedModel = handler.getScaffoldsByScaffoldNameAndAssemblyAccession(
+                    name, asmAccession.get(), nameType, pageRequest);
         }
         return createAppropriateResponseEntity(pagedModel);
 

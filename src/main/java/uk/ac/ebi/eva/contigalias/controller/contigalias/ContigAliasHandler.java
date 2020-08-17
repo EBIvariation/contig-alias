@@ -27,8 +27,10 @@ import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
+import uk.ac.ebi.eva.contigalias.service.ScaffoldService;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,19 +46,27 @@ public class ContigAliasHandler {
 
     private final ChromosomeService chromosomeService;
 
+    private final ScaffoldService scaffoldService;
+
     private final PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
 
     private final PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler;
 
+    private final PagedResourcesAssembler<ScaffoldEntity> scaffoldAssembler;
+
     @Autowired
     public ContigAliasHandler(AssemblyService assemblyService,
                               ChromosomeService chromosomeService,
+                              ScaffoldService scaffoldService,
                               PagedResourcesAssembler<AssemblyEntity> assemblyAssembler,
-                              PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler) {
+                              PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler,
+                              PagedResourcesAssembler<ScaffoldEntity> scaffoldAssembler) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
+        this.scaffoldService = scaffoldService;
         this.assemblyAssembler = assemblyAssembler;
         this.chromosomeAssembler = chromosomeAssembler;
+        this.scaffoldAssembler = scaffoldAssembler;
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByAccession(String accession) {
@@ -113,7 +123,8 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(page, chromosomeAssembler);
     }
 
-    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyAccession(String accession, Pageable request) {
+    public PagedModel<EntityModel<ChromosomeEntity>> getChromosomesByAssemblyAccession(String accession,
+                                                                                       Pageable request) {
         Page<ChromosomeEntity> page = chromosomeService.getChromosomesByAssemblyAccession(accession, request);
         return generatePagedModelFromPage(page, chromosomeAssembler);
     }
@@ -153,4 +164,76 @@ public class ContigAliasHandler {
         }
         return generatePagedModelFromPage(page, chromosomeAssembler);
     }
+
+    public PagedModel<EntityModel<AssemblyEntity>> getAssembliesByScaffoldGenbank(String genbank) {
+        List<AssemblyEntity> assemblies = scaffoldService.getAssembliesByScaffoldGenbank(genbank);
+        return generatePagedModelFromPage(new PageImpl<>(assemblies), assemblyAssembler);
+    }
+
+    public PagedModel<EntityModel<AssemblyEntity>> getAssembliesByScaffoldRefseq(String refseq) {
+        List<AssemblyEntity> assemblies = scaffoldService.getAssembliesByScaffoldRefseq(refseq);
+        return generatePagedModelFromPage(new PageImpl<>(assemblies), assemblyAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByGenbank(String genbank, Pageable request) {
+        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByGenbank(genbank, request);
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByRefseq(String refseq, Pageable request) {
+        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByRefseq(refseq, request);
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByAssemblyGenbank(String genbank, Pageable request) {
+        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByAssemblyGenbank(genbank, request);
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByAssemblyRefseq(String refseq, Pageable request) {
+        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByAssemblyRefseq(refseq, request);
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByAssemblyAccession(String accession, Pageable request) {
+        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByAssemblyAccession(accession, request);
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByScaffoldNameAndAssemblyTaxid(
+            String name, long taxid, String nameType, Pageable request) {
+        Page<ScaffoldEntity> page;
+        if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
+            page = scaffoldService.getScaffoldsByUcscNameAndAssemblyTaxid(name, taxid, request);
+        } else {
+            page = scaffoldService.getScaffoldsByNameAndAssemblyTaxid(name, taxid, request);
+        }
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByScaffoldNameAndAssemblyAccession(
+            String name, String accession, String nameType, Pageable request) {
+        Page<ScaffoldEntity> page = new PageImpl<>(Collections.emptyList());
+        Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
+        if (assembly.isPresent()) {
+            if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
+                page = scaffoldService.getScaffoldsByUcscNameAndAssembly(name, assembly.get(), request);
+            } else {
+                page = scaffoldService.getScaffoldsByNameAndAssembly(name, assembly.get(), request);
+            }
+        }
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
+    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByName(
+            String name, String nameType, Pageable request) {
+        Page<ScaffoldEntity> page;
+        if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
+            page = scaffoldService.getScaffoldsByUcscName(name, request);
+        } else {
+            page = scaffoldService.getScaffoldsByName(name, request);
+        }
+        return generatePagedModelFromPage(page, scaffoldAssembler);
+    }
+
 }

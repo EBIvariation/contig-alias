@@ -29,10 +29,13 @@ import org.springframework.hateoas.PagedModel;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
+import uk.ac.ebi.eva.contigalias.entitygenerator.ScaffoldGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
+import uk.ac.ebi.eva.contigalias.service.ScaffoldService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,7 +84,7 @@ public class ContigAliasHandlerTest {
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null, assembler, null);
+            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null, null);
         }
 
         @Test
@@ -147,7 +150,8 @@ public class ContigAliasHandlerTest {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.wrap(entities, null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null, assembler, null);
+            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null,
+                                             null);
         }
 
         @Test
@@ -195,7 +199,8 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeAssembler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            handler = new ContigAliasHandler(null, mockChromosomeService, null, mockChromosomeAssembler);
+            handler = new ContigAliasHandler(null, mockChromosomeService, null, null, mockChromosomeAssembler,
+                                             null);
         }
 
         @Test
@@ -298,8 +303,9 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeAssembler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockAssemblyAssembler,
-                                             mockChromosomeAssembler);
+            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, null,
+                                             mockAssemblyAssembler,
+                                             mockChromosomeAssembler, null);
         }
 
         @AfterEach
@@ -427,4 +433,259 @@ public class ContigAliasHandlerTest {
         }
 
     }
+
+    @Nested
+    class ScaffoldServiceTests {
+
+        ScaffoldEntity entity = ScaffoldGenerator.generate();
+
+        @BeforeEach
+        void setUp() {
+            ScaffoldService mockScaffoldService = mock(ScaffoldService.class);
+
+            Page<ScaffoldEntity> pageOfEntity = new PageImpl<>(Collections.singletonList(entity));
+            Mockito.when(mockScaffoldService.getScaffoldsByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService.getScaffoldsByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+
+            PagedResourcesAssembler<ScaffoldEntity> mockScaffoldAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ScaffoldEntity>> scaffoldPagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(entity)), null);
+            Mockito.when(mockScaffoldAssembler.toModel(any()))
+                   .thenReturn(scaffoldPagedModel);
+
+            handler = new ContigAliasHandler(null, null, mockScaffoldService, null, null, mockScaffoldAssembler);
+        }
+
+        @Test
+        public void getScaffoldByGenbank() {
+            testScaffoldEntityResponse(handler.getScaffoldsByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST));
+        }
+
+        @Test
+        public void getScaffoldByRefseq() {
+            testScaffoldEntityResponse(handler.getScaffoldsByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST));
+        }
+
+        void testScaffoldEntityResponse(PagedModel<EntityModel<ScaffoldEntity>> body) {
+            assertNotNull(body);
+            Collection<EntityModel<ScaffoldEntity>> content = body.getContent();
+            assertTrue(content.size() > 0);
+            content.forEach(it -> assertScaffoldIdenticalToEntity(it.getContent()));
+        }
+
+        void assertScaffoldIdenticalToEntity(ScaffoldEntity scaffold) {
+            assertNotNull(scaffold);
+            assertEquals(entity.getName(), scaffold.getName());
+            assertEquals(entity.getGenbank(), scaffold.getGenbank());
+            assertEquals(entity.getRefseq(), scaffold.getRefseq());
+            assertEquals(entity.getUcscName(), scaffold.getUcscName());
+        }
+
+    }
+
+    @Nested
+    class ScaffoldServiceTestsWithAssemblies {
+
+        private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
+
+        private final List<ScaffoldEntity> scaffoldEntities = new LinkedList<>();
+
+        private final int SCAFFOLD_LIST_SIZE = 5;
+
+        @BeforeEach
+        void setup() {
+            ScaffoldService mockScaffoldService = mock(ScaffoldService.class);
+            for (int i = 0; i < SCAFFOLD_LIST_SIZE; i++) {
+                ScaffoldEntity generate = ScaffoldGenerator.generate(i, assemblyEntity);
+                scaffoldEntities.add(generate);
+                List<AssemblyEntity> listOfEntity = Collections.singletonList(this.assemblyEntity);
+                Mockito.when(mockScaffoldService.getAssembliesByScaffoldGenbank(generate.getGenbank()))
+                       .thenReturn(listOfEntity);
+                Mockito.when(mockScaffoldService.getAssembliesByScaffoldRefseq(generate.getRefseq()))
+                       .thenReturn(listOfEntity);
+            }
+            PageImpl<ScaffoldEntity> pageOfScaffoldEntities = new PageImpl<>(scaffoldEntities);
+            Mockito.when(mockScaffoldService
+                                 .getScaffoldsByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfScaffoldEntities);
+            Mockito.when(mockScaffoldService
+                                 .getScaffoldsByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfScaffoldEntities);
+
+            AssemblyService mockAssemblyService = mock(AssemblyService.class);
+            Optional<AssemblyEntity> optionalOfAssemblyEntity = Optional.of(this.assemblyEntity);
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.assemblyEntity.getGenbank()))
+                   .thenReturn(optionalOfAssemblyEntity);
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.assemblyEntity.getRefseq()))
+                   .thenReturn(optionalOfAssemblyEntity);
+            String chrName = scaffoldEntities.get(0)
+                                             .getName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            Mockito.when(
+                    mockScaffoldService.getScaffoldsByNameAndAssemblyTaxid(chrName, asmTaxid, DEFAULT_PAGE_REQUEST))
+                   .thenReturn(new PageImpl<>(
+                           scaffoldEntities
+                                   .stream()
+                                   .filter(it -> it.getName().equals(chrName) &&
+                                           it.getAssembly().getTaxid().equals(asmTaxid))
+                                   .collect(Collectors.toList())));
+
+            List<ScaffoldEntity> scaffoldsByNameAndAssembly = scaffoldEntities
+                    .stream()
+                    .filter(it -> it.getName().equals(chrName) &&
+                            it.getAssembly().equals(assemblyEntity))
+                    .collect(Collectors.toList());
+
+            Mockito.when(
+                    mockScaffoldService.getScaffoldsByNameAndAssembly(chrName, assemblyEntity, DEFAULT_PAGE_REQUEST))
+                   .thenReturn(new PageImpl<>(scaffoldsByNameAndAssembly));
+
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(assemblyEntity.getGenbank()))
+                   .thenReturn(Optional.of(assemblyEntity));
+
+            PagedResourcesAssembler<AssemblyEntity> mockAssemblyAssembler = mock(PagedResourcesAssembler.class);
+
+            PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel(
+                    Collections.singleton(new EntityModel<>(assemblyEntity)), null);
+            Mockito.when(mockAssemblyAssembler.toModel(any()))
+                   .thenReturn(assemblyPagedModel);
+
+            PagedResourcesAssembler<ScaffoldEntity> mockScaffoldAssembler = mock(PagedResourcesAssembler.class);
+
+            PagedModel<EntityModel<ScaffoldEntity>> scaffoldPagedModel = PagedModel.wrap(scaffoldEntities, null);
+            Mockito.when(mockScaffoldAssembler.toModel(any()))
+                   .thenReturn(scaffoldPagedModel);
+
+            handler = new ContigAliasHandler(mockAssemblyService, null, mockScaffoldService, mockAssemblyAssembler,
+                                             null, mockScaffoldAssembler);
+        }
+
+        @AfterEach
+        void tearDown() {
+            scaffoldEntities.clear();
+        }
+
+        @Test
+        void getAssemblyByScaffoldGenbank() {
+            for (ScaffoldEntity scaffoldEntity : scaffoldEntities) {
+                testAssemblyEntityResponse(handler.getAssembliesByScaffoldGenbank(scaffoldEntity.getGenbank()));
+            }
+        }
+
+        @Test
+        void getAssemblyByScaffoldRefseq() {
+            for (ScaffoldEntity scaffoldEntity : scaffoldEntities) {
+                testAssemblyEntityResponse(handler.getAssembliesByScaffoldRefseq(scaffoldEntity.getRefseq()));
+            }
+        }
+
+        @Test
+        void getScaffoldsByAssemblyGenbank() {
+            testScaffoldEntityResponses(
+                    handler.getScaffoldsByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
+        }
+
+        @Test
+        void getScaffoldsByAssemblyRefseq() {
+            testScaffoldEntityResponses(
+                    handler.getScaffoldsByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
+        }
+
+        @Test
+        void getScaffoldsByAssemblyAccessionGenbank() {
+            testScaffoldEntityResponses(
+                    handler.getScaffoldsByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
+        }
+
+        @Test
+        void getScaffoldsByAssemblyAccessionRefseq() {
+            testScaffoldEntityResponses(
+                    handler.getScaffoldsByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
+        }
+
+        void testAssemblyEntityResponse(PagedModel<EntityModel<AssemblyEntity>> pagedModel) {
+            assertNotNull(pagedModel);
+            Collection<EntityModel<AssemblyEntity>> content = pagedModel.getContent();
+            assertNotNull(content);
+            assertTrue(content.size() > 0);
+            List<AssemblyEntity> assemblyEntities = content
+                    .stream()
+                    .map(EntityModel::getContent)
+                    .collect(Collectors.toList());
+            assertNotNull(assemblyEntities);
+            assemblyEntities.forEach(this::testAssemblyEntityResponse);
+        }
+
+        @Test
+        void getScaffoldsByScaffoldNameAndAssemblyTaxid() {
+            String chrName = scaffoldEntities.get(0).getName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            PagedModel<EntityModel<ScaffoldEntity>> pagedModel = handler
+                    .getScaffoldsByScaffoldNameAndAssemblyTaxid(
+                            chrName, asmTaxid, NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToScaffoldEntities(pagedModel);
+        }
+
+        @Test
+        void getScaffoldsByScaffoldNameAndAssemblyAccession() {
+            String chrName = scaffoldEntities.get(0).getName();
+            PagedModel<EntityModel<ScaffoldEntity>> pagedModel = handler
+                    .getScaffoldsByScaffoldNameAndAssemblyAccession(
+                            chrName, assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToScaffoldEntities(pagedModel);
+        }
+
+        @Test
+        void getScaffoldsByScaffoldUcscNameAndAssemblyTaxid() {
+            String chrName = scaffoldEntities.get(0).getUcscName();
+            Long asmTaxid = assemblyEntity.getTaxid();
+            PagedModel<EntityModel<ScaffoldEntity>> pagedModel = handler
+                    .getScaffoldsByScaffoldNameAndAssemblyTaxid(
+                            chrName, asmTaxid, NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToScaffoldEntities(pagedModel);
+        }
+
+        @Test
+        void getScaffoldsByScaffoldUcscNameAndAssemblyAccession() {
+            String chrName = scaffoldEntities.get(0).getUcscName();
+            PagedModel<EntityModel<ScaffoldEntity>> pagedModel = handler
+                    .getScaffoldsByScaffoldNameAndAssemblyAccession(
+                            chrName, assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
+            assertPagedModelIdenticalToScaffoldEntities(pagedModel);
+        }
+
+        private void assertPagedModelIdenticalToScaffoldEntities(
+                PagedModel<EntityModel<ScaffoldEntity>> pagedModel) {
+            assertNotNull(pagedModel);
+            Collection<EntityModel<ScaffoldEntity>> content = pagedModel.getContent();
+            assertNotNull(content);
+            assertFalse(content.isEmpty());
+            List<ScaffoldEntity> collect = content.stream().map(EntityModel::getContent).collect(Collectors.toList());
+            collect.containsAll(scaffoldEntities);
+        }
+
+        void testAssemblyEntityResponse(AssemblyEntity assembly) {
+            assertNotNull(assembly);
+            assertEquals(this.assemblyEntity.getName(), assembly.getName());
+            assertEquals(this.assemblyEntity.getOrganism(), assembly.getOrganism());
+            assertEquals(this.assemblyEntity.getGenbank(), assembly.getGenbank());
+            assertEquals(this.assemblyEntity.getRefseq(), assembly.getRefseq());
+            assertEquals(this.assemblyEntity.getTaxid(), assembly.getTaxid());
+            assertEquals(this.assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
+        }
+
+        void testScaffoldEntityResponses(PagedModel<EntityModel<ScaffoldEntity>> entityModel) {
+            assertNotNull(entityModel);
+            Collection<EntityModel<ScaffoldEntity>> content = entityModel.getContent();
+            assertNotNull(content);
+            List<EntityModel<ScaffoldEntity>> list = new ArrayList<>(content);
+            assertEquals(scaffoldEntities.size(), list.size());
+            List<ScaffoldEntity> chxList = list.stream().map(EntityModel::getContent).collect(Collectors.toList());
+            assertTrue(scaffoldEntities.containsAll(chxList));
+        }
+
+    }
+
 }
