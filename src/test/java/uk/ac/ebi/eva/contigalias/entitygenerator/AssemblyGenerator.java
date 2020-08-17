@@ -41,7 +41,8 @@ public class AssemblyGenerator {
                 .setGenbankRefseqIdentical(new Random().nextBoolean())
                 .setMd5checksum("md5" + id)
                 .setTrunc512checksum("trunc512" + id)
-                .setChromosomes(new LinkedList<>());
+                .setChromosomes(new LinkedList<>())
+                .setScaffolds(new LinkedList<>());
     }
 
     public static AssemblyEntity generate() {
@@ -63,6 +64,7 @@ public class AssemblyGenerator {
         assertTrue(entity.getMd5checksum().endsWith(sId));
         assertTrue(entity.getTrunc512checksum().endsWith(sId));
         assertNotNull(entity.getChromosomes());
+        assertNotNull(entity.getScaffolds());
     }
 
     @Test
@@ -78,6 +80,7 @@ public class AssemblyGenerator {
         assertTrue(entity.getMd5checksum().endsWith(sId));
         assertTrue(entity.getTrunc512checksum().endsWith(sId));
         assertNotNull(entity.getChromosomes());
+        assertNotNull(entity.getScaffolds());
     }
 
 
