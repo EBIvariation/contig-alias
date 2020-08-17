@@ -21,6 +21,7 @@ import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReader;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
+import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
 import java.io.IOException;
@@ -30,16 +31,17 @@ import java.util.Optional;
 @Repository("NCBIDataSource")
 public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
-    private final NCBIBrowser ncbiBrowser;
+    private final NCBIBrowserFactory factory;
 
     @Autowired
-    public NCBIAssemblyDataSource(NCBIBrowser ncbiBrowser) {
-        this.ncbiBrowser = ncbiBrowser;
+    public NCBIAssemblyDataSource(NCBIBrowserFactory factory) {
+        this.factory = factory;
     }
 
     @Override
     public Optional<AssemblyEntity> getAssemblyByAccession(
             String accession) throws IOException, IllegalArgumentException {
+        NCBIBrowser ncbiBrowser = factory.build();
         ncbiBrowser.connect();
         Optional<String> directory = ncbiBrowser.getGenomeReportDirectory(accession);
         if (!directory.isPresent()) {

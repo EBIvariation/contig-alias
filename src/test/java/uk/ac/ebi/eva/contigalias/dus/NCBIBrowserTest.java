@@ -35,10 +35,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class NCBIBrowserTest {
 
     @Autowired
+    private NCBIBrowserFactory factory;
+
     private NCBIBrowser ncbiBrowser;
 
     @BeforeEach
     void setUp() throws IOException {
+        ncbiBrowser = factory.build();
         ncbiBrowser.connect();
     }
 
