@@ -68,10 +68,15 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void putChromosomeChecksumsByAccession() {
-        service.putChromosomeChecksumsByAccession(entity.getGenbank(),entity.getMd5checksum(), entity.getTrunc512checksum());
-        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(entity.getGenbank(),
-                                                                                      Pageable.unpaged());
-        assertChromosomePageWithChecksumsIdenticalToEntity(page);
+        String md5 = "MyCustomMd5ChecksumForTesting";
+        String trunc512 = "MyCustomTrunc512ChecksumForTesting";
+        service.putChromosomeChecksumsByAccession(entity.getGenbank(), md5, trunc512);
+        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(entity.getGenbank(), Pageable.unpaged());
+        assertChromosomePageIdenticalToEntity(page);
+        page.forEach(chromosomeEntity -> {
+            assertEquals(md5, chromosomeEntity.getMd5checksum());
+            assertEquals(trunc512, chromosomeEntity.getTrunc512checksum());
+        });
     }
 
     void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
@@ -80,23 +85,11 @@ public class ChromosomeServiceIntegrationTest {
         page.forEach(this::assertChromosomeIdenticalToEntity);
     }
 
-    void assertChromosomePageWithChecksumsIdenticalToEntity(Page<ChromosomeEntity> page){
-        assertNotNull(page);
-        assertTrue(page.getTotalElements() > 0);
-        page.forEach(this::assertChromosomeIdenticalToEntity);
-        page.forEach(this::assertChromosomePageWithChecksumsIdenticalToEntity);
-    }
-
     void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
         assertEquals(entity.getName(), chromosomeEntity.getName());
         assertEquals(entity.getGenbank(), chromosomeEntity.getGenbank());
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
         assertEquals(entity.getUcscName(), chromosomeEntity.getUcscName());
-    }
-
-    void assertChromosomePageWithChecksumsIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
-        assertEquals(entity.getMd5checksum(), chromosomeEntity.getMd5checksum());
-        assertEquals(entity.getTrunc512checksum(), chromosomeEntity.getTrunc512checksum());
     }
 
 }

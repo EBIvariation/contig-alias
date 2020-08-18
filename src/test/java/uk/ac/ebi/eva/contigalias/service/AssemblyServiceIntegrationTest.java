@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -228,13 +229,15 @@ public class AssemblyServiceIntegrationTest {
 
         @Test
         void putAssemblyChecksumsByAccession() {
+            String md5 = "MyCustomMd5ChecksumForTesting";
+            String trunc512 = "MyCustomTrunc512ChecksumForTesting";
             service.putAssemblyChecksumsByAccession(
-                    entity.getGenbank(), entity.getMd5checksum(), entity.getTrunc512checksum());
+                    entity.getGenbank(), md5, trunc512);
             Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
             assertAssemblyOptionalIdenticalToEntity(accession);
             AssemblyEntity assemblyEntity = accession.get();
-            assertEquals(entity.getMd5checksum(), assemblyEntity.getMd5checksum());
-            assertEquals(entity.getTrunc512checksum(), assemblyEntity.getTrunc512checksum());
+            assertEquals(md5, assemblyEntity.getMd5checksum());
+            assertEquals(trunc512, assemblyEntity.getTrunc512checksum());
         }
 
         void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> optional) {
