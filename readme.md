@@ -27,7 +27,7 @@ Set a boolean flag using `<contig-alias.scaffolds-enabled>` to enable or disable
                 <contig-alias.ddl-behaviour>${preferred_behaviour}</contig-alias.ddl-behaviour>
                 <ftp.proxy.host>${optional default=null}</ftp.proxy.host>
                 <ftp.proxy.port>${optional default=0}</ftp.proxy.port>
-                <contig-alias.scaffolds-enabled>${optinal default=false}</contig-alias.scaffolds-enabled>
+                <contig-alias.scaffolds-enabled>${optional default=false}</contig-alias.scaffolds-enabled>
             </properties>
         </profile>
     </profiles>
