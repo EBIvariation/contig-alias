@@ -29,10 +29,13 @@ import org.springframework.hateoas.PagedModel;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
+import uk.ac.ebi.eva.contigalias.entitygenerator.ScaffoldGenerator;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
+import uk.ac.ebi.eva.contigalias.service.ScaffoldService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -300,7 +303,23 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeAssembler.toModel(any()))
                    .thenReturn(chromosomePagedModel);
 
-            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, null,
+            ScaffoldEntity scaffoldEntity = ScaffoldGenerator.generate();
+
+            ScaffoldService mockScaffoldService = mock(ScaffoldService.class);
+
+            Page<ScaffoldEntity> pageOfEntity = new PageImpl<>(Collections.singletonList(scaffoldEntity));
+            Mockito.when(mockScaffoldService.getScaffoldsByGenbank(scaffoldEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService.getScaffoldsByRefseq(scaffoldEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+
+            PagedResourcesAssembler<ScaffoldEntity> mockScaffoldAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<ScaffoldEntity>> scaffoldPagedModel = new PagedModel<>(
+                    Collections.singletonList(new EntityModel<>(scaffoldEntity)), null);
+            Mockito.when(mockScaffoldAssembler.toModel(any()))
+                   .thenReturn(scaffoldPagedModel);
+
+            handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockScaffoldService,
                                              mockAssemblyAssembler,
                                              mockChromosomeAssembler, null);
         }
