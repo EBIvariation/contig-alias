@@ -139,37 +139,6 @@ public class ContigAliasControllerIntegrationTest {
                 .thenReturn(assemblyPagedModel);
         when(mockHandler.getAssemblyByRefseq(assemblyEntity.getRefseq()))
                 .thenReturn(assemblyPagedModel);
-
-        when(mockHandler.getScaffoldsByGenbank(scaffoldEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByRefseq(scaffoldEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByScaffoldNameAndAssemblyAccession(
-                scaffoldEntity.getName(), assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByScaffoldNameAndAssemblyTaxid(
-                scaffoldEntity.getName(), assemblyEntity.getTaxid(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByScaffoldNameAndAssemblyAccession(
-                scaffoldEntity.getUcscName(), assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByScaffoldNameAndAssemblyTaxid(
-                scaffoldEntity.getUcscName(), assemblyEntity.getTaxid(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-
-        when(mockHandler.getAssembliesByScaffoldGenbank(assemblyEntity.getGenbank()))
-                .thenReturn(assemblyPagedModel);
-        when(mockHandler.getAssembliesByScaffoldRefseq(assemblyEntity.getRefseq()))
-                .thenReturn(assemblyPagedModel);
-
-        when(mockHandler.getScaffoldsByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
-        when(mockHandler.getScaffoldsByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
-                .thenReturn(scaffoldPagedModel);
     }
 
     void assertAssemblyPagedModelResponseValid(ResultActions actions) throws Exception {
@@ -179,11 +148,6 @@ public class ContigAliasControllerIntegrationTest {
 
     void assertChromosomePagedModelResponseValid(ResultActions actions) throws Exception {
         String path = "$._embedded.chromosomeEntities[0]";
-        assertPagedModelResponseValid(actions, path);
-    }
-
-    void assertScaffoldPagedModelResponseValid(ResultActions actions) throws Exception {
-        String path = "$._embedded.scaffoldEntities[0]";
         assertPagedModelResponseValid(actions, path);
     }
 
@@ -315,106 +279,4 @@ public class ContigAliasControllerIntegrationTest {
                         .param("authority", AUTHORITY_REFSEQ));
         assertChromosomePagedModelResponseValid(resultActions);
     }
-
-    @Test
-    void getScaffoldByGenbank() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/insdc/{insdc}", scaffoldEntity.getGenbank()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldByRefseq() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/refseq/{refseq}", scaffoldEntity.getRefseq()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByScaffoldNameAndAssemblyTaxid() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/name/{name}",
-                    scaffoldEntity.getName()).param("taxid", assemblyEntity.getTaxid().toString()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByScaffoldNameAndAssemblyAccession() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/name/{name}",
-                    scaffoldEntity.getName()).param("accession", assemblyEntity.getGenbank()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByScaffoldUcscNameAndAssemblyTaxid() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/name/{name}",
-                    scaffoldEntity.getUcscName())
-                        .param("taxid", assemblyEntity.getTaxid().toString())
-                        .param("name", NAME_UCSC_TYPE));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByScaffoldUcscNameAndAssemblyAccession() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/name/{name}",
-                    scaffoldEntity.getUcscName())
-                        .param("accession", assemblyEntity.getGenbank())
-                        .param("name", NAME_UCSC_TYPE));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getAssemblyByScaffoldGenbank() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/insdc/{insdc}/assemblies", assemblyEntity.getGenbank()));
-        assertAssemblyPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getAssemblyByScaffoldRefseq() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/scaffolds/refseq/{refseq}/assemblies", assemblyEntity.getRefseq()));
-        assertAssemblyPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByAssemblyAccessionNoAuthority() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/{accession}/scaffolds", assemblyEntity.getGenbank()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByAssemblyGenbank() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/insdc/{insdc}/scaffolds", assemblyEntity.getGenbank()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByAssemblyAccessionGenbank() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/{accession}/scaffolds", assemblyEntity.getGenbank())
-                        .param("authority", AUTHORITY_GENBANK));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByAssemblyRefseq() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/refseq/{refseq}/scaffolds", assemblyEntity.getRefseq()));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
-    @Test
-    void getScaffoldsByAssemblyAccessionRefseq() throws Exception {
-        ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/{accession}/scaffolds", assemblyEntity.getRefseq())
-                        .param("authority", AUTHORITY_REFSEQ));
-        assertScaffoldPagedModelResponseValid(resultActions);
-    }
-
 }
