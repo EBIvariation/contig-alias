@@ -34,7 +34,7 @@ public class ChromosomeGenerator {
     private static final String PREFIX_NAME = "name";
 
     public static ChromosomeEntity generate(long id) {
-        return new ChromosomeEntity()
+        return (ChromosomeEntity) new ChromosomeEntity()
                 .setName(PREFIX_NAME + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)

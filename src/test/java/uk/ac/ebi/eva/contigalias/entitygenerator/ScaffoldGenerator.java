@@ -34,7 +34,7 @@ public class ScaffoldGenerator {
     private static final String PREFIX_NAME = "name";
 
     public static ScaffoldEntity generate(long id) {
-        return new ScaffoldEntity()
+        return (ScaffoldEntity) new ScaffoldEntity()
                 .setName(PREFIX_NAME + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
