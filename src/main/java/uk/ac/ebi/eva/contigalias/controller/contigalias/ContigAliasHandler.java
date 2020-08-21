@@ -112,7 +112,8 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
     }
 
-    private Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity>... pages) {
+    @SafeVarargs
+    private final Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity>... pages) {
         List<SequenceEntity> sequenceEntities = new LinkedList<>();
         for (Page<? extends SequenceEntity> page : pages) {
             sequenceEntities.addAll(page.toList());
