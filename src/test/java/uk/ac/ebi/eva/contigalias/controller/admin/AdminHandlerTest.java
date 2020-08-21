@@ -62,7 +62,7 @@ public class AdminHandlerTest {
         Mockito.when(mockAssemblyAssembler.toModel(any()))
                .thenReturn(assemblyPagedModel);
 
-        handler = new AdminHandler(mockAssemblyService, mockAssemblyAssembler);
+        handler = new AdminHandler(mockAssemblyService, null, mockAssemblyAssembler);
     }
 
     @Test

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
+import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,33 +36,44 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.generatePagedMode
 @Service
 public class AdminHandler {
 
-    private final AssemblyService service;
+    private final AssemblyService assemblyService;
+
+    private final ChromosomeService chromosomeService;
 
     private final PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
 
     @Autowired
-    public AdminHandler(AssemblyService service,
+    public AdminHandler(AssemblyService assemblyService,
+                        ChromosomeService chromosomeService,
                         PagedResourcesAssembler<AssemblyEntity> assemblyAssembler) {
-        this.service = service;
+        this.assemblyService = assemblyService;
+        this.chromosomeService = chromosomeService;
         this.assemblyAssembler = assemblyAssembler;
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyOrFetchByAccession(String accession) throws IOException {
-        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession(accession);
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyOrFetchByAccession(accession);
         entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
     public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {
-        service.fetchAndInsertAssembly(accession);
+        assemblyService.fetchAndInsertAssembly(accession);
     }
 
     public void fetchAndInsertAssemblyByAccession(List<String> accessions) {
-        service.fetchAndInsertAssembly(accessions);
+        assemblyService.fetchAndInsertAssembly(accessions);
     }
 
     public void deleteAssemblyByAccession(String accession) {
-        service.deleteAssemblyByAccession(accession);
+        assemblyService.deleteAssemblyByAccession(accession);
     }
 
+    public void putAssemblyChecksumsByAccession(String accession, String md5, String trunc512) {
+        assemblyService.putAssemblyChecksumsByAccession(accession, md5, trunc512);
+    }
+
+    public void putChromosomeChecksumsByAccession(String accession, String md5, String trunc512) {
+        chromosomeService.putChromosomeChecksumsByAccession(accession, md5, trunc512);
+    }
 }

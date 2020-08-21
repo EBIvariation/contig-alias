@@ -53,6 +53,12 @@ public class ChromosomeEntity {
     @ApiModelProperty(value = "Chromosome's UCSC style name")
     private String ucscName;
 
+    @ApiModelProperty(value = "Chromosome's MD5 checksum value.")
+    private String md5checksum;
+
+    @ApiModelProperty(value = "Chromosome's TRUNC512 checksum value.")
+    private String trunc512checksum;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this chromosome belongs to.")
     @ManyToOne(cascade = CascadeType.ALL)
@@ -101,6 +107,24 @@ public class ChromosomeEntity {
         return this;
     }
 
+    public String getMd5checksum() {
+        return md5checksum;
+    }
+
+    public ChromosomeEntity setMd5checksum(String md5checksum) {
+        this.md5checksum = md5checksum;
+        return this;
+    }
+
+    public String getTrunc512checksum() {
+        return trunc512checksum;
+    }
+
+    public ChromosomeEntity setTrunc512checksum(String trunc512checksum) {
+        this.trunc512checksum = trunc512checksum;
+        return this;
+    }
+
     public AssemblyEntity getAssembly() {
         return assembly;
     }
@@ -110,4 +134,17 @@ public class ChromosomeEntity {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "ChromosomeEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", genbank='" + genbank + '\'' +
+                ", refseq='" + refseq + '\'' +
+                ", ucscName='" + ucscName + '\'' +
+                ", md5checksum='" + md5checksum + '\'' +
+                ", trunc512checksum='" + trunc512checksum + '\'' +
+                ", assembly=" + assembly +
+                '}';
+    }
 }

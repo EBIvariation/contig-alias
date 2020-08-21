@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
@@ -63,6 +64,19 @@ public class ChromosomeServiceIntegrationTest {
         Page<ChromosomeEntity> page = service.getChromosomesByRefseq(
                 entity.getRefseq(), DEFAULT_PAGE_REQUEST);
         assertChromosomePageIdenticalToEntity(page);
+    }
+
+    @Test
+    void putChromosomeChecksumsByAccession() {
+        String md5 = "MyCustomMd5ChecksumForTesting";
+        String trunc512 = "MyCustomTrunc512ChecksumForTesting";
+        service.putChromosomeChecksumsByAccession(entity.getGenbank(), md5, trunc512);
+        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(entity.getGenbank(), Pageable.unpaged());
+        assertChromosomePageIdenticalToEntity(page);
+        page.forEach(chromosomeEntity -> {
+            assertEquals(md5, chromosomeEntity.getMd5checksum());
+            assertEquals(trunc512, chromosomeEntity.getTrunc512checksum());
+        });
     }
 
     void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {

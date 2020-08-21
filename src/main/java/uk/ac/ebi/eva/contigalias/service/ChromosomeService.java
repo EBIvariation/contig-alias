@@ -98,8 +98,9 @@ public class ChromosomeService {
         return injectAssemblyIntoChromosomes(page, assembly);
     }
 
-    public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request){
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(accession, accession, request);
+    public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request) {
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(
+                accession, accession, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
@@ -153,6 +154,19 @@ public class ChromosomeService {
 
     private void stripAssemblyFromChromosome(ChromosomeEntity chromosome) {
         chromosome.setAssembly(null);
+    }
+
+    public void putChromosomeChecksumsByAccession(String accession, String md5, String trunc512) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankOrRefseq(
+                accession, accession, Pageable.unpaged());
+        if (page.isEmpty()){
+            throw new IllegalArgumentException(
+                    "No chromosomes corresponding to accession " + accession + " found in the database");
+        }
+        page.forEach(it -> {
+            it.setMd5checksum(md5).setTrunc512checksum(trunc512);
+            repository.save(it);
+        });
     }
 
     public void insertChromosome(ChromosomeEntity entity) {

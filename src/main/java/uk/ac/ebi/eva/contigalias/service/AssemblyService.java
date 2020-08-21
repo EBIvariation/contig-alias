@@ -88,6 +88,17 @@ public class AssemblyService {
         return page;
     }
 
+    public void putAssemblyChecksumsByAccession(String accession, String md5, String trunc512) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
+        if (!entity.isPresent()) {
+            throw new IllegalArgumentException(
+                    "No assembly corresponding to accession " + accession + " found in the database");
+        }
+        AssemblyEntity assemblyEntity = entity.get();
+        assemblyEntity.setMd5checksum(md5).setTrunc512checksum(trunc512);
+        repository.save(assemblyEntity);
+    }
+
     public void fetchAndInsertAssembly(String accession)
             throws IOException, IllegalArgumentException {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);

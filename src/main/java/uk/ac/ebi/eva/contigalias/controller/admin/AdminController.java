@@ -85,7 +85,7 @@ public class AdminController {
                     "any data except an HTTP status code of 400 in case the user tries to insert an assembly that " +
                     "already exists in the local database.")
     @PutMapping(value = "assemblies/{accession}")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
+    public ResponseEntity<Void> fetchAndInsertAssemblyByAccession(
             @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
         try {
             handler.fetchAndInsertAssemblyByAccession(accession);
@@ -107,7 +107,7 @@ public class AdminController {
                     " endpoint does not return any data and processes elements in the given list in an asynchronous " +
                     "parallel manner.")
     @PutMapping(value = "assemblies")
-    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
+    public ResponseEntity<Void> fetchAndInsertAssemblyByAccession(
             @RequestBody(required = false) @ApiParam(value = "A JSON array of GenBank or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
@@ -115,6 +115,30 @@ public class AdminController {
         }
         handler.fetchAndInsertAssemblyByAccession(accessions);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+//    This endpoint can be enabled in the future when checksums for assemblies are added to the project.
+//    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to an assembly by accession.",
+//            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
+//                    "add the given checksums to the assembly that matches the given INSDC or RefSeq accession.")
+//    @PutMapping(value = "assemblies/{accession}/checksum")
+//    public void putAssemblyChecksumsByAccession(
+//            @PathVariable @ApiParam(value = "INSDC or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+//            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the assembly.") String md5,
+//            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the assembly.") String
+//                    trunc512) {
+//        handler.putAssemblyChecksumsByAccession(accession, md5, trunc512);
+//    }
+
+    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to all chromosomes by accession.",
+            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
+                    "add the given checksums to all chromosomes that match the given INSDC or RefSeq accession.")
+    @PutMapping(value = "chromosomes/{accession}/checksum")
+    public void putChromosomeChecksumsByAccession(
+            @PathVariable @ApiParam(value = "INSDC or Refseq chromosome accession. Eg: NC_000001.11") String accession,
+            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the chromosomes.") String md5,
+            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
+        handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
     }
 
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",

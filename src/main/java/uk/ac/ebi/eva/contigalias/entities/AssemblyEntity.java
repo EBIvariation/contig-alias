@@ -60,6 +60,12 @@ public class AssemblyEntity {
     @ApiModelProperty(value = "Are assembly's Genbank and Refseq accessions identical")
     private boolean isGenbankRefseqIdentical;
 
+    @ApiModelProperty(value = "Assembly's MD5 checksum value.")
+    private String md5checksum;
+
+    @ApiModelProperty(value = "Assembly's TRUNC512 checksum value.")
+    private String trunc512checksum;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "assembly", cascade = CascadeType.ALL)
@@ -126,6 +132,24 @@ public class AssemblyEntity {
         return this;
     }
 
+    public String getMd5checksum() {
+        return md5checksum;
+    }
+
+    public AssemblyEntity setMd5checksum(String md5checksum) {
+        this.md5checksum = md5checksum;
+        return this;
+    }
+
+    public String getTrunc512checksum() {
+        return trunc512checksum;
+    }
+
+    public AssemblyEntity setTrunc512checksum(String trunc512checksum) {
+        this.trunc512checksum = trunc512checksum;
+        return this;
+    }
+
     public List<ChromosomeEntity> getChromosomes() {
         return chromosomes;
     }
@@ -155,6 +179,12 @@ public class AssemblyEntity {
                .append("\n")
                .append("Genbank & Refseq identical :\t")
                .append(isGenbankRefseqIdentical)
+               .append("\n")
+               .append("md5checksum :\t")
+               .append(this.md5checksum)
+               .append("\n")
+               .append("trunc512checksum :\t")
+               .append(this.trunc512checksum)
                .append("\n");
         if (this.chromosomes != null) {
             builder.append("Number of chromosomes :\t")

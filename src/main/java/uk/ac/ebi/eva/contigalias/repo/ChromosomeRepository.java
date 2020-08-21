@@ -31,6 +31,8 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     Page<ChromosomeEntity> findChromosomeEntitiesByRefseq(String refseq, Pageable request);
 
+    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankOrRefseq(String genbank, String refseq, Pageable request);
+
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq, Pageable request);

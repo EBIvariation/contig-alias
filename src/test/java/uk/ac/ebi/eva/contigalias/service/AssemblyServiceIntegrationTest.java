@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -75,7 +76,7 @@ public class AssemblyServiceIntegrationTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         for (AssemblyEntity entity : entities) {
             service.deleteAssembly(entity);
         }
@@ -226,9 +227,22 @@ public class AssemblyServiceIntegrationTest {
             }
         }
 
-        void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> page) {
-            assertOptionalValid(page);
-            assertAssemblyEntityIdenticalToEntity(page.get());
+        @Test
+        void putAssemblyChecksumsByAccession() {
+            String md5 = "MyCustomMd5ChecksumForTesting";
+            String trunc512 = "MyCustomTrunc512ChecksumForTesting";
+            service.putAssemblyChecksumsByAccession(
+                    entity.getGenbank(), md5, trunc512);
+            Optional<AssemblyEntity> accession = service.getAssemblyByAccession(entity.getGenbank());
+            assertAssemblyOptionalIdenticalToEntity(accession);
+            AssemblyEntity assemblyEntity = accession.get();
+            assertEquals(md5, assemblyEntity.getMd5checksum());
+            assertEquals(trunc512, assemblyEntity.getTrunc512checksum());
+        }
+
+        void assertAssemblyOptionalIdenticalToEntity(Optional<AssemblyEntity> optional) {
+            assertOptionalValid(optional);
+            assertAssemblyEntityIdenticalToEntity(optional.get());
         }
 
         void assertAssemblyEntityIdenticalToEntity(AssemblyEntity actual) {
