@@ -175,4 +175,48 @@ public class ScaffoldService {
         repository.delete(entity);
     }
 
+    public long countScaffoldEntitiesByGenbank(String genbank) {
+        return repository.countScaffoldEntitiesByGenbank(genbank);
+    }
+
+    public long countScaffoldEntitiesByRefseq(String refseq) {
+        return repository.countScaffoldEntitiesByRefseq(refseq);
+    }
+
+    public long countScaffoldEntitiesByAssembly_Genbank(String asmGenbank) {
+        return repository.countScaffoldEntitiesByAssembly_Genbank(asmGenbank);
+    }
+
+    public long countScaffoldEntitiesByAssembly_Refseq(String asmRefseq) {
+        return repository.countScaffoldEntitiesByAssembly_Refseq(asmRefseq);
+    }
+
+    public long countScaffoldEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid) {
+        return repository.countScaffoldEntitiesByNameAndAssembly_Taxid(name, asmTaxid);
+    }
+
+    public long countScaffoldEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid) {
+        return repository.countScaffoldEntitiesByUcscNameAndAssembly_Taxid(ucscName, asmTaxid);
+    }
+
+    public long countScaffoldEntitiesByNameAndAssembly(String name, AssemblyEntity assembly) {
+        return repository.countScaffoldEntitiesByNameAndAssembly(name, assembly);
+    }
+
+    public long countScaffoldEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly) {
+        return repository.countScaffoldEntitiesByUcscNameAndAssembly(ucscName, assembly);
+    }
+
+    public long countScaffoldEntitiesByName(String name) {
+        return repository.countScaffoldEntitiesByName(name);
+    }
+
+    public long countScaffoldEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq) {
+        return repository.countScaffoldEntitiesByAssemblyGenbankOrAssemblyRefseq(genbank, refseq);
+    }
+
+    public long countScaffoldEntitiesByUcscName(String ucscName) {
+        return repository.countScaffoldEntitiesByUcscName(ucscName);
+    }
+
 }

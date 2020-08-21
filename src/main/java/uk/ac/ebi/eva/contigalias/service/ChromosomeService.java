@@ -189,4 +189,48 @@ public class ChromosomeService {
         repository.delete(entity);
     }
 
+    public long countChromosomeEntitiesByGenbank(String genbank) {
+        return repository.countChromosomeEntitiesByGenbank(genbank);
+    }
+
+    public long countChromosomeEntitiesByRefseq(String refseq) {
+        return repository.countChromosomeEntitiesByRefseq(refseq);
+    }
+
+    public long countChromosomeEntitiesByAssembly_Genbank(String asmGenbank) {
+        return repository.countChromosomeEntitiesByAssembly_Genbank(asmGenbank);
+    }
+
+    public long countChromosomeEntitiesByAssembly_Refseq(String asmRefseq) {
+        return repository.countChromosomeEntitiesByAssembly_Refseq(asmRefseq);
+    }
+
+    public long countChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid) {
+        return repository.countChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid);
+    }
+
+    public long countChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid) {
+        return repository.countChromosomeEntitiesByUcscNameAndAssembly_Taxid(ucscName, asmTaxid);
+    }
+
+    public long countChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly) {
+        return repository.countChromosomeEntitiesByNameAndAssembly(name, assembly);
+    }
+
+    public long countChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly) {
+        return repository.countChromosomeEntitiesByUcscNameAndAssembly(ucscName, assembly);
+    }
+
+    public long countChromosomeEntitiesByName(String name) {
+        return repository.countChromosomeEntitiesByName(name);
+    }
+
+    public long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq) {
+        return repository.countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(genbank, refseq);
+    }
+
+    public long countChromosomeEntitiesByUcscName(String ucscName) {
+        return repository.countChromosomeEntitiesByUcscName(ucscName);
+    }
+
 }

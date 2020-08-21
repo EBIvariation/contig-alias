@@ -51,4 +51,26 @@ public interface ScaffoldRepository extends JpaRepository<ScaffoldEntity, Long> 
 
     Page<ScaffoldEntity> findScaffoldEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
                                                                    Pageable request);
+
+    long countScaffoldEntitiesByGenbank(String genbank);
+
+    long countScaffoldEntitiesByRefseq(String refseq);
+
+    long countScaffoldEntitiesByAssembly_Genbank(String asmGenbank);
+
+    long countScaffoldEntitiesByAssembly_Refseq(String asmRefseq);
+
+    long countScaffoldEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid);
+
+    long countScaffoldEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid);
+
+    long countScaffoldEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
+
+    long countScaffoldEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly);
+
+    long countScaffoldEntitiesByName(String name);
+
+    long countScaffoldEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq);
+
+    long countScaffoldEntitiesByUcscName(String ucscName);
 }

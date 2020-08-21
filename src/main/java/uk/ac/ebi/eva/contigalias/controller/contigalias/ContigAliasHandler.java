@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.contigalias.controller.contigalias;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -26,6 +27,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
@@ -112,15 +114,6 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
     }
 
-    @SafeVarargs
-    private final Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity>... pages) {
-        List<SequenceEntity> sequenceEntities = new LinkedList<>();
-        for (Page<? extends SequenceEntity> page : pages) {
-            sequenceEntities.addAll(page.toList());
-        }
-        return new PageImpl<>(sequenceEntities);
-    }
-
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByRefseq(String refseq, Pageable request) {
         Page<? extends SequenceEntity> page = chromosomeService.getChromosomesByRefseq(refseq, request);
         return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
@@ -176,6 +169,15 @@ public class ContigAliasHandler {
             page = chromosomeService.getChromosomesByName(name, request);
         }
         return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+    }
+
+    @SafeVarargs
+    private final Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity>... pages) {
+        List<SequenceEntity> sequenceEntities = new LinkedList<>();
+        for (Page<? extends SequenceEntity> page : pages) {
+            sequenceEntities.addAll(page.toList());
+        }
+        return new PageImpl<>(sequenceEntities);
     }
 
     public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByGenbank(String genbank, Pageable request) {
