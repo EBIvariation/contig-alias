@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.repo.ScaffoldRepository;
 

@@ -17,8 +17,6 @@
 package uk.ac.ebi.eva.contigalias.dus;
 
 import org.apache.commons.net.ftp.FTPFile;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;

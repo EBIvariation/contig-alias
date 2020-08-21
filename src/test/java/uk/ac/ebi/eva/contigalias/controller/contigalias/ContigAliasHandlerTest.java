@@ -30,6 +30,7 @@ import org.springframework.hateoas.PagedModel;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ScaffoldGenerator;
@@ -193,13 +194,13 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeService.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
 
-            PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssembler = mock(PagedResourcesAssembler.class);
-            PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = new PagedModel<>(
+            PagedResourcesAssembler<SequenceEntity> mockSequencesAssembler = mock(PagedResourcesAssembler.class);
+            PagedModel<EntityModel<SequenceEntity>> sequencePagedModel = new PagedModel<>(
                     Collections.singletonList(new EntityModel<>(entity)), null);
-            Mockito.when(mockChromosomeAssembler.toModel(any()))
-                   .thenReturn(chromosomePagedModel);
+            Mockito.when(mockSequencesAssembler.toModel(any()))
+                   .thenReturn(sequencePagedModel);
 
-            handler = new ContigAliasHandler(null, mockChromosomeService, null, null, mockChromosomeAssembler,
+            handler = new ContigAliasHandler(null, mockChromosomeService, null, null, mockSequencesAssembler,
                                              null);
         }
 
@@ -213,11 +214,11 @@ public class ContigAliasHandlerTest {
             testChromosomeEntityResponse(handler.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
-        void testChromosomeEntityResponse(PagedModel<EntityModel<ChromosomeEntity>> body) {
+        void testChromosomeEntityResponse(PagedModel<EntityModel<SequenceEntity>> body) {
             assertNotNull(body);
-            Collection<EntityModel<ChromosomeEntity>> content = body.getContent();
+            Collection<EntityModel<SequenceEntity>> content = body.getContent();
             assertTrue(content.size() > 0);
-            content.forEach(it -> assertChromosomeIdenticalToEntity(it.getContent()));
+            content.forEach(it -> assertChromosomeIdenticalToEntity((ChromosomeEntity) it.getContent()));
         }
 
         void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosome) {
@@ -287,6 +288,23 @@ public class ContigAliasHandlerTest {
                                  .getChromosomesByNameAndAssembly(chrName, assemblyEntity, DEFAULT_PAGE_REQUEST))
                    .thenReturn(new PageImpl<>(chromosomesByNameAndAssembly));
 
+            Mockito.when(mockChromosomeService
+                                 .getChromosomesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfChromosomeEntities);
+
+
+            Mockito.when(mockChromosomeService
+                                 .getChromosomesByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfChromosomeEntities);
+
+            Mockito.when(mockChromosomeService.getChromosomesByUcscNameAndAssembly(
+                    chromosomeEntities.get(0).getUcscName(), assemblyEntity, DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfChromosomeEntities);
+
+            Mockito.when(mockChromosomeService.getChromosomesByUcscNameAndAssemblyTaxid(
+                    chromosomeEntities.get(0).getUcscName(), assemblyEntity.getTaxid(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfChromosomeEntities);
+
             Mockito.when(mockAssemblyService.getAssemblyByAccession(assemblyEntity.getGenbank()))
                    .thenReturn(Optional.of(assemblyEntity));
 
@@ -297,11 +315,13 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockAssemblyAssembler.toModel(any()))
                    .thenReturn(assemblyPagedModel);
 
-            PagedResourcesAssembler<ChromosomeEntity> mockChromosomeAssembler = mock(PagedResourcesAssembler.class);
+            PagedResourcesAssembler<SequenceEntity> mockSequenceAssembler = mock(PagedResourcesAssembler.class);
 
-            PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = PagedModel.wrap(chromosomeEntities, null);
-            Mockito.when(mockChromosomeAssembler.toModel(any()))
-                   .thenReturn(chromosomePagedModel);
+            PagedModel<EntityModel<SequenceEntity>> sequencePagedModel = PagedModel.wrap(
+                    chromosomeEntities.stream().map(SequenceEntity.class::cast).collect(
+                            Collectors.toList()), null);
+            Mockito.when(mockSequenceAssembler.toModel(any()))
+                   .thenReturn(sequencePagedModel);
 
             ScaffoldEntity scaffoldEntity = ScaffoldGenerator.generate();
 
@@ -321,7 +341,7 @@ public class ContigAliasHandlerTest {
 
             handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockScaffoldService,
                                              mockAssemblyAssembler,
-                                             mockChromosomeAssembler, null);
+                                             mockSequenceAssembler, null);
         }
 
         @AfterEach
@@ -384,7 +404,7 @@ public class ContigAliasHandlerTest {
         void getChromosomesByChromosomeNameAndAssemblyTaxid() {
             String chrName = chromosomeEntities.get(0).getName();
             Long asmTaxid = assemblyEntity.getTaxid();
-            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
+            PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getChromosomesByChromosomeNameAndAssemblyTaxid(
                             chrName, asmTaxid, NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
@@ -393,7 +413,7 @@ public class ContigAliasHandlerTest {
         @Test
         void getChromosomesByChromosomeNameAndAssemblyAccession() {
             String chrName = chromosomeEntities.get(0).getName();
-            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
+            PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getChromosomesByChromosomeNameAndAssemblyAccession(
                             chrName, assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
@@ -403,7 +423,7 @@ public class ContigAliasHandlerTest {
         void getChromosomesByChromosomeUcscNameAndAssemblyTaxid() {
             String chrName = chromosomeEntities.get(0).getUcscName();
             Long asmTaxid = assemblyEntity.getTaxid();
-            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
+            PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getChromosomesByChromosomeNameAndAssemblyTaxid(
                             chrName, asmTaxid, NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
@@ -412,19 +432,19 @@ public class ContigAliasHandlerTest {
         @Test
         void getChromosomesByChromosomeUcscNameAndAssemblyAccession() {
             String chrName = chromosomeEntities.get(0).getUcscName();
-            PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler
+            PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getChromosomesByChromosomeNameAndAssemblyAccession(
                             chrName, assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 
         private void assertPagedModelIdenticalToChromosomeEntities(
-                PagedModel<EntityModel<ChromosomeEntity>> pagedModel) {
+                PagedModel<EntityModel<SequenceEntity>> pagedModel) {
             assertNotNull(pagedModel);
-            Collection<EntityModel<ChromosomeEntity>> content = pagedModel.getContent();
+            Collection<EntityModel<SequenceEntity>> content = pagedModel.getContent();
             assertNotNull(content);
             assertFalse(content.isEmpty());
-            List<ChromosomeEntity> collect = content.stream().map(EntityModel::getContent).collect(Collectors.toList());
+            List<SequenceEntity> collect = content.stream().map(EntityModel::getContent).collect(Collectors.toList());
             collect.containsAll(chromosomeEntities);
         }
 
@@ -438,13 +458,13 @@ public class ContigAliasHandlerTest {
             assertEquals(this.assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
         }
 
-        void testChromosomeEntityResponses(PagedModel<EntityModel<ChromosomeEntity>> entityModel) {
+        void testChromosomeEntityResponses(PagedModel<EntityModel<SequenceEntity>> entityModel) {
             assertNotNull(entityModel);
-            Collection<EntityModel<ChromosomeEntity>> content = entityModel.getContent();
+            Collection<EntityModel<SequenceEntity>> content = entityModel.getContent();
             assertNotNull(content);
-            List<EntityModel<ChromosomeEntity>> list = new ArrayList<>(content);
+            List<EntityModel<SequenceEntity>> list = new ArrayList<>(content);
             assertEquals(chromosomeEntities.size(), list.size());
-            List<ChromosomeEntity> chxList = list.stream().map(EntityModel::getContent).collect(Collectors.toList());
+            List<SequenceEntity> chxList = list.stream().map(EntityModel::getContent).collect(Collectors.toList());
             assertTrue(chromosomeEntities.containsAll(chxList));
         }
 

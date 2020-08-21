@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.util.Optional;
 
@@ -195,7 +195,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomesByGenbank(chrGenbank, pageRequest);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getChromosomesByGenbank(genbank, pageRequest);
         return createAppropriateResponseEntity(pagedModel);
     }
 
@@ -203,12 +203,12 @@ public class ContigAliasController {
             notes = "Given a chromosome's RefSeq accession, this endpoint will return a list of all chromosomes that " +
                     "match that accession. This endpoint will either return a list of chromosomes. ")
     @GetMapping(value = "chromosomes/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByRefseq(
-            @PathVariable(name = "refseq") @ApiParam(value = "RefSeq accession of the chromosomes. Eg: NC_000001.11") String chrRefseq,
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByRefseq(
+            @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel = handler.getChromosomesByRefseq(chrRefseq, pageRequest);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getChromosomesByRefseq(refseq, pageRequest);
         return createAppropriateResponseEntity(pagedModel);
     }
 
@@ -216,9 +216,8 @@ public class ContigAliasController {
             notes = "Given an assembly's INSDC or RefSeq accession, this endpoint will return a list of all the " +
                     "chromosomes that are associated with the assembly uniquely identified by the given accession. ")
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyAccession(
-            @PathVariable(name = "accession") @ApiParam(value = "INSDC or Refseq assembly accession. Eg: " +
-                    "GCA_000001405.10") String asmAccession,
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByAssemblyAccession(
+            @PathVariable String accession,
             @RequestParam(required = false, name = "authority") @ApiParam("Specify if the provided accession is a " +
                     "INSDC or a RefSeq accession. The acceptable param values are " + AUTHORITY_INSDC + " " +
                     "and " + AUTHORITY_REFSEQ + " respectively. If this parameter is omitted then the results having " +
@@ -230,7 +229,7 @@ public class ContigAliasController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        PagedModel<EntityModel<SequenceEntity>> pagedModel;
         if (asmAuthority != null && !asmAuthority.isEmpty()) {
             if (asmAuthority.toLowerCase().equals(AUTHORITY_INSDC)) {
                 pagedModel = handler.getChromosomesByAssemblyGenbank(asmAccession, pageRequest);
@@ -257,9 +256,9 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
-                = handler.getChromosomesByAssemblyGenbank(asmGenbank, pageRequest);
-        linkPagedModelGetAssemblyByAuthority(asmGenbank, AUTHORITY_INSDC, pagedModel);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel
+                = handler.getChromosomesByAssemblyGenbank(genbank, pageRequest);
+        linkPagedModelGetAssemblyByAuthority(genbank, AUTHORITY_GENBANK, pagedModel);
         return createAppropriateResponseEntity(pagedModel);
     }
 
@@ -267,14 +266,14 @@ public class ContigAliasController {
             notes = "Given an assembly's RefSeq accession, this endpoint will return a list of all the " +
                     "chromosomes that are associated with the assembly uniquely identified by the given accession. ")
     @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyRefseq(
-            @PathVariable(name = "refseq") @ApiParam(value = "Refseq assembly accession. Eg: GCF_000001405.26") String asmRefseq,
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByAssemblyRefseq(
+            @PathVariable String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel
-                = handler.getChromosomesByAssemblyRefseq(asmRefseq, pageRequest);
-        linkPagedModelGetAssemblyByAuthority(asmRefseq, AUTHORITY_REFSEQ, pagedModel);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel
+                = handler.getChromosomesByAssemblyRefseq(refseq, pageRequest);
+        linkPagedModelGetAssemblyByAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
         return createAppropriateResponseEntity(pagedModel);
     }
 
@@ -287,7 +286,7 @@ public class ContigAliasController {
                     "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
                     "HTTP error code 400 if invalid parameters are found.")
     @GetMapping(value = "chromosomes/name/{name}")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
             @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
             @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
@@ -305,7 +304,7 @@ public class ContigAliasController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<ChromosomeEntity>> pagedModel;
+        PagedModel<EntityModel<SequenceEntity>> pagedModel;
         String nameType = nameTypeOpt.orElse(NAME_SEQUENCE_TYPE);
         if (!isTaxidValid && !isAccessionValid) {
             pagedModel = handler.getChromosomesByName(name, nameType, pageRequest);

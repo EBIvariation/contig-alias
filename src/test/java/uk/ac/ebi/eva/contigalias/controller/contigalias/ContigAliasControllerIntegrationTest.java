@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ScaffoldGenerator;
@@ -83,8 +84,8 @@ public class ContigAliasControllerIntegrationTest {
         Mockito.when(assemblyAssembler.toModel(any()))
                .thenReturn(assemblyPagedModel);
 
-        PagedResourcesAssembler<ChromosomeEntity> chromosomeAssembler = mock(PagedResourcesAssembler.class);
-        PagedModel<EntityModel<ChromosomeEntity>> chromosomePagedModel = new PagedModel<>(
+        PagedResourcesAssembler<SequenceEntity> chromosomeAssembler = mock(PagedResourcesAssembler.class);
+        PagedModel<EntityModel<SequenceEntity>> chromosomePagedModel = new PagedModel<>(
                 Collections.singletonList(new EntityModel<>(chromosomeEntity)), null);
         Mockito.when(chromosomeAssembler.toModel(any()))
                .thenReturn(chromosomePagedModel);
