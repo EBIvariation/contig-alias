@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -74,19 +75,19 @@ public class ContigAliasHandlerTest {
         @Test
         void createScaffoldsPageRequestTestOnlyChromosomes() {
             PageRequest request = PageRequest.of(1, 10);
-            List<PageRequest>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
+            List<Pageable>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
 
             assertNotNull(scaffoldsPageRequest);
 
-            List<PageRequest> chrRequests = scaffoldsPageRequest[0];
+            List<Pageable> chrRequests = scaffoldsPageRequest[0];
             assertNotNull(chrRequests);
             assertEquals(1, chrRequests.size());
 
-            PageRequest chrRequest = chrRequests.get(0);
+            Pageable chrRequest = chrRequests.get(0);
             assertEquals(1, chrRequest.getPageNumber());
             assertEquals(10, chrRequest.getPageSize());
 
-            List<PageRequest> scfRequests = scaffoldsPageRequest[1];
+            List<Pageable> scfRequests = scaffoldsPageRequest[1];
             assertNotNull(scfRequests);
             assertEquals(0, scfRequests.size());
         }
@@ -95,23 +96,23 @@ public class ContigAliasHandlerTest {
         @Test
         void createScaffoldsPageRequestTestOnlyScaffolds() {
             PageRequest request = PageRequest.of(3, 10);
-            List<PageRequest>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
+            List<Pageable>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
 
             assertNotNull(scaffoldsPageRequest);
 
-            List<PageRequest> chrRequests = scaffoldsPageRequest[0];
+            List<Pageable> chrRequests = scaffoldsPageRequest[0];
             assertNotNull(chrRequests);
             assertEquals(0, chrRequests.size());
 
-            List<PageRequest> scfRequests = scaffoldsPageRequest[1];
+            List<Pageable> scfRequests = scaffoldsPageRequest[1];
             assertNotNull(scfRequests);
             assertEquals(2, scfRequests.size());
 
-            PageRequest scfRequest1 = scfRequests.get(0);
+            Pageable scfRequest1 = scfRequests.get(0);
             assertEquals(0, scfRequest1.getPageNumber());
             assertEquals(7, scfRequest1.getPageSize());
 
-            PageRequest scfRequest2 = scfRequests.get(1);
+            Pageable scfRequest2 = scfRequests.get(1);
             assertEquals(1, scfRequest2.getPageNumber());
             assertEquals(3, scfRequest2.getPageSize());
         }
@@ -120,23 +121,23 @@ public class ContigAliasHandlerTest {
         @Test
         void createScaffoldsPageRequestTestBothCombined() {
             PageRequest request = PageRequest.of(2, 10);
-            List<PageRequest>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
+            List<Pageable>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
 
             assertNotNull(scaffoldsPageRequest);
 
-            List<PageRequest> chrRequests = scaffoldsPageRequest[0];
+            List<Pageable> chrRequests = scaffoldsPageRequest[0];
             assertNotNull(chrRequests);
             assertEquals(1, chrRequests.size());
 
-            PageRequest chrRequest = chrRequests.get(0);
+            Pageable chrRequest = chrRequests.get(0);
             assertEquals(2, chrRequest.getPageNumber());
             assertEquals(7, chrRequest.getPageSize());
 
-            List<PageRequest> scfRequests = scaffoldsPageRequest[1];
+            List<Pageable> scfRequests = scaffoldsPageRequest[1];
             assertNotNull(scfRequests);
             assertEquals(1, scfRequests.size());
 
-            PageRequest scfRequest = scfRequests.get(0);
+            Pageable scfRequest = scfRequests.get(0);
             assertEquals(0, scfRequest.getPageNumber());
             assertEquals(3, scfRequest.getPageSize());
         }
@@ -270,6 +271,7 @@ public class ContigAliasHandlerTest {
         @BeforeEach
         void setUp() {
             ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
+            ScaffoldService mockScaffoldService = mock(ScaffoldService.class);
 
             Page<ChromosomeEntity> pageOfEntity = new PageImpl<>(Collections.singletonList(entity));
             Mockito.when(mockChromosomeService.getChromosomesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
@@ -277,13 +279,17 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockChromosomeService.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
 
+            Page<ScaffoldEntity> pageOfEmptyScaffoldEntity = new PageImpl<>(Collections.emptyList());
+            Mockito.when(mockScaffoldService.getScaffoldsByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEmptyScaffoldEntity);
+
             PagedResourcesAssembler<SequenceEntity> mockSequencesAssembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<SequenceEntity>> sequencePagedModel = new PagedModel<>(
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(mockSequencesAssembler.toModel(any()))
                    .thenReturn(sequencePagedModel);
 
-            handler = new ContigAliasHandler(null, mockChromosomeService, null, null, mockSequencesAssembler,
+            handler = new ContigAliasHandler(null, mockChromosomeService, mockScaffoldService, null, mockSequencesAssembler,
                                              null);
         }
 

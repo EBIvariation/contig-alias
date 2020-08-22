@@ -109,8 +109,16 @@ public class ContigAliasHandler {
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByGenbank(String genbank, Pageable request) {
-        Page<? extends SequenceEntity> page = chromosomeService.getChromosomesByGenbank(genbank, request);
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        long count = chromosomeService.countChromosomeEntitiesByGenbank(genbank);
+        List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
+        for (Pageable pageable : pageRequests[0]) {
+            pages.add(chromosomeService.getChromosomesByGenbank(genbank, pageable));
+        }
+        for (Pageable pageable: pageRequests[1]){
+            pages.add(scaffoldService.getScaffoldsByGenbank(genbank, pageable));
+        }
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByRefseq(String refseq, Pageable request) {
@@ -170,8 +178,11 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
     }
 
-    @SafeVarargs
-    private final Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity>... pages) {
+    private Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity> page) {
+        return createSequencePage(Collections.singletonList(page));
+    }
+
+    private Page<SequenceEntity> createSequencePage(List<Page<? extends SequenceEntity>> pages) {
         List<SequenceEntity> sequenceEntities = new LinkedList<>();
         for (Page<? extends SequenceEntity> page : pages) {
             sequenceEntities.addAll(page.toList());
@@ -179,8 +190,8 @@ public class ContigAliasHandler {
         return new PageImpl<>(sequenceEntities);
     }
 
-    List<PageRequest>[] createScaffoldsPageRequest(long totalChromosomes, PageRequest request) {
-        List<PageRequest>[] result = new List[2];
+    List<Pageable>[] createScaffoldsPageRequest(long totalChromosomes, Pageable request) {
+        List<Pageable>[] result = new List[2];
         result[0] = new LinkedList<>();
         result[1] = new LinkedList<>();
 
@@ -208,11 +219,6 @@ public class ContigAliasHandler {
             result[0].add(request);
         }
         return result;
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByGenbank(String genbank, Pageable request) {
-        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByGenbank(genbank, request);
-        return generatePagedModelFromPage(page, scaffoldAssembler);
     }
 
     public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByRefseq(String refseq, Pageable request) {
