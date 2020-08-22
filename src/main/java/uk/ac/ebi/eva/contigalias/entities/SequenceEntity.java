@@ -50,6 +50,12 @@ public class SequenceEntity {
     @ApiModelProperty(value = "Sequence's UCSC style name")
     private String ucscName;
 
+    @ApiModelProperty(value = "Sequence's MD5 checksum value.")
+    private String md5checksum;
+
+    @ApiModelProperty(value = "Sequence's TRUNC512 checksum value.")
+    private String trunc512checksum;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this sequence belongs to.")
     @ManyToOne(cascade = CascadeType.ALL)
@@ -92,6 +98,24 @@ public class SequenceEntity {
 
     public SequenceEntity setUcscName(String ucscName) {
         this.ucscName = ucscName;
+        return this;
+    }
+
+    public String getMd5checksum() {
+        return md5checksum;
+    }
+
+    public SequenceEntity setMd5checksum(String md5checksum) {
+        this.md5checksum = md5checksum;
+        return this;
+    }
+
+    public String getTrunc512checksum() {
+        return trunc512checksum;
+    }
+
+    public SequenceEntity setTrunc512checksum(String trunc512checksum) {
+        this.trunc512checksum = trunc512checksum;
         return this;
     }
 
