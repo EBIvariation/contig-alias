@@ -122,24 +122,56 @@ public class ContigAliasHandler {
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByRefseq(String refseq, Pageable request) {
-        Page<? extends SequenceEntity> page = chromosomeService.getChromosomesByRefseq(refseq, request);
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        long count = chromosomeService.countChromosomeEntitiesByRefseq(refseq);
+        List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
+        for (Pageable pageable : pageRequests[0]) {
+            pages.add(chromosomeService.getChromosomesByRefseq(refseq, pageable));
+        }
+        for (Pageable pageable: pageRequests[1]){
+            pages.add(scaffoldService.getScaffoldsByRefseq(refseq, pageable));
+        }
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByAssemblyGenbank(String genbank, Pageable request) {
-        Page<? extends SequenceEntity> page = chromosomeService.getChromosomesByAssemblyGenbank(genbank, request);
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        long count = chromosomeService.countChromosomeEntitiesByAssembly_Genbank(genbank);
+        List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
+        for (Pageable pageable : pageRequests[0]) {
+            pages.add(chromosomeService.getChromosomesByAssemblyGenbank(genbank, pageable));
+        }
+        for (Pageable pageable: pageRequests[1]){
+            pages.add(scaffoldService.getScaffoldsByAssemblyGenbank(genbank, pageable));
+        }
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByAssemblyRefseq(String refseq, Pageable request) {
-        Page<? extends SequenceEntity> page = chromosomeService.getChromosomesByAssemblyRefseq(refseq, request);
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        long count = chromosomeService.countChromosomeEntitiesByAssembly_Refseq(refseq);
+        List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
+        for (Pageable pageable : pageRequests[0]) {
+            pages.add(chromosomeService.getChromosomesByAssemblyRefseq(refseq, pageable));
+        }
+        for (Pageable pageable: pageRequests[1]){
+            pages.add(scaffoldService.getScaffoldsByAssemblyRefseq(refseq, pageable));
+        }
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByAssemblyAccession(String accession,
                                                                                      Pageable request) {
-        Page<? extends SequenceEntity> page = chromosomeService.getChromosomesByAssemblyAccession(accession, request);
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        long count = chromosomeService.countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(accession, accession);
+        List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
+        for (Pageable pageable : pageRequests[0]) {
+            pages.add(chromosomeService.getChromosomesByAssemblyAccession(accession, pageable));
+        }
+        for (Pageable pageable: pageRequests[1]){
+            pages.add(scaffoldService.getScaffoldsByAssemblyAccession(accession, pageable));
+        }
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
@@ -219,26 +251,6 @@ public class ContigAliasHandler {
             result[0].add(request);
         }
         return result;
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByRefseq(String refseq, Pageable request) {
-        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByRefseq(refseq, request);
-        return generatePagedModelFromPage(page, scaffoldAssembler);
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByAssemblyGenbank(String genbank, Pageable request) {
-        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByAssemblyGenbank(genbank, request);
-        return generatePagedModelFromPage(page, scaffoldAssembler);
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByAssemblyRefseq(String refseq, Pageable request) {
-        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByAssemblyRefseq(refseq, request);
-        return generatePagedModelFromPage(page, scaffoldAssembler);
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByAssemblyAccession(String accession, Pageable request) {
-        Page<ScaffoldEntity> page = scaffoldService.getScaffoldsByAssemblyAccession(accession, request);
-        return generatePagedModelFromPage(page, scaffoldAssembler);
     }
 
     public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByScaffoldNameAndAssemblyTaxid(

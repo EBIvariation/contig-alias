@@ -282,6 +282,8 @@ public class ContigAliasHandlerTest {
             Page<ScaffoldEntity> pageOfEmptyScaffoldEntity = new PageImpl<>(Collections.emptyList());
             Mockito.when(mockScaffoldService.getScaffoldsByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEmptyScaffoldEntity);
+            Mockito.when(mockScaffoldService.getScaffoldsByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEmptyScaffoldEntity);
 
             PagedResourcesAssembler<SequenceEntity> mockSequencesAssembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<SequenceEntity>> sequencePagedModel = new PagedModel<>(
@@ -289,7 +291,8 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockSequencesAssembler.toModel(any()))
                    .thenReturn(sequencePagedModel);
 
-            handler = new ContigAliasHandler(null, mockChromosomeService, mockScaffoldService, null, mockSequencesAssembler,
+            handler = new ContigAliasHandler(null, mockChromosomeService, mockScaffoldService, null,
+                                             mockSequencesAssembler,
                                              null);
         }
 
@@ -420,6 +423,18 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockScaffoldService.getScaffoldsByGenbank(scaffoldEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
             Mockito.when(mockScaffoldService.getScaffoldsByRefseq(scaffoldEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService
+                                 .getScaffoldsByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(
+                    mockScaffoldService.getScaffoldsByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService
+                                 .getScaffoldsByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService
+                                 .getScaffoldsByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
 
             PagedResourcesAssembler<ScaffoldEntity> mockScaffoldAssembler = mock(PagedResourcesAssembler.class);
