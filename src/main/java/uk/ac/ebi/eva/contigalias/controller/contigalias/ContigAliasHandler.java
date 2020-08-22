@@ -27,7 +27,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
@@ -178,6 +177,37 @@ public class ContigAliasHandler {
             sequenceEntities.addAll(page.toList());
         }
         return new PageImpl<>(sequenceEntities);
+    }
+
+    List<PageRequest>[] createScaffoldsPageRequest(long totalChromosomes, PageRequest request) {
+        List<PageRequest>[] result = new List[2];
+        result[0] = new LinkedList<>();
+        result[1] = new LinkedList<>();
+
+        int currentPageSize = request.getPageSize(); // 10
+        long maxFilledPageSize = request.getOffset() + currentPageSize; //30
+
+        if (maxFilledPageSize > totalChromosomes/*27*/) {
+
+            int totalChrPages = (int) ((totalChromosomes / currentPageSize) + 1); // 3
+            int maxFilledChrPageSize = (totalChrPages) * currentPageSize; //30
+            int chrResultOffset = (int) (totalChromosomes % currentPageSize); // 7
+            int secondPageOffset = currentPageSize - chrResultOffset;
+
+            if (maxFilledPageSize <= maxFilledChrPageSize){
+                if (chrResultOffset != 0) {
+                    result[0].add(PageRequest.of(request.getPageNumber(), chrResultOffset));
+                }
+                result[1].add(PageRequest.of(0, secondPageOffset));
+            }else{
+                int scaffoldPageNumber = (int) ((maxFilledPageSize - maxFilledChrPageSize) / currentPageSize);
+                result[1].add(PageRequest.of(scaffoldPageNumber - 1, chrResultOffset));
+                result[1].add(PageRequest.of(scaffoldPageNumber, secondPageOffset));
+            }
+        }else{
+            result[0].add(request);
+        }
+        return result;
     }
 
     public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByGenbank(String genbank, Pageable request) {

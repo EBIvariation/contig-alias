@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -59,6 +60,88 @@ import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasContro
 public class ContigAliasHandlerTest {
 
     private ContigAliasHandler handler;
+
+    @Nested
+    class ManualPaginationTests {
+
+        long TOTAL_CHROMOSOMES = 27;
+
+        @BeforeEach
+        public void setup() {
+            handler = new ContigAliasHandler(null, null, null, null, null, null);
+        }
+
+        @Test
+        void createScaffoldsPageRequestTestOnlyChromosomes() {
+            PageRequest request = PageRequest.of(1, 10);
+            List<PageRequest>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
+
+            assertNotNull(scaffoldsPageRequest);
+
+            List<PageRequest> chrRequests = scaffoldsPageRequest[0];
+            assertNotNull(chrRequests);
+            assertEquals(1, chrRequests.size());
+
+            PageRequest chrRequest = chrRequests.get(0);
+            assertEquals(1, chrRequest.getPageNumber());
+            assertEquals(10, chrRequest.getPageSize());
+
+            List<PageRequest> scfRequests = scaffoldsPageRequest[1];
+            assertNotNull(scfRequests);
+            assertEquals(0, scfRequests.size());
+        }
+
+
+        @Test
+        void createScaffoldsPageRequestTestOnlyScaffolds() {
+            PageRequest request = PageRequest.of(3, 10);
+            List<PageRequest>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
+
+            assertNotNull(scaffoldsPageRequest);
+
+            List<PageRequest> chrRequests = scaffoldsPageRequest[0];
+            assertNotNull(chrRequests);
+            assertEquals(0, chrRequests.size());
+
+            List<PageRequest> scfRequests = scaffoldsPageRequest[1];
+            assertNotNull(scfRequests);
+            assertEquals(2, scfRequests.size());
+
+            PageRequest scfRequest1 = scfRequests.get(0);
+            assertEquals(0, scfRequest1.getPageNumber());
+            assertEquals(7, scfRequest1.getPageSize());
+
+            PageRequest scfRequest2 = scfRequests.get(1);
+            assertEquals(1, scfRequest2.getPageNumber());
+            assertEquals(3, scfRequest2.getPageSize());
+        }
+
+
+        @Test
+        void createScaffoldsPageRequestTestBothCombined() {
+            PageRequest request = PageRequest.of(2, 10);
+            List<PageRequest>[] scaffoldsPageRequest = handler.createScaffoldsPageRequest(TOTAL_CHROMOSOMES, request);
+
+            assertNotNull(scaffoldsPageRequest);
+
+            List<PageRequest> chrRequests = scaffoldsPageRequest[0];
+            assertNotNull(chrRequests);
+            assertEquals(1, chrRequests.size());
+
+            PageRequest chrRequest = chrRequests.get(0);
+            assertEquals(2, chrRequest.getPageNumber());
+            assertEquals(7, chrRequest.getPageSize());
+
+            List<PageRequest> scfRequests = scaffoldsPageRequest[1];
+            assertNotNull(scfRequests);
+            assertEquals(1, scfRequests.size());
+
+            PageRequest scfRequest = scfRequests.get(0);
+            assertEquals(0, scfRequest.getPageNumber());
+            assertEquals(3, scfRequest.getPageSize());
+        }
+
+    }
 
     @Nested
     class AssemblyServiceTests {
