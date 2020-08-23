@@ -140,7 +140,7 @@ public class AdminController {
                     "add the given checksums to all chromosomes that match the given INSDC or RefSeq accession.")
     @PutMapping(value = "chromosomes/{accession}/checksum")
     public void putChromosomeChecksumsByAccession(
-            @PathVariable @ApiParam(value = "INSDC or Refseq sequence accession. Eg: NC_000001.11") String accession,
+            @PathVariable @ApiParam(value = "INSDC or Refseq chromosome accession. Eg: NC_000001.11") String accession,
             @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the chromosomes.") String md5,
             @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
         handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
@@ -151,7 +151,7 @@ public class AdminController {
                     "add the given checksums to all scaffolds that match the given INSDC or RefSeq accession.")
     @PutMapping(value = "scaffolds/{accession}/checksum")
     public void putScaffoldChecksumsByAccession(
-            @PathVariable @ApiParam(value = "INSDC or Refseq sequence accession. Eg: NC_000001.11") String accession,
+            @PathVariable @ApiParam(value = "INSDC or Refseq scaffold accession. Eg: NC_000001.11") String accession,
             @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the scaffolds.") String md5,
             @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the scaffolds.") String trunc512) {
         handler.putScaffoldChecksumsByAccession(accession, md5, trunc512);
