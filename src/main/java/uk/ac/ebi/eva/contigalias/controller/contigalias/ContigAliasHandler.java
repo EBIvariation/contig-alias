@@ -27,13 +27,11 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import uk.ac.ebi.eva.contigalias.service.ScaffoldService;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -54,22 +52,17 @@ public class ContigAliasHandler {
 
     private final PagedResourcesAssembler<SequenceEntity> sequenceAssembler;
 
-    // TODO get rid of this
-    private final PagedResourcesAssembler<ScaffoldEntity> scaffoldAssembler;
-
     @Autowired
     public ContigAliasHandler(AssemblyService assemblyService,
                               ChromosomeService chromosomeService,
                               ScaffoldService scaffoldService,
                               PagedResourcesAssembler<AssemblyEntity> assemblyAssembler,
-                              PagedResourcesAssembler<SequenceEntity> sequenceAssembler,
-                              PagedResourcesAssembler<ScaffoldEntity> scaffoldAssembler) {
+                              PagedResourcesAssembler<SequenceEntity> sequenceAssembler) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
         this.scaffoldService = scaffoldService;
         this.assemblyAssembler = assemblyAssembler;
         this.sequenceAssembler = sequenceAssembler;
-        this.scaffoldAssembler = scaffoldAssembler;
     }
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByAccession(String accession) {
@@ -115,7 +108,7 @@ public class ContigAliasHandler {
         for (Pageable pageable : pageRequests[0]) {
             pages.add(chromosomeService.getChromosomesByGenbank(genbank, pageable));
         }
-        for (Pageable pageable: pageRequests[1]){
+        for (Pageable pageable : pageRequests[1]) {
             pages.add(scaffoldService.getScaffoldsByGenbank(genbank, pageable));
         }
         return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
@@ -128,7 +121,7 @@ public class ContigAliasHandler {
         for (Pageable pageable : pageRequests[0]) {
             pages.add(chromosomeService.getChromosomesByRefseq(refseq, pageable));
         }
-        for (Pageable pageable: pageRequests[1]){
+        for (Pageable pageable : pageRequests[1]) {
             pages.add(scaffoldService.getScaffoldsByRefseq(refseq, pageable));
         }
         return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
@@ -141,7 +134,7 @@ public class ContigAliasHandler {
         for (Pageable pageable : pageRequests[0]) {
             pages.add(chromosomeService.getChromosomesByAssemblyGenbank(genbank, pageable));
         }
-        for (Pageable pageable: pageRequests[1]){
+        for (Pageable pageable : pageRequests[1]) {
             pages.add(scaffoldService.getScaffoldsByAssemblyGenbank(genbank, pageable));
         }
         return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
@@ -154,7 +147,7 @@ public class ContigAliasHandler {
         for (Pageable pageable : pageRequests[0]) {
             pages.add(chromosomeService.getChromosomesByAssemblyRefseq(refseq, pageable));
         }
-        for (Pageable pageable: pageRequests[1]){
+        for (Pageable pageable : pageRequests[1]) {
             pages.add(scaffoldService.getScaffoldsByAssemblyRefseq(refseq, pageable));
         }
         return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
@@ -168,7 +161,7 @@ public class ContigAliasHandler {
         for (Pageable pageable : pageRequests[0]) {
             pages.add(chromosomeService.getChromosomesByAssemblyAccession(accession, pageable));
         }
-        for (Pageable pageable: pageRequests[1]){
+        for (Pageable pageable : pageRequests[1]) {
             pages.add(scaffoldService.getScaffoldsByAssemblyAccession(accession, pageable));
         }
         return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
@@ -176,48 +169,91 @@ public class ContigAliasHandler {
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByChromosomeNameAndAssemblyTaxid(
             String name, long taxid, String nameType, Pageable request) {
-        Page<? extends SequenceEntity> page;
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
         if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
-            page = chromosomeService.getChromosomesByUcscNameAndAssemblyTaxid(name, taxid, request);
+            long count = chromosomeService.countChromosomeEntitiesByUcscNameAndAssembly_Taxid(name, taxid);
+            List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+            for (Pageable pageable : pageRequests[0]) {
+                pages.add(chromosomeService.getChromosomesByUcscNameAndAssemblyTaxid(name, taxid, pageable));
+            }
+            for (Pageable pageable : pageRequests[1]) {
+                pages.add(scaffoldService.getScaffoldsByUcscNameAndAssemblyTaxid(name, taxid, pageable));
+            }
         } else {
-            page = chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid, request);
+            long count = chromosomeService.countChromosomeEntitiesByNameAndAssembly_Taxid(name, taxid);
+            List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+            for (Pageable pageable : pageRequests[0]) {
+                pages.add(chromosomeService.getChromosomesByNameAndAssemblyTaxid(name, taxid, pageable));
+            }
+            for (Pageable pageable : pageRequests[1]) {
+                pages.add(scaffoldService.getScaffoldsByNameAndAssemblyTaxid(name, taxid, pageable));
+            }
         }
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByChromosomeNameAndAssemblyAccession(
             String name, String accession, String nameType, Pageable request) {
-        Page<? extends SequenceEntity> page = new PageImpl<>(Collections.emptyList());
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
         Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
         if (assembly.isPresent()) {
+            AssemblyEntity assemblyEntity = assembly.get();
             if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
-                page = chromosomeService.getChromosomesByUcscNameAndAssembly(name, assembly.get(), request);
+                long count = chromosomeService.countChromosomeEntitiesByUcscNameAndAssembly(name, assemblyEntity);
+                List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+                for (Pageable pageable : pageRequests[0]) {
+                    pages.add(chromosomeService.getChromosomesByUcscNameAndAssembly(name, assemblyEntity, pageable));
+                }
+                for (Pageable pageable : pageRequests[1]) {
+                    pages.add(scaffoldService.getScaffoldsByUcscNameAndAssembly(name, assemblyEntity, pageable));
+                }
             } else {
-                page = chromosomeService.getChromosomesByNameAndAssembly(name, assembly.get(), request);
+                long count = chromosomeService.countChromosomeEntitiesByNameAndAssembly(name, assemblyEntity);
+                List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+                for (Pageable pageable : pageRequests[0]) {
+                    pages.add(chromosomeService.getChromosomesByNameAndAssembly(name, assemblyEntity, pageable));
+                }
+                for (Pageable pageable : pageRequests[1]) {
+                    pages.add(scaffoldService.getScaffoldsByNameAndAssembly(name, assemblyEntity, pageable));
+                }
             }
         }
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     public PagedModel<EntityModel<SequenceEntity>> getChromosomesByName(
             String name, String nameType, Pageable request) {
-        Page<? extends SequenceEntity> page;
+        List<Page<? extends SequenceEntity>> pages = new LinkedList<>();
         if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
-            page = chromosomeService.getChromosomesByUcscName(name, request);
+            long count = chromosomeService.countChromosomeEntitiesByUcscName(name);
+            List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+            for (Pageable pageable : pageRequests[0]) {
+                pages.add(chromosomeService.getChromosomesByUcscName(name, pageable));
+            }
+            for (Pageable pageable : pageRequests[1]) {
+                pages.add(scaffoldService.getScaffoldsByUcscName(name, pageable));
+            }
         } else {
-            page = chromosomeService.getChromosomesByName(name, request);
+            long count = chromosomeService.countChromosomeEntitiesByName(name);
+            List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+            for (Pageable pageable : pageRequests[0]) {
+                pages.add(chromosomeService.getChromosomesByName(name, pageable));
+            }
+            for (Pageable pageable : pageRequests[1]) {
+                pages.add(scaffoldService.getScaffoldsByName(name, pageable));
+            }
         }
-        return generatePagedModelFromPage(createSequencePage(page), sequenceAssembler);
-    }
-
-    private Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity> page) {
-        return createSequencePage(Collections.singletonList(page));
+        return generatePagedModelFromPage(createSequencePage(pages), sequenceAssembler);
     }
 
     private Page<SequenceEntity> createSequencePage(List<Page<? extends SequenceEntity>> pages) {
         List<SequenceEntity> sequenceEntities = new LinkedList<>();
-        for (Page<? extends SequenceEntity> page : pages) {
-            sequenceEntities.addAll(page.toList());
+        if (pages != null && pages.size() > 0) {
+            for (Page<? extends SequenceEntity> page : pages) {
+                if (page != null) {
+                    sequenceEntities.addAll(page.toList());
+                }
+            }
         }
         return new PageImpl<>(sequenceEntities);
     }
@@ -237,56 +273,20 @@ public class ContigAliasHandler {
             int chrResultOffset = (int) (totalChromosomes % currentPageSize); // 7
             int secondPageOffset = currentPageSize - chrResultOffset;
 
-            if (maxFilledPageSize <= maxFilledChrPageSize){
+            if (maxFilledPageSize <= maxFilledChrPageSize) {
                 if (chrResultOffset != 0) {
                     result[0].add(PageRequest.of(request.getPageNumber(), chrResultOffset));
                 }
                 result[1].add(PageRequest.of(0, secondPageOffset));
-            }else{
+            } else {
                 int scaffoldPageNumber = (int) ((maxFilledPageSize - maxFilledChrPageSize) / currentPageSize);
                 result[1].add(PageRequest.of(scaffoldPageNumber - 1, chrResultOffset));
                 result[1].add(PageRequest.of(scaffoldPageNumber, secondPageOffset));
             }
-        }else{
+        } else {
             result[0].add(request);
         }
         return result;
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByScaffoldNameAndAssemblyTaxid(
-            String name, long taxid, String nameType, Pageable request) {
-        Page<ScaffoldEntity> page;
-        if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
-            page = scaffoldService.getScaffoldsByUcscNameAndAssemblyTaxid(name, taxid, request);
-        } else {
-            page = scaffoldService.getScaffoldsByNameAndAssemblyTaxid(name, taxid, request);
-        }
-        return generatePagedModelFromPage(page, scaffoldAssembler);
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByScaffoldNameAndAssemblyAccession(
-            String name, String accession, String nameType, Pageable request) {
-        Page<ScaffoldEntity> page = new PageImpl<>(Collections.emptyList());
-        Optional<AssemblyEntity> assembly = assemblyService.getAssemblyByAccession(accession);
-        if (assembly.isPresent()) {
-            if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
-                page = scaffoldService.getScaffoldsByUcscNameAndAssembly(name, assembly.get(), request);
-            } else {
-                page = scaffoldService.getScaffoldsByNameAndAssembly(name, assembly.get(), request);
-            }
-        }
-        return generatePagedModelFromPage(page, scaffoldAssembler);
-    }
-
-    public PagedModel<EntityModel<ScaffoldEntity>> getScaffoldsByName(
-            String name, String nameType, Pageable request) {
-        Page<ScaffoldEntity> page;
-        if (nameType.equals(ContigAliasController.NAME_UCSC_TYPE)) {
-            page = scaffoldService.getScaffoldsByUcscName(name, request);
-        } else {
-            page = scaffoldService.getScaffoldsByName(name, request);
-        }
-        return generatePagedModelFromPage(page, scaffoldAssembler);
     }
 
 }

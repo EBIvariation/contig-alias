@@ -65,11 +65,11 @@ public class ContigAliasHandlerTest {
     @Nested
     class ManualPaginationTests {
 
-        long TOTAL_CHROMOSOMES = 27;
+        private final long TOTAL_CHROMOSOMES = 27;
 
         @BeforeEach
         public void setup() {
-            handler = new ContigAliasHandler(null, null, null, null, null, null);
+            handler = new ContigAliasHandler(null, null, null, null, null);
         }
 
         @Test
@@ -91,7 +91,6 @@ public class ContigAliasHandlerTest {
             assertNotNull(scfRequests);
             assertEquals(0, scfRequests.size());
         }
-
 
         @Test
         void createScaffoldsPageRequestTestOnlyScaffolds() {
@@ -116,7 +115,6 @@ public class ContigAliasHandlerTest {
             assertEquals(1, scfRequest2.getPageNumber());
             assertEquals(3, scfRequest2.getPageSize());
         }
-
 
         @Test
         void createScaffoldsPageRequestTestBothCombined() {
@@ -169,7 +167,7 @@ public class ContigAliasHandlerTest {
                     Collections.singletonList(new EntityModel<>(entity)), null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null, null);
+            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null);
         }
 
         @Test
@@ -235,8 +233,7 @@ public class ContigAliasHandlerTest {
             PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.wrap(entities, null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
-            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null,
-                                             null);
+            handler = new ContigAliasHandler(mockAssemblyService, null, null, assembler, null);
         }
 
         @Test
@@ -292,8 +289,7 @@ public class ContigAliasHandlerTest {
                    .thenReturn(sequencePagedModel);
 
             handler = new ContigAliasHandler(null, mockChromosomeService, mockScaffoldService, null,
-                                             mockSequencesAssembler,
-                                             null);
+                                             mockSequencesAssembler);
         }
 
         @Test
@@ -415,9 +411,9 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockSequenceAssembler.toModel(any()))
                    .thenReturn(sequencePagedModel);
 
-            ScaffoldEntity scaffoldEntity = ScaffoldGenerator.generate();
-
             ScaffoldService mockScaffoldService = mock(ScaffoldService.class);
+
+            ScaffoldEntity scaffoldEntity = ScaffoldGenerator.generate(assemblyEntity);
 
             Page<ScaffoldEntity> pageOfEntity = new PageImpl<>(Collections.singletonList(scaffoldEntity));
             Mockito.when(mockScaffoldService.getScaffoldsByGenbank(scaffoldEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
@@ -436,6 +432,16 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockScaffoldService
                                  .getScaffoldsByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService.getScaffoldsByNameAndAssemblyTaxid(scaffoldEntity.getName(), asmTaxid,
+                                                                                DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService
+                                 .getScaffoldsByUcscNameAndAssemblyTaxid(scaffoldEntity.getUcscName(), asmTaxid,
+                                                                         DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
+            Mockito.when(mockScaffoldService.getScaffoldsByNameAndAssembly(scaffoldEntity.getName(), assemblyEntity,
+                                                                           DEFAULT_PAGE_REQUEST))
+                   .thenReturn(pageOfEntity);
 
             PagedResourcesAssembler<ScaffoldEntity> mockScaffoldAssembler = mock(PagedResourcesAssembler.class);
             PagedModel<EntityModel<ScaffoldEntity>> scaffoldPagedModel = new PagedModel<>(
@@ -444,8 +450,7 @@ public class ContigAliasHandlerTest {
                    .thenReturn(scaffoldPagedModel);
 
             handler = new ContigAliasHandler(mockAssemblyService, mockChromosomeService, mockScaffoldService,
-                                             mockAssemblyAssembler,
-                                             mockSequenceAssembler, null);
+                                             mockAssemblyAssembler, mockSequenceAssembler);
         }
 
         @AfterEach
@@ -544,12 +549,22 @@ public class ContigAliasHandlerTest {
 
         private void assertPagedModelIdenticalToChromosomeEntities(
                 PagedModel<EntityModel<SequenceEntity>> pagedModel) {
+            List<SequenceEntity> entities = assertPagedModelValidAndReturnContentList(pagedModel);
+            assertPagedModelIdenticalToChromosomeEntities(entities);
+        }
+
+        private List<SequenceEntity> assertPagedModelValidAndReturnContentList(
+                PagedModel<EntityModel<SequenceEntity>> pagedModel) {
             assertNotNull(pagedModel);
             Collection<EntityModel<SequenceEntity>> content = pagedModel.getContent();
             assertNotNull(content);
             assertFalse(content.isEmpty());
-            List<SequenceEntity> collect = content.stream().map(EntityModel::getContent).collect(Collectors.toList());
-            collect.containsAll(chromosomeEntities);
+            return content.stream().map(EntityModel::getContent).collect(Collectors.toList());
+        }
+
+        private void assertPagedModelIdenticalToChromosomeEntities(List<SequenceEntity> collect) {
+            assertNotNull(collect);
+            assertTrue(collect.containsAll(chromosomeEntities));
         }
 
         void testAssemblyEntityResponse(AssemblyEntity assembly) {
