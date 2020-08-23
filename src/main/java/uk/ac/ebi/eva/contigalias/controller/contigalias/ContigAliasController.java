@@ -57,7 +57,7 @@ public class ContigAliasController {
 
     public static final String AUTHORITY_NONE = "none";
 
-    public static final String NAME_SEQUENCE_TYPE = "sequence";
+    public static final String NAME_SEQUENCE_TYPE = "chromosome";
 
     public static final String NAME_UCSC_TYPE = "ucsc";
 
@@ -150,16 +150,16 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @ApiOperation(value = "Get a list of assemblies using the GenBank accession of one of the sequences they have " +
+    @ApiOperation(value = "Get a list of assemblies using the GenBank accession of one of the chromosomes they have " +
             "in common.",
-            notes = "Given a sequence's GenBank accession, this endpoint will return a list of assemblies that are " +
-                    "associated with a sequence having the same GenBank accession as the one provided. This " +
+            notes = "Given a chromosome's GenBank accession, this endpoint will return a list of assemblies that are " +
+                    "associated with a chromosome having the same GenBank accession as the one provided. This " +
                     "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
                     "parameters (page and size) to control pagination of results. If the page number and/or page size" +
                     " are invalid then an HTTP status code of 416 is returned by this endpoint.")
-    @GetMapping(value = "sequences/genbank/{genbank}/assemblies")
+    @GetMapping(value = "chromosomes/genbank/{genbank}/assemblies")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesBySequenceGenbank
-            (@PathVariable @ApiParam(value = "GenBank accession of the sequences.") String genbank,
+            (@PathVariable @ApiParam(value = "GenBank accession of the chromosomes.") String genbank,
              @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
              @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
@@ -168,16 +168,16 @@ public class ContigAliasController {
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
-    @ApiOperation(value = "Get a list of assemblies using the RefSeq accession of one of the sequences they have " +
+    @ApiOperation(value = "Get a list of assemblies using the RefSeq accession of one of the chromosomes they have " +
             "in common.",
-            notes = "Given a sequence's RefSeq accession, this endpoint will return a list of assemblies that are " +
-                    "associated with a sequence having the same RefSeq accession as the one provided. This " +
+            notes = "Given a chromosome's RefSeq accession, this endpoint will return a list of assemblies that are " +
+                    "associated with a chromosome having the same RefSeq accession as the one provided. This " +
                     "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
                     "parameters (page and size) to control pagination of results. If the page number and/or page size" +
                     " are invalid then an HTTP status code of 416 is returned by this endpoint.")
-    @GetMapping(value = "sequences/refseq/{refseq}/assemblies")
+    @GetMapping(value = "chromosomes/refseq/{refseq}/assemblies")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesBySequenceRefseq(
-            @PathVariable @ApiParam(value = "RefSeq accession of the sequences.") String refseq,
+            @PathVariable @ApiParam(value = "RefSeq accession of the chromosomes.") String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
@@ -186,12 +186,12 @@ public class ContigAliasController {
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
-    @ApiOperation(value = "Get a list of sequences using their common GenBank accession.",
-            notes = "Given a sequence's GenBank accession, this endpoint will return a list of all sequences that" +
-                    " match that accession. This endpoint will either return a list of sequences.")
-    @GetMapping(value = "sequences/genbank/{genbank}", produces = "application/json")
+    @ApiOperation(value = "Get a list of chromosomes using their common GenBank accession.",
+            notes = "Given a chromosome's GenBank accession, this endpoint will return a list of all chromosomes that" +
+                    " match that accession. This endpoint will either return a list of chromosomes.")
+    @GetMapping(value = "chromosomes/genbank/{genbank}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByGenbank(
-            @PathVariable @ApiParam(value = "Genbank sequence accession. Eg: CM000663.2") String genbank,
+            @PathVariable @ApiParam(value = "Genbank chromosome accession. Eg: CM000663.2") String genbank,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
@@ -199,12 +199,12 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @ApiOperation(value = "Get a list of sequences using their common RefSeq accession.",
-            notes = "Given a sequence's RefSeq accession, this endpoint will return a list of all sequences that " +
-                    "match that accession. This endpoint will either return a list of sequences.")
-    @GetMapping(value = "sequences/refseq/{refseq}", produces = "application/json")
+    @ApiOperation(value = "Get a list of chromosomes using their common RefSeq accession.",
+            notes = "Given a chromosome's RefSeq accession, this endpoint will return a list of all chromosomes that " +
+                    "match that accession. This endpoint will either return a list of chromosomes.")
+    @GetMapping(value = "chromosomes/refseq/{refseq}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByRefseq(
-            @PathVariable @ApiParam(value = "Refseq sequence accession. Eg: NC_000001.11") String refseq,
+            @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
@@ -212,7 +212,8 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @GetMapping(value = "assemblies/{accession}/sequences", produces = "application/json")
+    @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.")
+    @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyAccession(
     @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.",
             notes = "Given an assembly's INSDC or RefSeq accession, this endpoint will return a list of all the " +
@@ -247,7 +248,8 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @GetMapping(value = "assemblies/genbank/{genbank}/sequences", produces = "application/json")
+    @ApiOperation(value = "Get chromosomes using the genbank accession of its parent assembly.")
+    @GetMapping(value = "assemblies/genbank/{genbank}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyGenbank(
             @PathVariable String genbank,
     @ApiOperation(value = "Get chromosomes using the insdc accession of its parent assembly.",
@@ -262,7 +264,8 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @GetMapping(value = "assemblies/refseq/{refseq}/sequences", produces = "application/json")
+    @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.")
+    @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyRefseq(
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.",
             notes = "Given an assembly's RefSeq accession, this endpoint will return a list of all the " +
@@ -277,22 +280,22 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @ApiOperation(value = "Get sequences using a combination of their own name and the Taxonomic ID's of their " +
+    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
             "parent assemblies.",
-            notes = "Given a sequence's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
-                    "that it belongs to, this endpoint will return a non-emtpy list of sequences that satisfy the " +
+            notes = "Given a chromosome's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
+                    "that it belongs to, this endpoint will return a non-emtpy list of chromosomes that satisfy the " +
                     "given parameters. If no Taxonomic ID or accession are provided then the endpoint returns a list " +
-                    "of sequences which have the given name. Each sequence will also have its parent assembly " +
-                    "nested inside it. The endpoint will either return a list of sequences or it will return an " +
+                    "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
+                    "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
                     "HTTP error code 400 if invalid parameters are found.")
-    @GetMapping(value = "sequences/name/{name}")
+    @GetMapping(value = "chromosomes/name/{name}")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesBySequenceNameAndAssemblyTaxidOrAccession(
-            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of sequence. Eg: HSCHR1_RANDOM_CTG5") String name,
+            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
             @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
                     "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
             @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
-                    "sequence name or a UCSC style name. The acceptable param values are " + NAME_SEQUENCE_TYPE + " " +
+                    "chromosome name or a UCSC style name. The acceptable param values are " + NAME_SEQUENCE_TYPE + " " +
                     "and " + NAME_UCSC_TYPE + " respectively. If this parameter is omitted then the name is assumed " +
                     "to be a " + NAME_SEQUENCE_TYPE + " name by default.") Optional<String> nameTypeOpt,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,

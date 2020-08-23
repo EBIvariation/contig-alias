@@ -183,21 +183,21 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getChromosomeByGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/genbank/{genbank}", chromosomeEntity.getGenbank()));
+                get("/v1/chromosomes/genbank/{genbank}", chromosomeEntity.getGenbank()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
     @Test
     void getChromosomeByRefseq() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/refseq/{refseq}", chromosomeEntity.getRefseq()));
+                get("/v1/chromosomes/refseq/{refseq}", chromosomeEntity.getRefseq()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
     @Test
     void getSequencesByChromosomeNameAndAssemblyTaxid() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/name/{name}",
+                get("/v1/chromosomes/name/{name}",
                     chromosomeEntity.getName()).param("taxid", assemblyEntity.getTaxid().toString()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
@@ -205,7 +205,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getSequencesByChromosomeNameAndAssemblyAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/name/{name}",
+                get("/v1/chromosomes/name/{name}",
                     chromosomeEntity.getName()).param("accession", assemblyEntity.getGenbank()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
@@ -213,7 +213,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getSequencesByChromosomeUcscNameAndAssemblyTaxid() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/name/{name}",
+                get("/v1/chromosomes/name/{name}",
                     chromosomeEntity.getUcscName())
                         .param("taxid", assemblyEntity.getTaxid().toString())
                         .param("name", NAME_UCSC_TYPE));
@@ -223,7 +223,7 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getSequencesByChromosomeUcscNameAndAssemblyAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/name/{name}",
+                get("/v1/chromosomes/name/{name}",
                     chromosomeEntity.getUcscName())
                         .param("accession", assemblyEntity.getGenbank())
                         .param("name", NAME_UCSC_TYPE));
@@ -233,35 +233,35 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getAssemblyByChromosomeGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/genbank/{genbank}/assemblies", assemblyEntity.getGenbank()));
+                get("/v1/chromosomes/genbank/{genbank}/assemblies", assemblyEntity.getGenbank()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
     @Test
     void getAssemblyByChromosomeRefseq() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/sequences/refseq/{refseq}/assemblies", assemblyEntity.getRefseq()));
+                get("/v1/chromosomes/refseq/{refseq}/assemblies", assemblyEntity.getRefseq()));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
     @Test
     void getSequencesByAssemblyAccessionNoAuthority() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/{accession}/sequences", assemblyEntity.getGenbank()));
+                get("/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
     @Test
     void getSequencesByAssemblyGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/genbank/{genbank}/sequences", assemblyEntity.getGenbank()));
+                get("/v1/assemblies/genbank/{genbank}/chromosomes", assemblyEntity.getGenbank()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
     @Test
     void getSequencesByAssemblyAccessionGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/{accession}/sequences", assemblyEntity.getGenbank())
+                get("/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank())
                         .param("authority", AUTHORITY_GENBANK));
         assertChromosomePagedModelResponseValid(resultActions);
     }
@@ -269,14 +269,14 @@ public class ContigAliasControllerIntegrationTest {
     @Test
     void getSequencesByAssemblyRefseq() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/refseq/{refseq}/sequences", assemblyEntity.getRefseq()));
+                get("/v1/assemblies/refseq/{refseq}/chromosomes", assemblyEntity.getRefseq()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
     @Test
     void getSequencesByAssemblyAccessionRefseq() throws Exception {
         ResultActions resultActions = mockMvc.perform(
-                get("/v1/assemblies/{accession}/sequences", assemblyEntity.getRefseq())
+                get("/v1/assemblies/{accession}/chromosomes", assemblyEntity.getRefseq())
                         .param("authority", AUTHORITY_REFSEQ));
         assertChromosomePagedModelResponseValid(resultActions);
     }
