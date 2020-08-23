@@ -294,12 +294,12 @@ public class ContigAliasHandlerTest {
 
         @Test
         public void getChromosomeByGenbank() {
-            testChromosomeEntityResponse(handler.getChromosomesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST));
+            testChromosomeEntityResponse(handler.getSequencesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         public void getChromosomeByRefseq() {
-            testChromosomeEntityResponse(handler.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST));
+            testChromosomeEntityResponse(handler.getSequencesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
         void testChromosomeEntityResponse(PagedModel<EntityModel<SequenceEntity>> body) {
@@ -461,39 +461,39 @@ public class ContigAliasHandlerTest {
         @Test
         void getAssemblyByChromosomeGenbank() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                testAssemblyEntityResponse(handler.getAssembliesByChromosomeGenbank(chromosomeEntity.getGenbank()));
+                testAssemblyEntityResponse(handler.getAssembliesBySequenceGenbank(chromosomeEntity.getGenbank()));
             }
         }
 
         @Test
         void getAssemblyByChromosomeRefseq() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                testAssemblyEntityResponse(handler.getAssembliesByChromosomeRefseq(chromosomeEntity.getRefseq()));
+                testAssemblyEntityResponse(handler.getAssembliesBySequenceRefseq(chromosomeEntity.getRefseq()));
             }
         }
 
         @Test
         void getChromosomesByAssemblyGenbank() {
             testChromosomeEntityResponses(
-                    handler.getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
+                    handler.getSequencesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         void getChromosomesByAssemblyRefseq() {
             testChromosomeEntityResponses(
-                    handler.getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
+                    handler.getSequencesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         void getChromosomesByAssemblyAccessionGenbank() {
             testChromosomeEntityResponses(
-                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
+                    handler.getSequencesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
         void getChromosomesByAssemblyAccessionRefseq() {
             testChromosomeEntityResponses(
-                    handler.getChromosomesByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
+                    handler.getSequencesByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST));
         }
 
         void testAssemblyEntityResponse(PagedModel<EntityModel<AssemblyEntity>> pagedModel) {
@@ -514,7 +514,7 @@ public class ContigAliasHandlerTest {
             String chrName = chromosomeEntities.get(0).getName();
             Long asmTaxid = assemblyEntity.getTaxid();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
-                    .getChromosomesByChromosomeNameAndAssemblyTaxid(
+                    .getSequencesBySequenceNameAndAssemblyTaxid(
                             chrName, asmTaxid, NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
@@ -523,7 +523,7 @@ public class ContigAliasHandlerTest {
         void getChromosomesByChromosomeNameAndAssemblyAccession() {
             String chrName = chromosomeEntities.get(0).getName();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
-                    .getChromosomesByChromosomeNameAndAssemblyAccession(
+                    .getSequencesBySequenceNameAndAssemblyAccession(
                             chrName, assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
@@ -533,7 +533,7 @@ public class ContigAliasHandlerTest {
             String chrName = chromosomeEntities.get(0).getUcscName();
             Long asmTaxid = assemblyEntity.getTaxid();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
-                    .getChromosomesByChromosomeNameAndAssemblyTaxid(
+                    .getSequencesBySequenceNameAndAssemblyTaxid(
                             chrName, asmTaxid, NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
@@ -542,7 +542,7 @@ public class ContigAliasHandlerTest {
         void getChromosomesByChromosomeUcscNameAndAssemblyAccession() {
             String chrName = chromosomeEntities.get(0).getUcscName();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
-                    .getChromosomesByChromosomeNameAndAssemblyAccession(
+                    .getSequencesBySequenceNameAndAssemblyAccession(
                             chrName, assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }

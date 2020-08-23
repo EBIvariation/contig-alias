@@ -161,6 +161,19 @@ public class ScaffoldService {
         return page;
     }
 
+    public void putScaffoldChecksumsByAccession(String accession, String md5, String trunc512) {
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByGenbankOrRefseq(
+                accession, accession, Pageable.unpaged());
+        if (page.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No scaffolds corresponding to accession " + accession + " found in the database");
+        }
+        page.forEach(it -> {
+            it.setMd5checksum(md5).setTrunc512checksum(trunc512);
+            repository.save(it);
+        });
+    }
+
     private void stripAssemblyFromChromosome(ScaffoldEntity scaffold) {
         scaffold.setAssembly(null);
     }

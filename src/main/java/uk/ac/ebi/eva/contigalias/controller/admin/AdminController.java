@@ -40,7 +40,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DE
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
-import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.linkPagedModelGetChromosomesByAssemblyAccession;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.linkPagedModelGetSequencesByAssemblyAccession;
 
 @RequestMapping("/v1/admin")
 @RestController
@@ -69,8 +69,8 @@ public class AdminController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(asmAccession);
-            linkPagedModelGetChromosomesByAssemblyAccession(asmAccession, pageNumber, pageSize, pagedModel, "");
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(accession);
+            linkPagedModelGetSequencesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -122,11 +122,13 @@ public class AdminController {
 
 //    This endpoint can be enabled in the future when checksums for assemblies are added to the project.
 //    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to an assembly by accession.",
-//            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
+//            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will
+//            " +
 //                    "add the given checksums to the assembly that matches the given INSDC or RefSeq accession.")
 //    @PutMapping(value = "assemblies/{accession}/checksum")
 //    public void putAssemblyChecksumsByAccession(
-//            @PathVariable @ApiParam(value = "INSDC or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+//            @PathVariable @ApiParam(value = "INSDC or Refseq assembly accession. Eg: GCA_000001405.10") String
+//            accession,
 //            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the assembly.") String md5,
 //            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the assembly.") String
 //                    trunc512) {
@@ -138,17 +140,28 @@ public class AdminController {
                     "add the given checksums to all chromosomes that match the given INSDC or RefSeq accession.")
     @PutMapping(value = "chromosomes/{accession}/checksum")
     public void putChromosomeChecksumsByAccession(
-            @PathVariable @ApiParam(value = "INSDC or Refseq chromosome accession. Eg: NC_000001.11") String accession,
+            @PathVariable @ApiParam(value = "INSDC or Refseq sequence accession. Eg: NC_000001.11") String accession,
             @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the chromosomes.") String md5,
             @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
         handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
+    }
+
+    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to all scaffolds by accession.",
+            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
+                    "add the given checksums to all scaffolds that match the given INSDC or RefSeq accession.")
+    @PutMapping(value = "scaffolds/{accession}/checksum")
+    public void putScaffoldChecksumsByAccession(
+            @PathVariable @ApiParam(value = "INSDC or Refseq sequence accession. Eg: NC_000001.11") String accession,
+            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the scaffolds.") String md5,
+            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the scaffolds.") String trunc512) {
+        handler.putScaffoldChecksumsByAccession(accession, md5, trunc512);
     }
 
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
             notes = "Given an assembly's accession this endpoint will delete the assembly that matches that " +
                     "accession from the local database. The accession can be either a INSDC or RefSeq accession and" +
                     " the endpoint will automatically deletes the correct assembly from the database. Deleting an " +
-                    "assembly also deletes all chromosomes that are associated with that assembly. This endpoint does" +
+                    "assembly also deletes all sequences that are associated with that assembly. This endpoint does" +
                     " not return any data.")
     @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(

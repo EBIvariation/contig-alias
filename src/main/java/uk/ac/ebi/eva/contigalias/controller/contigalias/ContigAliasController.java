@@ -68,7 +68,7 @@ public class ContigAliasController {
         this.handler = handler;
     }
 
-    public static void linkPagedModelGetChromosomesByAssemblyAccession(
+    public static void linkPagedModelGetSequencesByAssemblyAccession(
             String accession, Integer pageNumber, Integer pageSize, PagedModel<EntityModel<AssemblyEntity>> pagedModel,
             String authority) {
         if (pageNumber == null) {
@@ -77,10 +77,10 @@ public class ContigAliasController {
         if (pageSize == null) {
             pageSize = DEFAULT_PAGE_SIZE;
         }
-        pagedModel.add(
-                linkTo(methodOn(ContigAliasController.class)
-                               .getChromosomesByAssemblyAccession(accession, authority, pageNumber, pageSize))
-                        .withRel(REL_CHROMOSOMES));
+        pagedModel.add(linkTo(methodOn(ContigAliasController.class)
+                                      .getSequencesByAssemblyAccession(
+                                              accession, authority, pageNumber, pageSize))
+                               .withRel(REL_CHROMOSOMES));
     }
 
     @ApiOperation(value = "Get an assembly using its INSDC or RefSeq accession. ",
@@ -96,8 +96,8 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByAccession(asmAccession);
-            linkPagedModelGetChromosomesByAssemblyAccession(asmAccession, pageNumber, pageSize, pagedModel, "");
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByAccession(accession);
+            linkPagedModelGetSequencesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -112,9 +112,9 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByGenbank(asmGenbank);
-            linkPagedModelGetChromosomesByAssemblyAccession(
-                    asmGenbank, pageNumber, pageSize, pagedModel, AUTHORITY_INSDC);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByGenbank(genbank);
+            linkPagedModelGetSequencesByAssemblyAccession(
+                    genbank, pageNumber, pageSize, pagedModel, AUTHORITY_GENBANK);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -129,9 +129,9 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByRefseq(asmRefseq);
-            linkPagedModelGetChromosomesByAssemblyAccession(
-                    asmRefseq, pageNumber, pageSize, pagedModel, AUTHORITY_REFSEQ);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByRefseq(refseq);
+            linkPagedModelGetSequencesByAssemblyAccession(
+                    refseq, pageNumber, pageSize, pagedModel, AUTHORITY_REFSEQ);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -150,73 +150,73 @@ public class ContigAliasController {
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @ApiOperation(value = "Get a list of assemblies using the INSDC accession of one of the chromosomes they have " +
+    @ApiOperation(value = "Get a list of assemblies using the GenBank accession of one of the sequences they have " +
             "in common.",
-            notes = "Given a chromosome's INSDC accession, this endpoint will return a list of assemblies that are " +
-                    "associated with a chromosome having the same INSDC accession as the one provided. This " +
+            notes = "Given a sequence's GenBank accession, this endpoint will return a list of assemblies that are " +
+                    "associated with a sequence having the same GenBank accession as the one provided. This " +
                     "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
                     "parameters (page and size) to control pagination of results. If the page number and/or page size" +
-                    " are invalid then an HTTP status code of 416 is returned by this endpoint. ")
-    @GetMapping(value = "chromosomes/insdc/{insdc}/assemblies")
-    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByChromosomeGenbank(
-            @PathVariable(name = "insdc") @ApiParam(value = "INSDC accession of the chromosomes. Eg: CM000663.2") String chrGenbank,
-            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
-            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+                    " are invalid then an HTTP status code of 416 is returned by this endpoint.")
+    @GetMapping(value = "sequences/genbank/{genbank}/assemblies")
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesBySequenceGenbank
+            (@PathVariable @ApiParam(value = "GenBank accession of the sequences.") String genbank,
+             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesByChromosomeGenbank(chrGenbank);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesBySequenceGenbank(genbank);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
-    @ApiOperation(value = "Get a list of assemblies using the RefSeq accession of one of the chromosomes they have " +
+    @ApiOperation(value = "Get a list of assemblies using the RefSeq accession of one of the sequences they have " +
             "in common.",
-            notes = "Given a chromosome's RefSeq accession, this endpoint will return a list of assemblies that are " +
-                    "associated with a chromosome having the same RefSeq accession as the one provided. This " +
+            notes = "Given a sequence's RefSeq accession, this endpoint will return a list of assemblies that are " +
+                    "associated with a sequence having the same RefSeq accession as the one provided. This " +
                     "endpoint returns a list containing one or more assemblies. It also accepts two additional " +
                     "parameters (page and size) to control pagination of results. If the page number and/or page size" +
-                    " are invalid then an HTTP status code of 416 is returned by this endpoint. ")
-    @GetMapping(value = "chromosomes/refseq/{refseq}/assemblies")
-    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesByChromosomeRefseq(
-            @PathVariable(name = "refseq") @ApiParam(value = "RefSeq accession of the chromosomes. Eg: NC_000001.11") String chrRefseq,
+                    " are invalid then an HTTP status code of 416 is returned by this endpoint.")
+    @GetMapping(value = "sequences/refseq/{refseq}/assemblies")
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssembliesBySequenceRefseq(
+            @PathVariable @ApiParam(value = "RefSeq accession of the sequences.") String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesByChromosomeRefseq(chrRefseq);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesBySequenceRefseq(refseq);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
-    @ApiOperation(value = "Get a list of chromosomes using their common INSDC accession.",
-            notes = "Given a chromosome's INSDC accession, this endpoint will return a list of all chromosomes that" +
-                    " match that accession. This endpoint will either return a list of chromosomes. ")
-    @GetMapping(value = "chromosomes/insdc/{insdc}", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByGenbank(
-            @PathVariable(name = "insdc") @ApiParam(value = "INSDC accession of the chromosomes. Eg: CM000663.2") String chrGenbank,
+    @ApiOperation(value = "Get a list of sequences using their common GenBank accession.",
+            notes = "Given a sequence's GenBank accession, this endpoint will return a list of all sequences that" +
+                    " match that accession. This endpoint will either return a list of sequences.")
+    @GetMapping(value = "sequences/genbank/{genbank}", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByGenbank(
+            @PathVariable @ApiParam(value = "Genbank sequence accession. Eg: CM000663.2") String genbank,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getChromosomesByGenbank(genbank, pageRequest);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getSequencesByGenbank(genbank, pageRequest);
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @ApiOperation(value = "Get a list of chromosomes using their common RefSeq accession.",
-            notes = "Given a chromosome's RefSeq accession, this endpoint will return a list of all chromosomes that " +
-                    "match that accession. This endpoint will either return a list of chromosomes. ")
-    @GetMapping(value = "chromosomes/refseq/{refseq}", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByRefseq(
-            @PathVariable @ApiParam(value = "Refseq chromosome accession. Eg: NC_000001.11") String refseq,
+    @ApiOperation(value = "Get a list of sequences using their common RefSeq accession.",
+            notes = "Given a sequence's RefSeq accession, this endpoint will return a list of all sequences that " +
+                    "match that accession. This endpoint will either return a list of sequences.")
+    @GetMapping(value = "sequences/refseq/{refseq}", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByRefseq(
+            @PathVariable @ApiParam(value = "Refseq sequence accession. Eg: NC_000001.11") String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getChromosomesByRefseq(refseq, pageRequest);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getSequencesByRefseq(refseq, pageRequest);
         return createAppropriateResponseEntity(pagedModel);
     }
 
+    @GetMapping(value = "assemblies/{accession}/sequences", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyAccession(
     @ApiOperation(value = "Get chromosomes using the accession of its parent assembly.",
             notes = "Given an assembly's INSDC or RefSeq accession, this endpoint will return a list of all the " +
                     "chromosomes that are associated with the assembly uniquely identified by the given accession. ")
-    @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByAssemblyAccession(
             @PathVariable String accession,
             @RequestParam(required = false, name = "authority") @ApiParam("Specify if the provided accession is a " +
                     "INSDC or a RefSeq accession. The acceptable param values are " + AUTHORITY_INSDC + " " +
@@ -231,63 +231,63 @@ public class ContigAliasController {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<SequenceEntity>> pagedModel;
         if (asmAuthority != null && !asmAuthority.isEmpty()) {
-            if (asmAuthority.toLowerCase().equals(AUTHORITY_INSDC)) {
-                pagedModel = handler.getChromosomesByAssemblyGenbank(asmAccession, pageRequest);
-                linkPagedModelGetAssemblyByAuthority(asmAccession, AUTHORITY_INSDC, pagedModel);
+            if (asmAuthority.toLowerCase().equals(AUTHORITY_GENBANK)) {
+                pagedModel = handler.getSequencesByAssemblyGenbank(accession, pageRequest);
+                linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_GENBANK, pagedModel);
             } else if (asmAuthority.toLowerCase().equals(AUTHORITY_REFSEQ)) {
-                pagedModel = handler.getChromosomesByAssemblyRefseq(asmAccession, pageRequest);
-                linkPagedModelGetAssemblyByAuthority(asmAccession, AUTHORITY_REFSEQ, pagedModel);
+                pagedModel = handler.getSequencesByAssemblyRefseq(accession, pageRequest);
+                linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_REFSEQ, pagedModel);
             } else {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         } else {
-            pagedModel = handler.getChromosomesByAssemblyAccession(asmAccession, pageRequest);
-            linkPagedModelGetAssemblyByAuthority(asmAccession, AUTHORITY_NONE, pagedModel);
+            pagedModel = handler.getSequencesByAssemblyAccession(accession, pageRequest);
+            linkPagedModelGetAssemblyByAuthority(accession, AUTHORITY_NONE, pagedModel);
         }
         return createAppropriateResponseEntity(pagedModel);
     }
 
+    @GetMapping(value = "assemblies/genbank/{genbank}/sequences", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyGenbank(
+            @PathVariable String genbank,
     @ApiOperation(value = "Get chromosomes using the insdc accession of its parent assembly.",
             notes = "Given an assembly's INSDC accession, this endpoint will return a list of all the " +
                     "chromosomes that are associated with the assembly uniquely identified by the given accession. ")
-    @GetMapping(value = "assemblies/insdc/{insdc}/chromosomes", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<ChromosomeEntity>>> getChromosomesByAssemblyGenbank(
-            @PathVariable(name = "insdc") @ApiParam(value = "INSDC assembly accession. Eg: GCA_000001405.10") String asmGenbank,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<SequenceEntity>> pagedModel
-                = handler.getChromosomesByAssemblyGenbank(genbank, pageRequest);
+                = handler.getSequencesByAssemblyGenbank(genbank, pageRequest);
         linkPagedModelGetAssemblyByAuthority(genbank, AUTHORITY_GENBANK, pagedModel);
         return createAppropriateResponseEntity(pagedModel);
     }
 
+    @GetMapping(value = "assemblies/refseq/{refseq}/sequences", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyRefseq(
     @ApiOperation(value = "Get chromosomes using the refseq accession of its parent assembly.",
             notes = "Given an assembly's RefSeq accession, this endpoint will return a list of all the " +
                     "chromosomes that are associated with the assembly uniquely identified by the given accession. ")
-    @GetMapping(value = "assemblies/refseq/{refseq}/chromosomes", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByAssemblyRefseq(
             @PathVariable String refseq,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<SequenceEntity>> pagedModel
-                = handler.getChromosomesByAssemblyRefseq(refseq, pageRequest);
+                = handler.getSequencesByAssemblyRefseq(refseq, pageRequest);
         linkPagedModelGetAssemblyByAuthority(refseq, AUTHORITY_REFSEQ, pagedModel);
         return createAppropriateResponseEntity(pagedModel);
     }
 
-    @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
+    @ApiOperation(value = "Get sequences using a combination of their own name and the Taxonomic ID's of their " +
             "parent assemblies.",
-            notes = "Given a chromosome's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
-                    "that it belongs to, this endpoint will return a non-emtpy list of chromosomes that satisfy the " +
+            notes = "Given a sequence's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
+                    "that it belongs to, this endpoint will return a non-emtpy list of sequences that satisfy the " +
                     "given parameters. If no Taxonomic ID or accession are provided then the endpoint returns a list " +
-                    "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
-                    "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
+                    "of sequences which have the given name. Each sequence will also have its parent assembly " +
+                    "nested inside it. The endpoint will either return a list of sequences or it will return an " +
                     "HTTP error code 400 if invalid parameters are found.")
-    @GetMapping(value = "chromosomes/name/{name}")
-    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getChromosomesByChromosomeNameAndAssemblyTaxidOrAccession(
-            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of chromosome. Eg: HSCHR1_RANDOM_CTG5") String name,
+    @GetMapping(value = "sequences/name/{name}")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesBySequenceNameAndAssemblyTaxidOrAccession(
+            @PathVariable @ApiParam(value = "Sequence name or UCSC style name of sequence. Eg: HSCHR1_RANDOM_CTG5") String name,
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
             @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
                     "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
@@ -307,12 +307,12 @@ public class ContigAliasController {
         PagedModel<EntityModel<SequenceEntity>> pagedModel;
         String nameType = nameTypeOpt.orElse(NAME_SEQUENCE_TYPE);
         if (!isTaxidValid && !isAccessionValid) {
-            pagedModel = handler.getChromosomesByName(name, nameType, pageRequest);
+            pagedModel = handler.getSequencesByName(name, nameType, pageRequest);
         } else if (isTaxidValid) {
-            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyTaxid(
+            pagedModel = handler.getSequencesBySequenceNameAndAssemblyTaxid(
                     name, taxid.get(), nameType, pageRequest);
         } else {
-            pagedModel = handler.getChromosomesByChromosomeNameAndAssemblyAccession(
+            pagedModel = handler.getSequencesBySequenceNameAndAssemblyAccession(
                     name, asmAccession.get(), nameType, pageRequest);
         }
         return createAppropriateResponseEntity(pagedModel);

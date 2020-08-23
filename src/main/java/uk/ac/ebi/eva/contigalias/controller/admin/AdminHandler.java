@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
+import uk.ac.ebi.eva.contigalias.service.ScaffoldService;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,14 +41,18 @@ public class AdminHandler {
 
     private final ChromosomeService chromosomeService;
 
+    private final ScaffoldService scaffoldService;
+
     private final PagedResourcesAssembler<AssemblyEntity> assemblyAssembler;
 
     @Autowired
     public AdminHandler(AssemblyService assemblyService,
                         ChromosomeService chromosomeService,
+                        ScaffoldService scaffoldService,
                         PagedResourcesAssembler<AssemblyEntity> assemblyAssembler) {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
+        this.scaffoldService = scaffoldService;
         this.assemblyAssembler = assemblyAssembler;
     }
 
@@ -75,5 +80,9 @@ public class AdminHandler {
 
     public void putChromosomeChecksumsByAccession(String accession, String md5, String trunc512) {
         chromosomeService.putChromosomeChecksumsByAccession(accession, md5, trunc512);
+    }
+
+    public void putScaffoldChecksumsByAccession(String accession, String md5, String trunc512) {
+        scaffoldService.putScaffoldChecksumsByAccession(accession, md5, trunc512);
     }
 }
