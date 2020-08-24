@@ -262,7 +262,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByAssemblyAccessionGenbank() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/assemblies/{accession}/chromosomes", assemblyEntity.getGenbank())
-                        .param("authority", AUTHORITY_GENBANK));
+                        .param("authority", AUTHORITY_INSDC));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
