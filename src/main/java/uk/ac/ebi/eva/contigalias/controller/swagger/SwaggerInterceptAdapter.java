@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.contigalias.controller.swagger;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -25,14 +26,17 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class SwaggerInterceptAdapter extends HandlerInterceptorAdapter {
 
+    @Value("${server.servlet.context-path:/}")
+    private String contextPath;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
         String req = request.getRequestURI();
 
-        if (req.equals("/") || req.equals("/contig-alias") || req.equals("/contig-alias/")
-                || req.equals("/contig-alias-admin") || req.equals("/contig-alias-admin/")) {
-            response.sendRedirect("/swagger-ui.html");
+        if (req.equals(contextPath) || req.equals(contextPath + "/") ||
+                req.equals(contextPath + "/v1") || req.equals(contextPath + "/v1/")) {
+            response.sendRedirect(contextPath + "/swagger-ui.html");
             return false;
         }
 

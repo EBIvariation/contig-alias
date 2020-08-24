@@ -52,31 +52,33 @@ public class AdminController {
         this.handler = handler;
     }
 
-    @ApiOperation(value = "Get or fetch an assembly using its GenBank or RefSeq accession.",
+    @ApiOperation(value = "Get or fetch an assembly using its INSDC or RefSeq accession.",
             notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
-                    ". The accession can be either a GenBank or a RefSeq accession and the software will " +
+                    ". The accession can be either a INSDC or a RefSeq accession and the software will " +
                     "automatically fetch a result from the database for any assembly having the aforementioned " +
-                    "accession as its GenBank or RefSeq accession. This endpoint will first look for the assembly in " +
+                    "accession as its INSDC or RefSeq accession. This endpoint will first look for the assembly in " +
                     "local database and return the result. If local search fails, it will search for the target " +
                     "assembly at a remote source (NCBI by default). If the desired assembly is found at the remote " +
                     "source, it will fetch and add it to the local database and also return the result to the user. " +
-                    "This endpoint will either return a list containing a single result or an HTTP status code of 404.")
+                    "This endpoint will either return a list containing a single result or an HTTP status code of 404" +
+                    ". ")
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyOrFetchByAccession(
-            @PathVariable @ApiParam(value = "Genbank or Refseq assembly accession. Eg: GCA_000001405.10") String accession,
+            @PathVariable(name = "accession") @ApiParam(value = "INSDC or Refseq assembly accession. Eg: " +
+                    "GCA_000001405.10") String asmAccession,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(accession);
-            linkPagedModelGetChromosomesByAssemblyAccession(accession, pageNumber, pageSize, pagedModel, "");
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(asmAccession);
+            linkPagedModelGetChromosomesByAssemblyAccession(asmAccession, pageNumber, pageSize, pagedModel, "");
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
-    @ApiOperation(value = "Fetch an assembly from remote server using its GenBank or RefSeq accession and insert " +
+    @ApiOperation(value = "Fetch an assembly from remote server using its INSDC or RefSeq accession and insert " +
             "into local database.",
             notes = "Given an assembly's accession, this endpoint will fetch and add the assembly that matches that " +
-                    "accession into the local database. The accession can be either a GenBank or a RefSeq accession " +
+                    "accession into the local database. The accession can be either a INSDC or a RefSeq accession " +
                     "and the endpoint will automatically fetch the correct assembly from remote server. It will first" +
                     " search for the target assembly in the local database as trying to insert an assembly which " +
                     "already exists in the database is prohibited. If such an assembly is not found locally then it " +
@@ -85,21 +87,22 @@ public class AdminController {
                     "any data except an HTTP status code of 400 in case the user tries to insert an assembly that " +
                     "already exists in the local database.")
     @PutMapping(value = "assemblies/{accession}")
-    public ResponseEntity<Void> fetchAndInsertAssemblyByAccession(
-            @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) throws IOException {
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
+            @PathVariable(name = "accession") @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
+                    "GCA_000001405.10") String asmAccession) throws IOException {
         try {
-            handler.fetchAndInsertAssemblyByAccession(accession);
+            handler.fetchAndInsertAssemblyByAccession(asmAccession);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Fetch assemblies from remote server using their GenBank or RefSeq accessions and insert " +
+    @ApiOperation(value = "Fetch assemblies from remote server using their INSDC or RefSeq accessions and insert " +
             "into local database.",
             notes = "Given a list of assembly accessions, for every accession in the list this endpoint will fetch " +
                     "and add the assembly that matches that accession into the local database. The accession can be " +
-                    "either a GenBank or RefSeq accession and the endpoint will automatically fetch the correct " +
+                    "either a INSDC or RefSeq accession and the endpoint will automatically fetch the correct " +
                     "assembly from remote server. It will first search for the target assembly in the local database " +
                     "as trying to insert an assembly which already exists in the database is prohibited. If such an " +
                     "assembly is not found locally then it will look for it at a remote source (NCBI by default). If " +
@@ -143,14 +146,15 @@ public class AdminController {
 
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
             notes = "Given an assembly's accession this endpoint will delete the assembly that matches that " +
-                    "accession from the local database. The accession can be either a GenBank or RefSeq accession and" +
+                    "accession from the local database. The accession can be either a INSDC or RefSeq accession and" +
                     " the endpoint will automatically deletes the correct assembly from the database. Deleting an " +
                     "assembly also deletes all chromosomes that are associated with that assembly. This endpoint does" +
                     " not return any data.")
     @DeleteMapping(value = "assemblies/{accession}")
     public void deleteAssemblyByAccession(
-            @PathVariable @ApiParam(value = "GenBank or RefSeq assembly accession. Eg: GCA_000001405.10") String accession) {
-        handler.deleteAssemblyByAccession(accession);
+            @PathVariable(name = "accession") @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
+                    "GCA_000001405.10") String asmAccession) {
+        handler.deleteAssemblyByAccession(asmAccession);
     }
 
 }

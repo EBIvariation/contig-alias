@@ -51,13 +51,13 @@ public class AssemblyEntity {
     @ApiModelProperty(value = "Assembly's taxonomic ID.")
     private Long taxid;
 
-    @ApiModelProperty(value = "Assembly's Genbank accession.")
+    @ApiModelProperty(value = "Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
     private String genbank;
 
     @ApiModelProperty(value = "Assembly's Refseq accession.")
     private String refseq;
 
-    @ApiModelProperty(value = "Are assembly's Genbank and Refseq accessions identical")
+    @ApiModelProperty(value = "Are assembly's INSDC and Refseq accessions identical")
     private boolean isGenbankRefseqIdentical;
 
     @ApiModelProperty(value = "Assembly's MD5 checksum value.")
@@ -171,13 +171,13 @@ public class AssemblyEntity {
                .append("Tax ID :\t")
                .append(this.taxid)
                .append("\n")
-               .append("Genbank :\t")
+               .append("INSDC :\t")
                .append(this.genbank)
                .append("\n")
                .append("Refseq :\t")
                .append(this.refseq)
                .append("\n")
-               .append("Genbank & Refseq identical :\t")
+               .append("INSDC & Refseq identical :\t")
                .append(isGenbankRefseqIdentical)
                .append("\n")
                .append("md5checksum :\t")
