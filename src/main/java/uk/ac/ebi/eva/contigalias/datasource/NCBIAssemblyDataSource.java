@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReader;
+import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -33,9 +34,13 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
     private final NCBIBrowserFactory factory;
 
+    private final AssemblyReportReaderFactory readerFactory;
+
     @Autowired
-    public NCBIAssemblyDataSource(NCBIBrowserFactory factory) {
+    public NCBIAssemblyDataSource(NCBIBrowserFactory factory,
+                                  AssemblyReportReaderFactory readerFactory) {
         this.factory = factory;
+        this.readerFactory = readerFactory;
     }
 
     @Override
@@ -49,7 +54,7 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         }
         AssemblyEntity assemblyEntity;
         try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(directory.get())) {
-            AssemblyReportReader reader = new AssemblyReportReader(stream);
+            AssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
             ncbiBrowser.disconnect();

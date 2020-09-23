@@ -19,7 +19,7 @@ package uk.ac.ebi.eva.contigalias.entitygenerator;
 import org.junit.jupiter.api.Test;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,48 +29,46 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ChromosomeGenerator {
+public class ScaffoldGenerator {
 
     private static final String PREFIX_NAME = "name";
 
-    public static ChromosomeEntity generate(long id) {
-        return (ChromosomeEntity) new ChromosomeEntity()
+    public static ScaffoldEntity generate(long id) {
+        return (ScaffoldEntity) new ScaffoldEntity()
                 .setName(PREFIX_NAME + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
-                .setMd5checksum("md5" + id)
-                .setTrunc512checksum("trunc512" + id)
                 .setAssembly(null);
     }
 
-    public static ChromosomeEntity generate() {
+    public static ScaffoldEntity generate() {
         long id = new Random().nextLong();
         return generate(id);
     }
 
-    public static ChromosomeEntity generate(long id, AssemblyEntity assembly) {
+    public static ScaffoldEntity generate(long id, AssemblyEntity assembly) {
         if (assembly == null) {
             throw new IllegalArgumentException("Assembly cannot be null!");
         }
-        ChromosomeEntity entity = generate(id);
-        if (assembly.getChromosomes() == null) {
-            assembly.setChromosomes(new LinkedList<>());
+        ScaffoldEntity entity = generate(id);
+        if (assembly.getScaffolds() == null) {
+            assembly.setScaffolds(new LinkedList<>());
         }
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
-        chromosomes.add(entity);
+        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        scaffolds.add(entity);
         entity.setAssembly(assembly);
         return entity;
     }
 
-    public static ChromosomeEntity generate(AssemblyEntity assembly) {
+    public static ScaffoldEntity generate(AssemblyEntity assembly) {
         long id = new Random().nextLong();
         return generate(id, assembly);
     }
 
     @Test
     void generateTest() {
-        ChromosomeEntity entity = generate();
+        ScaffoldEntity entity = generate();
         int length = PREFIX_NAME.length();
         String name = entity.getName();
         assertTrue(name.length() > length);
@@ -79,8 +77,6 @@ public class ChromosomeGenerator {
         assertTrue(entity.getGenbank().endsWith(sId));
         assertTrue(entity.getRefseq().endsWith(sId));
         assertTrue(entity.getUcscName().endsWith(sId));
-        assertTrue(entity.getMd5checksum().endsWith(sId));
-        assertTrue(entity.getTrunc512checksum().endsWith(sId));
         assertNull(entity.getAssembly());
     }
 
@@ -89,24 +85,24 @@ public class ChromosomeGenerator {
         AssemblyEntity assembly = new AssemblyEntity();
         int iterate = 10;
         for (int i = 0; i < iterate; i++) {
-            ChromosomeEntity generate = generate(assembly);
-            assertEquals(generate, assembly.getChromosomes().get(i));
+            ScaffoldEntity generate = generate(assembly);
+            assertEquals(generate, assembly.getScaffolds().get(i));
             assertEquals(assembly, generate.getAssembly());
         }
-        assertEquals(iterate, assembly.getChromosomes().size());
+        assertEquals(iterate, assembly.getScaffolds().size());
     }
 
     @Test
     void generateForGivenAssemblyWithSpecifiedIdTest() {
         AssemblyEntity assembly = new AssemblyEntity()
-                .setChromosomes(new LinkedList<>());
+                .setScaffolds(new LinkedList<>());
         int iterate = 10;
         for (int i = 0; i < iterate; i++) {
-            ChromosomeEntity generate = generate(i, assembly);
-            assertEquals(generate, assembly.getChromosomes().get(i));
+            ScaffoldEntity generate = generate(i, assembly);
+            assertEquals(generate, assembly.getScaffolds().get(i));
             assertEquals(assembly, generate.getAssembly());
         }
-        assertEquals(iterate, assembly.getChromosomes().size());
+        assertEquals(iterate, assembly.getScaffolds().size());
     }
 
 }

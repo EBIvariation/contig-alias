@@ -19,11 +19,11 @@ package uk.ac.ebi.eva.contigalias.entities;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name = "chromosome")
-public class ChromosomeEntity extends SequenceEntity {
+@Table(name = "scaffold")
+public class ScaffoldEntity extends SequenceEntity {
 
-    public ChromosomeEntity() {
+    public ScaffoldEntity() {
     }
+
 }

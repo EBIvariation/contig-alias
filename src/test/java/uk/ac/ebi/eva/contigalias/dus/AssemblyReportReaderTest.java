@@ -19,9 +19,13 @@ package uk.ac.ebi.eva.contigalias.dus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
+@ActiveProfiles("test")
 class AssemblyReportReaderTest {
 
     private static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
@@ -56,9 +62,14 @@ class AssemblyReportReaderTest {
 
     private static final String CHROMOSOME_CHR1_REFSEQ_ACCESSION = "AC_000158.1";
 
+    private ScaffoldEntity scaffoldEntity;
+
     private InputStreamReader streamReader;
 
     private InputStream stream;
+
+    @Autowired
+    private AssemblyReportReaderFactory readerFactory;
 
     private AssemblyReportReader reader;
 
@@ -67,7 +78,12 @@ class AssemblyReportReaderTest {
         stream = new FileInputStream(
                 new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
         streamReader = new InputStreamReader(stream);
-        reader = new AssemblyReportReader(streamReader);
+        reader = readerFactory.build(streamReader);
+        scaffoldEntity = (ScaffoldEntity) new ScaffoldEntity()
+                .setName("ChrU_1")
+                .setGenbank("GJ057137.1")
+                .setRefseq("NW_003097882.1")
+                .setUcscName(null);
     }
 
     @AfterEach
@@ -113,6 +129,27 @@ class AssemblyReportReaderTest {
         assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getGenbank());
         assertEquals(CHROMOSOME_CHR1_REFSEQ_ACCESSION, chromosome.getRefseq());
         assertNull(chromosome.getUcscName());
+    }
+
+    @Test
+    void verifyAssemblyHasScaffolds() throws IOException {
+        AssemblyEntity assembly = getAssemblyEntity();
+        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        assertNotNull(scaffolds);
+        assertEquals(3286, scaffolds.size());
+    }
+
+    @Test
+    void assertParsedScaffoldValid() throws IOException {
+        List<ScaffoldEntity> scaffolds = getAssemblyEntity().getScaffolds();
+        assertNotNull(scaffolds);
+        assertTrue(scaffolds.size() > 0);
+        ScaffoldEntity scaffold = scaffolds.get(0);
+        assertNotNull(scaffold);
+        assertEquals(scaffoldEntity.getName(), scaffold.getName());
+        assertEquals(scaffoldEntity.getGenbank(), scaffold.getGenbank());
+        assertEquals(scaffoldEntity.getRefseq(), scaffold.getRefseq());
+        assertEquals(scaffoldEntity.getUcscName(), scaffold.getUcscName());
     }
 
 }

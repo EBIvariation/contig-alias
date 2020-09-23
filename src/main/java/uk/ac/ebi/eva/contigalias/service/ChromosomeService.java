@@ -41,12 +41,12 @@ public class ChromosomeService {
 
     public Page<ChromosomeEntity> getChromosomesByGenbank(String genbank, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByGenbank(genbank, request);
-        return stripChromosomeFromAssembly(chromosomes);
+        return stripChromosomesAndScaffoldsFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByRefseq(String refseq, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByRefseq(refseq, request);
-        return stripChromosomeFromAssembly(chromosomes);
+        return stripChromosomesAndScaffoldsFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyGenbank(String asmGenbank, Pageable request) {
@@ -83,12 +83,12 @@ public class ChromosomeService {
 
     public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByName(name, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByNameAndAssembly(
@@ -106,14 +106,14 @@ public class ChromosomeService {
 
     public Page<ChromosomeEntity> getChromosomesByUcscName(String ucscName, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByUcscName(ucscName, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssemblyTaxid(
             String ucscName, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page
                 = repository.findChromosomeEntitiesByUcscNameAndAssembly_Taxid(ucscName, asmTaxid, request);
-        return stripChromosomeFromAssembly(page);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
@@ -131,11 +131,21 @@ public class ChromosomeService {
         return page;
     }
 
-    private Page<ChromosomeEntity> stripChromosomeFromAssembly(Page<ChromosomeEntity> page) {
+    private Page<ChromosomeEntity> stripChromosomesAndScaffoldsFromAssembly(Page<ChromosomeEntity> page) {
         if (page != null && page.getTotalElements() > 0) {
-            page.forEach(this::stripChromosomeFromAssembly);
+            page.forEach(it -> {
+                stripChromosomeFromAssembly(it);
+                stripScaffoldFromAssembly(it);
+            });
         }
         return page;
+    }
+
+    private void stripScaffoldFromAssembly(ChromosomeEntity chromosome) {
+        AssemblyEntity assembly = chromosome.getAssembly();
+        if (assembly != null) {
+            assembly.setScaffolds(null);
+        }
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {
@@ -177,6 +187,50 @@ public class ChromosomeService {
     public void deleteChromosome(ChromosomeEntity entity) {
         // TODO check if entity already exists in db
         repository.delete(entity);
+    }
+
+    public long countChromosomeEntitiesByGenbank(String genbank) {
+        return repository.countChromosomeEntitiesByGenbank(genbank);
+    }
+
+    public long countChromosomeEntitiesByRefseq(String refseq) {
+        return repository.countChromosomeEntitiesByRefseq(refseq);
+    }
+
+    public long countChromosomeEntitiesByAssembly_Genbank(String asmGenbank) {
+        return repository.countChromosomeEntitiesByAssembly_Genbank(asmGenbank);
+    }
+
+    public long countChromosomeEntitiesByAssembly_Refseq(String asmRefseq) {
+        return repository.countChromosomeEntitiesByAssembly_Refseq(asmRefseq);
+    }
+
+    public long countChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid) {
+        return repository.countChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid);
+    }
+
+    public long countChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid) {
+        return repository.countChromosomeEntitiesByUcscNameAndAssembly_Taxid(ucscName, asmTaxid);
+    }
+
+    public long countChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly) {
+        return repository.countChromosomeEntitiesByNameAndAssembly(name, assembly);
+    }
+
+    public long countChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly) {
+        return repository.countChromosomeEntitiesByUcscNameAndAssembly(ucscName, assembly);
+    }
+
+    public long countChromosomeEntitiesByName(String name) {
+        return repository.countChromosomeEntitiesByName(name);
+    }
+
+    public long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq) {
+        return repository.countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(genbank, refseq);
+    }
+
+    public long countChromosomeEntitiesByUcscName(String ucscName) {
+        return repository.countChromosomeEntitiesByUcscName(ucscName);
     }
 
 }

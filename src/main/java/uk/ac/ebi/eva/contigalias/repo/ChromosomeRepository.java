@@ -39,18 +39,42 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid,
+                                                                             Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly,
                                                                    Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
-                                                                   Pageable request);
+                                                                       Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByName(String name, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq,
+                                                                                   Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscName(String ucscName, Pageable request);
+
+    long countChromosomeEntitiesByGenbank(String genbank);
+
+    long countChromosomeEntitiesByRefseq(String refseq);
+
+    long countChromosomeEntitiesByAssembly_Genbank(String asmGenbank);
+
+    long countChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
+
+    long countChromosomeEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid);
+
+    long countChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid);
+
+    long countChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
+
+    long countChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly);
+
+    long countChromosomeEntitiesByName(String name);
+
+    long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq);
+
+    long countChromosomeEntitiesByUcscName(String ucscName);
 
 }

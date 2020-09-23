@@ -9,7 +9,10 @@ This web service has some authenticated endpoints. The current approach to secur
 The application also requires to be connected to an external database (PostgreSQL by default) to function. The credentials for this database need to be provided at compilation time using the same maven profiles. 
 
 Copy this text, replace manually the values enclosed in ${} and put it all in your ~/.m2/settings.xml (or just add the profile if the file exists).
+
 Use `<ftp.proxy.host>` and `<ftp.proxy.port>` to configure proxy settings for accessing FTP servers (such as NCBI's). Set them to `null` and `0` to prevent overriding default the proxy configuration.
+
+Set a boolean flag using `<contig-alias.scaffolds-enabled>` to enable or disable parsing and storing of scaffolds in the database.
 ```
 <settings>
     <profiles>
@@ -24,6 +27,7 @@ Use `<ftp.proxy.host>` and `<ftp.proxy.port>` to configure proxy settings for ac
                 <contig-alias.ddl-behaviour>${preferred_behaviour}</contig-alias.ddl-behaviour>
                 <ftp.proxy.host>${optional default=null}</ftp.proxy.host>
                 <ftp.proxy.port>${optional default=0}</ftp.proxy.port>
+                <contig-alias.scaffolds-enabled>${optional default=false}</contig-alias.scaffolds-enabled>
             </properties>
         </profile>
     </profiles>
