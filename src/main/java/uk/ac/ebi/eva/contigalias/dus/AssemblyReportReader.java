@@ -76,9 +76,9 @@ public class AssemblyReportReader {
             } else if (!line.startsWith("#")) {
                 String[] columns = line.split("\t", -1);
                 if (columns.length >= 6) {
-                    if (columns[3].equals("Chromosome")) {
+                    if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
                         parseChromosomeLine(columns);
-                    } else if (isScaffoldsEnabled && columns[1].equals("unplaced-scaffold")) {
+                    } else if (isScaffoldsEnabled) {
                         parseScaffoldLine(columns);
                     }
                 }
