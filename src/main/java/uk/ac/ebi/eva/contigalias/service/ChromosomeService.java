@@ -86,6 +86,11 @@ public class ChromosomeService {
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
+    public Page<ChromosomeEntity> getChromosomesByEnaSequenceName(String enaSequenceName, Pageable request) {
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByEnaSequenceName(enaSequenceName, request);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
+    }
+
     public Page<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByNameAndAssembly_Taxid(name, asmTaxid, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);

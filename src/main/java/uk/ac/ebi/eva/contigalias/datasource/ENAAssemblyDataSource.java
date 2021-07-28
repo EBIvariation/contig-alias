@@ -19,26 +19,31 @@ package uk.ac.ebi.eva.contigalias.datasource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReader;
-import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReaderFactory;
+import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReader;
+import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowser;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Repository("ENADataSource")
 public class ENAAssemblyDataSource implements AssemblyDataSource {
 
     private final ENABrowserFactory factory;
 
-    private final AssemblyReportReaderFactory readerFactory;
+    private final ENAAssemblyReportReaderFactory readerFactory;
 
     @Autowired
     public ENAAssemblyDataSource(ENABrowserFactory factory,
-                                 AssemblyReportReaderFactory readerFactory) {
+                                 ENAAssemblyReportReaderFactory readerFactory) {
         this.factory = factory;
         this.readerFactory = readerFactory;
     }
@@ -51,12 +56,39 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
         AssemblyEntity assemblyEntity;
         try (InputStream stream = enaBrowser.getAssemblyReportInputStream(accession)) {
-            AssemblyReportReader reader = readerFactory.build(stream);
+            ENAAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
             enaBrowser.disconnect();
         }
         return Optional.of(assemblyEntity);
+    }
+
+    public void getENASequenceNamesForAssembly(Optional<AssemblyEntity> optional) throws IOException {
+        // Given an existing AssemblyEntity we've gotten from NCBI, add ENA sequence names for chromosomes and scaffolds.
+        if (optional.isPresent()) {
+            AssemblyEntity targetAssembly = optional.get();
+            String genbank = targetAssembly.getGenbank();
+            Optional<AssemblyEntity> enaAssembly = getAssemblyByAccession(genbank);
+
+            if (enaAssembly.isPresent()) {
+                AssemblyEntity sourceAssembly = enaAssembly.get();
+                putENASequenceNames(sourceAssembly.getChromosomes(), targetAssembly.getChromosomes());
+                putENASequenceNames(sourceAssembly.getScaffolds(), targetAssembly.getScaffolds());
+            }
+        }
+    }
+
+    private void putENASequenceNames(
+            List<? extends SequenceEntity> sourceSequences, List<? extends SequenceEntity> targetSequences) {
+        // should mutate target sequences in place
+        Stream.concat(targetSequences.stream(), sourceSequences.stream())
+              .collect(Collectors.toMap(SequenceEntity::getGenbank, Function.identity(),
+                                        (targetSeq, sourceSeq) -> {
+                                            targetSeq.setEnaSequenceName(sourceSeq.getEnaSequenceName());
+                                            return targetSeq;
+                                        }));
+
     }
 
 }

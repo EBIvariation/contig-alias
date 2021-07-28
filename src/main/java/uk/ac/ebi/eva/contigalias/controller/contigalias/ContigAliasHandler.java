@@ -39,6 +39,7 @@ import java.util.Optional;
 import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToPage;
 import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.generatePagedModelFromPage;
 
+// TODO add endpoints here
 @Service
 public class ContigAliasHandler {
 

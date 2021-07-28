@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.repo.ScaffoldRepository;
 
@@ -60,6 +61,11 @@ public class ScaffoldService {
 
     public Page<ScaffoldEntity> getScaffoldsByName(String name, Pageable request) {
         Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByName(name, request);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
+    }
+
+    public Page<ScaffoldEntity> getScaffoldsByEnaSequenceName(String enaSequenceName, Pageable request) {
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByEnaSequenceName(enaSequenceName, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 

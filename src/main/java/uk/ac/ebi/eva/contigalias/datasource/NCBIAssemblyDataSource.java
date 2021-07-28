@@ -19,8 +19,8 @@ package uk.ac.ebi.eva.contigalias.datasource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReader;
-import uk.ac.ebi.eva.contigalias.dus.AssemblyReportReaderFactory;
+import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReader;
+import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -34,11 +34,11 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
     private final NCBIBrowserFactory factory;
 
-    private final AssemblyReportReaderFactory readerFactory;
+    private final NCBIAssemblyReportReaderFactory readerFactory;
 
     @Autowired
     public NCBIAssemblyDataSource(NCBIBrowserFactory factory,
-                                  AssemblyReportReaderFactory readerFactory) {
+                                  NCBIAssemblyReportReaderFactory readerFactory) {
         this.factory = factory;
         this.readerFactory = readerFactory;
     }
@@ -54,7 +54,7 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         }
         AssemblyEntity assemblyEntity;
         try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(directory.get())) {
-            AssemblyReportReader reader = readerFactory.build(stream);
+            NCBIAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
             ncbiBrowser.disconnect();

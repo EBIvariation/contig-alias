@@ -23,17 +23,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Component
-public class AssemblyReportReaderFactory {
+public class ENAAssemblyReportReaderFactory {
 
     @Value("${config.scaffolds.enabled:false}")
     private boolean SCAFFOLDS_ENABLED;
 
-    public AssemblyReportReader build(InputStream inputStream) {
-        return new AssemblyReportReader(new InputStreamReader(inputStream), SCAFFOLDS_ENABLED);
+    public ENAAssemblyReportReader build(InputStream inputStream) {
+        return new ENAAssemblyReportReader(new InputStreamReader(inputStream), SCAFFOLDS_ENABLED);
     }
 
-    public AssemblyReportReader build(InputStreamReader inputStreamReader) {
-        return new AssemblyReportReader(inputStreamReader, SCAFFOLDS_ENABLED);
+    public ENAAssemblyReportReader build(InputStreamReader inputStreamReader) {
+        return new ENAAssemblyReportReader(inputStreamReader, SCAFFOLDS_ENABLED);
     }
 
 }

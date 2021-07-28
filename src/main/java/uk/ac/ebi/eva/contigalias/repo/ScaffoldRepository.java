@@ -37,6 +37,8 @@ public interface ScaffoldRepository extends JpaRepository<ScaffoldEntity, Long> 
 
     Page<ScaffoldEntity> findScaffoldEntitiesByName(String name, Pageable request);
 
+    Page<ScaffoldEntity> findScaffoldEntitiesByEnaSequenceName(String enaSequenceName, Pageable request);
+
     Page<ScaffoldEntity> findScaffoldEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid, Pageable request);
 
     Page<ScaffoldEntity> findScaffoldEntitiesByNameAndAssembly(String name, AssemblyEntity assembly, Pageable request);

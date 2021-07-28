@@ -41,6 +41,9 @@ public class SequenceEntity {
     @ApiModelProperty(value = "The name of the sequence.")
     private String name;
 
+    @ApiModelProperty(value = "ENA's name of the assembly")
+    private String enaSequenceName;
+
     @ApiModelProperty(value = "Sequence's GenBank accession.")
     private String genbank;
 
@@ -73,6 +76,16 @@ public class SequenceEntity {
         this.name = name;
         return this;
     }
+
+    public String getEnaSequenceName() {
+        return enaSequenceName;
+    }
+
+    public SequenceEntity setEnaSequenceName(String enaSequenceName) {
+        this.enaSequenceName = enaSequenceName;
+        return this;
+    }
+
 
     public String getGenbank() {
         return genbank;
