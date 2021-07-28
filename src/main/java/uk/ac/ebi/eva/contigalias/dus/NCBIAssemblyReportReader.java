@@ -20,6 +20,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,33 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
     public NCBIAssemblyReportReader(InputStreamReader inputStreamReader, boolean isScaffoldsEnabled) {
         super(inputStreamReader, isScaffoldsEnabled);
+    }
+
+    protected void parseReport() throws IOException, NullPointerException {
+        if (reader == null) {
+            throw new NullPointerException("Cannot use AssemblyReportReader without having a valid InputStreamReader.");
+        }
+        String line = reader.readLine();
+        while (line != null) {
+            if (line.startsWith("# ")) {
+                if (assemblyEntity == null) {
+                    assemblyEntity = new AssemblyEntity();
+                }
+                parseAssemblyData(line);
+            } else if (!line.startsWith("#")) {
+                String[] columns = line.split("\t", -1);
+                if (columns.length >= 6 && columns[5].equals("=")) {
+                    if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
+                        parseChromosomeLine(columns);
+                    } else if (isScaffoldsEnabled) {
+                        parseScaffoldLine(columns);
+                    }
+                }
+            }
+            line = reader.readLine();
+        }
+        reportParsed = true;
+        reader.close();
     }
 
     protected void parseAssemblyData(String line) {

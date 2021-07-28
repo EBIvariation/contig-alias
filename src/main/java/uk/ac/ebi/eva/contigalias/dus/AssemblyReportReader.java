@@ -62,32 +62,7 @@ public abstract class AssemblyReportReader {
      *
      * @throws IOException Passes IOException thrown by {@link BufferedReader#readLine()}
      */
-    private void parseReport() throws IOException, NullPointerException {
-        if (reader == null) {
-            throw new NullPointerException("Cannot use AssemblyReportReader without having a valid InputStreamReader.");
-        }
-        String line = reader.readLine();
-        while (line != null) {
-            if (line.startsWith("# ")) {
-                if (assemblyEntity == null) {
-                    assemblyEntity = new AssemblyEntity();
-                }
-                parseAssemblyData(line);
-            } else if (!line.startsWith("#")) {
-                String[] columns = line.split("\t", -1);
-                if (columns.length >= 6 && columns[5].equals("=")) {
-                    if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
-                        parseChromosomeLine(columns);
-                    } else if (isScaffoldsEnabled) {
-                        parseScaffoldLine(columns);
-                    }
-                }
-            }
-            line = reader.readLine();
-        }
-        reportParsed = true;
-        reader.close();
-    }
+    protected abstract void parseReport() throws IOException, NullPointerException;
 
     /**
      * Parses lines in assembly report containing Assembly metadata. Breaks line into a tag:tagData format and
@@ -99,8 +74,7 @@ public abstract class AssemblyReportReader {
 
     /**
      * Parses lines in assembly report containing Chromosome metadata. This array is used to set metadata to
-     * corresponding
-     * fields in {@link ChromosomeEntity}.
+     * corresponding fields in {@link ChromosomeEntity}.
      *
      * @param columns An array of fields in a line of the assembly report file not starting with "#".
      */

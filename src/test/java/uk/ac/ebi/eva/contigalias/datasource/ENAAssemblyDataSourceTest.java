@@ -36,31 +36,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class AssemblyDataSourceTest {
-
-    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.3";
-
-    private static final String GCF_ACCESSION_NO_CHROMOSOMES = "GCF_006125015.1";
+public class ENAAssemblyDataSourceTest {
 
     @Autowired
-    @Qualifier("NCBIDataSource")
-    private AssemblyDataSource dataSource;
+    private ENAAssemblyDataSource dataSource;
 
     @Test
-    public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNotNull(chromosomes);
-        assertFalse(chromosomes.isEmpty());
-    }
-
-    @Test
-    public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNull(chromosomes);
+    public void getENASequenceNamesForAssembly() {
+        // TODO
     }
 
 }

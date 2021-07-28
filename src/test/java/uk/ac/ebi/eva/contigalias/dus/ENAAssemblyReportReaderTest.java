@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 EMBL - European Bioinformatics Institute
+ * Copyright 2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,48 +41,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class AssemblyReportReaderTest {
+class ENAAssemblyReportReaderTest {
 
-    private static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
+    private static final String CHROMOSOME_ENA_SEQUENCE_NAME = "1";
 
-    private static final String ASSEMBLY_ORGANISM_NAME = "Bos taurus (cattle)";
+    private static final String CHROMOSOME_GENBANK_ACCESSION = "GK000001.2";
 
-    private static final long ASSEMBLY_TAX_ID = 9913;
+    private static final String SCAFFOLD_SEQUENCE_NAME = "ChrU_1";
 
-    private static final String ASSEMBLY_GENBANK_ACCESSION = "GCA_000003055.3";
-
-    private static final String ASSEMBLY_REFSEQ_ACCESSION = "GCF_000003055.3";
-
-    private static final boolean ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL = true;
-
-    private static final String CHROMOSOME_CHR1_SEQUENCE_NAME = "Chr1";
-
-    private static final String CHROMOSOME_CHR1_GENBANK_ACCESSION = "GK000001.2";
-
-    private static final String CHROMOSOME_CHR1_REFSEQ_ACCESSION = "AC_000158.1";
-
-    private ScaffoldEntity scaffoldEntity;
+    private static final String SCAFFOLD_GENBANK_ACCESSION = "GJ057137.1";
 
     private InputStreamReader streamReader;
 
     private InputStream stream;
 
     @Autowired
-    private AssemblyReportReaderFactory readerFactory;
+    private ENAAssemblyReportReaderFactory readerFactory;
 
-    private AssemblyReportReader reader;
+    private ENAAssemblyReportReader reader;
 
     @BeforeEach
     void setup() throws FileNotFoundException {
-        stream = new FileInputStream(
-                new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
+        stream = new FileInputStream("src/test/resources/GCA_000003055.3_sequence_report.txt");
         streamReader = new InputStreamReader(stream);
         reader = readerFactory.build(streamReader);
-        scaffoldEntity = (ScaffoldEntity) new ScaffoldEntity()
-                .setName("ChrU_1")
-                .setGenbank("GJ057137.1")
-                .setRefseq("NW_003097882.1")
-                .setUcscName(null);
     }
 
     @AfterEach
@@ -102,17 +83,6 @@ class AssemblyReportReaderTest {
     }
 
     @Test
-    void verifyAssemblyMetadata() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        assertEquals(ASSEMBLY_NAME, assembly.getName());
-        assertEquals(ASSEMBLY_ORGANISM_NAME, assembly.getOrganism());
-        assertEquals(ASSEMBLY_TAX_ID, assembly.getTaxid());
-        assertEquals(ASSEMBLY_GENBANK_ACCESSION, assembly.getGenbank());
-        assertEquals(ASSEMBLY_REFSEQ_ACCESSION, assembly.getRefseq());
-        assertEquals(ASSEMBLY_IS_GENBANK_REFSEQ_IDENTICAL, assembly.isGenbankRefseqIdentical());
-    }
-
-    @Test
     void verifyAssemblyHasChromosomes() throws IOException {
         AssemblyEntity assembly = getAssemblyEntity();
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
@@ -125,9 +95,8 @@ class AssemblyReportReaderTest {
         AssemblyEntity assembly = getAssemblyEntity();
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         ChromosomeEntity chromosome = chromosomes.get(0);
-        assertEquals(CHROMOSOME_CHR1_SEQUENCE_NAME, chromosome.getName());
-        assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getGenbank());
-        assertEquals(CHROMOSOME_CHR1_REFSEQ_ACCESSION, chromosome.getRefseq());
+        assertEquals(CHROMOSOME_ENA_SEQUENCE_NAME, chromosome.getEnaSequenceName());
+        assertEquals(CHROMOSOME_GENBANK_ACCESSION, chromosome.getGenbank());
         assertNull(chromosome.getUcscName());
     }
 
@@ -146,10 +115,8 @@ class AssemblyReportReaderTest {
         assertTrue(scaffolds.size() > 0);
         ScaffoldEntity scaffold = scaffolds.get(0);
         assertNotNull(scaffold);
-        assertEquals(scaffoldEntity.getName(), scaffold.getName());
-        assertEquals(scaffoldEntity.getGenbank(), scaffold.getGenbank());
-        assertEquals(scaffoldEntity.getRefseq(), scaffold.getRefseq());
-        assertEquals(scaffoldEntity.getUcscName(), scaffold.getUcscName());
+        assertEquals(SCAFFOLD_SEQUENCE_NAME, scaffold.getEnaSequenceName());
+        assertEquals(SCAFFOLD_GENBANK_ACCESSION, scaffold.getGenbank());
     }
 
 }
