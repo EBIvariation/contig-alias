@@ -75,13 +75,13 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     long countChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid);
 
-    long countChromosomeEntitiesByEnaNameAndAssembly_Taxid(String enaName, long asmTaxid);
+    long countChromosomeEntitiesByEnaSequenceNameAndAssembly_Taxid(String enaName, long asmTaxid);
 
     long countChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
 
     long countChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly);
 
-    long countChromosomeEntitiesByEnaNameAndAssembly(String enaName, AssemblyEntity assembly);
+    long countChromosomeEntitiesByEnaSequenceNameAndAssembly(String enaName, AssemblyEntity assembly);
 
     long countChromosomeEntitiesByName(String name);
 
@@ -89,6 +89,6 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     long countChromosomeEntitiesByUcscName(String ucscName);
 
-    long countChromosomeEntitiesByEnaName(String enaName);
+    long countChromosomeEntitiesByEnaSequenceName(String enaName);
 
 }

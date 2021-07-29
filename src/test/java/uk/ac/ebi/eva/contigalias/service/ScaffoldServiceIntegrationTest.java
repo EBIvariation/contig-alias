@@ -76,6 +76,7 @@ public class ScaffoldServiceIntegrationTest {
         assertEquals(entity.getGenbank(), scaffoldEntity.getGenbank());
         assertEquals(entity.getRefseq(), scaffoldEntity.getRefseq());
         assertEquals(entity.getUcscName(), scaffoldEntity.getUcscName());
+        assertEquals(entity.getEnaSequenceName(), scaffoldEntity.getEnaSequenceName());
     }
 
 }

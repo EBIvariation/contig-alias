@@ -39,6 +39,7 @@ public class ChromosomeGenerator {
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
+                .setEnaSequenceName("ena" + id)
                 .setMd5checksum("md5" + id)
                 .setTrunc512checksum("trunc512" + id)
                 .setAssembly(null);

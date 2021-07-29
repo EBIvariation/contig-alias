@@ -90,6 +90,7 @@ public class ChromosomeServiceIntegrationTest {
         assertEquals(entity.getGenbank(), chromosomeEntity.getGenbank());
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
         assertEquals(entity.getUcscName(), chromosomeEntity.getUcscName());
+        assertEquals(entity.getEnaSequenceName(), chromosomeEntity.getEnaSequenceName());
     }
 
 }

@@ -39,6 +39,7 @@ public class ScaffoldGenerator {
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
+                .setEnaSequenceName("ena" + id)
                 .setAssembly(null);
     }
 

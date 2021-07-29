@@ -51,6 +51,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_R
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_SIZE;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_INSDC;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_ENA_TYPE;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_SEQUENCE_TYPE;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_UCSC_TYPE;
 
@@ -112,6 +113,12 @@ public class ContigAliasControllerIntegrationTest {
                 .thenReturn(chromosomePagedModel);
         when(mockHandler.getSequencesBySequenceNameAndAssemblyTaxid(
                 chromosomeEntity.getUcscName(), assemblyEntity.getTaxid(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST))
+                .thenReturn(chromosomePagedModel);
+        when(mockHandler.getSequencesBySequenceNameAndAssemblyAccession(
+                chromosomeEntity.getEnaSequenceName(), assemblyEntity.getGenbank(), NAME_ENA_TYPE, DEFAULT_PAGE_REQUEST))
+                .thenReturn(chromosomePagedModel);
+        when(mockHandler.getSequencesBySequenceNameAndAssemblyTaxid(
+                chromosomeEntity.getEnaSequenceName(), assemblyEntity.getTaxid(), NAME_ENA_TYPE, DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
 
         when(mockHandler.getAssembliesBySequenceGenbank(assemblyEntity.getGenbank()))
@@ -227,6 +234,26 @@ public class ContigAliasControllerIntegrationTest {
                     chromosomeEntity.getUcscName())
                         .param("accession", assemblyEntity.getGenbank())
                         .param("name", NAME_UCSC_TYPE));
+        assertChromosomePagedModelResponseValid(resultActions);
+    }
+
+    @Test
+    void getSequencesByChromosomeEnaNameAndAssemblyTaxid() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/v1/chromosomes/name/{name}",
+                    chromosomeEntity.getEnaSequenceName())
+                        .param("taxid", assemblyEntity.getTaxid().toString())
+                        .param("name", NAME_ENA_TYPE));
+        assertChromosomePagedModelResponseValid(resultActions);
+    }
+
+    @Test
+    void getSequencesByChromosomeEnaNameAndAssemblyAccession() throws Exception {
+        ResultActions resultActions = mockMvc.perform(
+                get("/v1/chromosomes/name/{name}",
+                    chromosomeEntity.getEnaSequenceName())
+                        .param("accession", assemblyEntity.getGenbank())
+                        .param("name", NAME_ENA_TYPE));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 

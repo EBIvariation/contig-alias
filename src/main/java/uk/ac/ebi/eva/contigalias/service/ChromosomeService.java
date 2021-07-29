@@ -234,7 +234,7 @@ public class ChromosomeService {
     }
 
     public long countChromosomeEntitiesByEnaNameAndAssembly_Taxid(String enaName, long asmTaxid) {
-        return repository.countChromosomeEntitiesByEnaNameAndAssembly_Taxid(enaName, asmTaxid);
+        return repository.countChromosomeEntitiesByEnaSequenceNameAndAssembly_Taxid(enaName, asmTaxid);
     }
 
     public long countChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly) {
@@ -246,7 +246,7 @@ public class ChromosomeService {
     }
 
     public long countChromosomeEntitiesByEnaNameAndAssembly(String enaName, AssemblyEntity assembly) {
-        return repository.countChromosomeEntitiesByEnaNameAndAssembly(enaName, assembly);
+        return repository.countChromosomeEntitiesByEnaSequenceNameAndAssembly(enaName, assembly);
     }
 
     public long countChromosomeEntitiesByName(String name) {
@@ -262,7 +262,7 @@ public class ChromosomeService {
     }
 
     public long countChromosomeEntitiesByEnaName(String enaName) {
-        return repository.countChromosomeEntitiesByEnaName(enaName);
+        return repository.countChromosomeEntitiesByEnaSequenceName(enaName);
     }
 
 }
