@@ -59,7 +59,7 @@ public class ENABrowser extends PassiveAnonymousFTPClient {
             throw new IllegalArgumentException("Accession should be at least 15 characters long!");
         }
 
-        String directory = accession.substring(0, 7) + "/" + accession.substring(7, 10) + "/";
+        String directory = accession.substring(0, 7) + "/" + accession.substring(0, 10) + "/";
         String filename = accession + "_sequence_report.txt";
         String fullPath = PATH_ENA_ASSEMBLY + directory + filename;
 

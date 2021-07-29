@@ -64,11 +64,6 @@ public class ScaffoldService {
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
-    public Page<ScaffoldEntity> getScaffoldsByEnaSequenceName(String enaSequenceName, Pageable request) {
-        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByEnaSequenceName(enaSequenceName, request);
-        return stripChromosomesAndScaffoldsFromAssembly(page);
-    }
-
     public Page<ScaffoldEntity> getScaffoldsByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
         Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByNameAndAssembly_Taxid(name, asmTaxid, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
@@ -103,6 +98,25 @@ public class ScaffoldService {
                                                                   Pageable request) {
         Page<ScaffoldEntity> page
                 = repository.findScaffoldEntitiesByUcscNameAndAssembly(ucscName, assembly, request);
+        assembly.setScaffolds(null);
+        return injectAssemblyIntoScaffolds(page, assembly);
+    }
+
+    public Page<ScaffoldEntity> getScaffoldsByEnaName(String enaSequenceName, Pageable request) {
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByEnaSequenceName(enaSequenceName, request);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
+    }
+
+    public Page<ScaffoldEntity> getScaffoldsByEnaNameAndAssemblyTaxid(String enaName, long asmTaxid, Pageable request) {
+        Page<ScaffoldEntity> page
+                = repository.findScaffoldEntitiesByEnaSequenceNameAndAssembly_Taxid(enaName, asmTaxid, request);
+        return stripChromosomesAndScaffoldsFromAssembly(page);
+    }
+
+    public Page<ScaffoldEntity> getScaffoldsByEnaNameAndAssembly(
+            String enaName, AssemblyEntity assembly, Pageable request) {
+        Page<ScaffoldEntity> page
+                = repository.findScaffoldEntitiesByEnaSequenceNameAndAssembly(enaName, assembly, request);
         assembly.setScaffolds(null);
         return injectAssemblyIntoScaffolds(page, assembly);
     }

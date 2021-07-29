@@ -49,8 +49,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     }
 
     @Override
-    public Optional<AssemblyEntity> getAssemblyByAccession(
-            String accession) throws IOException, IllegalArgumentException {
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         ENABrowser enaBrowser = factory.build();
         enaBrowser.connect();
 
@@ -64,8 +63,13 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         return Optional.of(assemblyEntity);
     }
 
+    /**
+     * Adds ENA sequence names to chromosomes and scaffolds in an assembly.
+     *
+     * @param optional {@link AssemblyEntity} to get ENA sequence names for
+     * @throws IOException Passes IOException thrown by {@link #getAssemblyByAccession(String)}
+     */
     public void getENASequenceNamesForAssembly(Optional<AssemblyEntity> optional) throws IOException {
-        // Given an existing AssemblyEntity we've gotten from NCBI, add ENA sequence names for chromosomes and scaffolds.
         if (optional.isPresent()) {
             AssemblyEntity targetAssembly = optional.get();
             String genbank = targetAssembly.getGenbank();
@@ -81,7 +85,6 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
     private void putENASequenceNames(
             List<? extends SequenceEntity> sourceSequences, List<? extends SequenceEntity> targetSequences) {
-        // should mutate target sequences in place
         Stream.concat(targetSequences.stream(), sourceSequences.stream())
               .collect(Collectors.toMap(SequenceEntity::getGenbank, Function.identity(),
                                         (targetSeq, sourceSeq) -> {

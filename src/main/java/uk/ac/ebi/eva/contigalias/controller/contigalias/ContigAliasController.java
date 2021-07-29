@@ -59,6 +59,8 @@ public class ContigAliasController {
 
     public static final String NAME_SEQUENCE_TYPE = "chromosome";
 
+    public static final String NAME_ENA_TYPE = "ena";
+
     public static final String NAME_UCSC_TYPE = "ucsc";
 
     private final ContigAliasHandler handler;
@@ -280,7 +282,7 @@ public class ContigAliasController {
     @ApiOperation(value = "Get chromosomes using a combination of their own name and the Taxonomic ID's of their " +
             "parent assemblies.",
             notes = "Given a chromosome's name and the Taxonomic ID or the GenBank/RefSeq accession of the assembly " +
-                    "that it belongs to, this endpoint will return a non-emtpy list of chromosomes that satisfy the " +
+                    "that it belongs to, this endpoint will return a non-empty list of chromosomes that satisfy the " +
                     "given parameters. If no Taxonomic ID or accession are provided then the endpoint returns a list " +
                     "of chromosomes which have the given name. Each chromosome will also have its parent assembly " +
                     "nested inside it. The endpoint will either return a list of chromosomes or it will return an " +
@@ -291,10 +293,10 @@ public class ContigAliasController {
             @RequestParam(required = false) @ApiParam(value = "Taxonomic ID of a group of accessions. Eg: 9606") Optional<Long> taxid,
             @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
                     "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
-            @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is a " +
-                    "chromosome name or a UCSC style name. The acceptable param values are " + NAME_SEQUENCE_TYPE +
-                    " " +
-                    "and " + NAME_UCSC_TYPE + " respectively. If this parameter is omitted then the name is assumed " +
+            @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is an " +
+                    "NCBI chromosome name, ENA name, or a UCSC style name. The acceptable param values are " +
+                    NAME_SEQUENCE_TYPE + ", " + NAME_ENA_TYPE + ", and " +
+                    NAME_UCSC_TYPE + " respectively. If this parameter is omitted then the name is assumed " +
                     "to be a " + NAME_SEQUENCE_TYPE + " name by default.") Optional<String> nameTypeOpt,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {

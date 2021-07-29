@@ -42,11 +42,17 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid,
                                                                              Pageable request);
 
+    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameAndAssembly_Taxid(String enaName, long asmTaxid,
+                                                                                    Pageable request);
+
     Page<ChromosomeEntity> findChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly,
                                                                    Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
                                                                        Pageable request);
+
+    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameAndAssembly(String enaName, AssemblyEntity assembly,
+                                                                              Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByName(String name, Pageable request);
 
@@ -69,14 +75,20 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     long countChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid);
 
+    long countChromosomeEntitiesByEnaNameAndAssembly_Taxid(String enaName, long asmTaxid);
+
     long countChromosomeEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
 
     long countChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly);
+
+    long countChromosomeEntitiesByEnaNameAndAssembly(String enaName, AssemblyEntity assembly);
 
     long countChromosomeEntitiesByName(String name);
 
     long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq);
 
     long countChromosomeEntitiesByUcscName(String ucscName);
+
+    long countChromosomeEntitiesByEnaName(String enaName);
 
 }
