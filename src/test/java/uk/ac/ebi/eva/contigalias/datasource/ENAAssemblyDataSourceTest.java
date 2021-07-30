@@ -23,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,12 +58,7 @@ public class ENAAssemblyDataSourceTest {
         Optional<AssemblyEntity> assembly = ncbiDataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
         enaDataSource.getENASequenceNamesForAssembly(assembly);
         assertTrue(assembly.isPresent());
-
-        List<ChromosomeEntity> chromosomes = assembly.get().getChromosomes();
-        assertTrue(chromosomes.stream().allMatch(chromosome -> chromosome.getEnaSequenceName() != null));
-
-        List<ScaffoldEntity> scaffolds = assembly.get().getScaffolds();
-        assertTrue(scaffolds.stream().allMatch(scaffold -> scaffold.getEnaSequenceName() != null));
+        assertTrue(enaDataSource.hasAllEnaSequenceNames(assembly.get()));
     }
 
 }

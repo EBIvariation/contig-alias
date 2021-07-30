@@ -24,6 +24,8 @@ import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowser;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
@@ -72,15 +74,24 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     public void getENASequenceNamesForAssembly(Optional<AssemblyEntity> optional) throws IOException {
         if (optional.isPresent()) {
             AssemblyEntity targetAssembly = optional.get();
-            String genbank = targetAssembly.getGenbank();
-            Optional<AssemblyEntity> enaAssembly = getAssemblyByAccession(genbank);
+            if (!hasAllEnaSequenceNames(targetAssembly)) {
+                String genbank = targetAssembly.getGenbank();
+                Optional<AssemblyEntity> enaAssembly = getAssemblyByAccession(genbank);
 
-            if (enaAssembly.isPresent()) {
-                AssemblyEntity sourceAssembly = enaAssembly.get();
-                putENASequenceNames(sourceAssembly.getChromosomes(), targetAssembly.getChromosomes());
-                putENASequenceNames(sourceAssembly.getScaffolds(), targetAssembly.getScaffolds());
+                if (enaAssembly.isPresent()) {
+                    AssemblyEntity sourceAssembly = enaAssembly.get();
+                    putENASequenceNames(sourceAssembly.getChromosomes(), targetAssembly.getChromosomes());
+                    putENASequenceNames(sourceAssembly.getScaffolds(), targetAssembly.getScaffolds());
+                }
             }
         }
+    }
+
+    public boolean hasAllEnaSequenceNames(AssemblyEntity assembly) {
+        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
+        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        return Stream.concat(chromosomes.stream(), scaffolds.stream())
+                     .allMatch(sequence -> sequence.getEnaSequenceName() != null);
     }
 
     private void putENASequenceNames(

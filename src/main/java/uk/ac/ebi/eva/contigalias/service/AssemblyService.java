@@ -67,7 +67,6 @@ public class AssemblyService {
 
         Optional<AssemblyEntity> entities = getAssemblyByAccession(accession);
         if (entities.isPresent()) {
-            // TODO check whether ena sequence names are already there
             enaDataSource.getENASequenceNamesForAssembly(entities);
             return entities;
         }
