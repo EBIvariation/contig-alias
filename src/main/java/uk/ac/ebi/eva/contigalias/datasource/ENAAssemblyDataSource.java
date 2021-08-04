@@ -30,10 +30,10 @@ import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Repository("ENADataSource")
@@ -66,12 +66,12 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     }
 
     /**
-     * Adds ENA sequence names to chromosomes and scaffolds in an assembly.
+     * Adds ENA sequence names to chromosomes and scaffolds in an assembly. Will modify the AssemblyEntity in-place.
      *
-     * @param optional {@link AssemblyEntity} to get ENA sequence names for
+     * @param optional {@link AssemblyEntity} to add ENA sequence names to
      * @throws IOException Passes IOException thrown by {@link #getAssemblyByAccession(String)}
      */
-    public void getENASequenceNamesForAssembly(Optional<AssemblyEntity> optional) throws IOException {
+    public void addENASequenceNamesToAssembly(Optional<AssemblyEntity> optional) throws IOException {
         if (optional.isPresent()) {
             AssemblyEntity targetAssembly = optional.get();
             if (!hasAllEnaSequenceNames(targetAssembly)) {
@@ -80,8 +80,8 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
                 if (enaAssembly.isPresent()) {
                     AssemblyEntity sourceAssembly = enaAssembly.get();
-                    putENASequenceNames(sourceAssembly.getChromosomes(), targetAssembly.getChromosomes());
-                    putENASequenceNames(sourceAssembly.getScaffolds(), targetAssembly.getScaffolds());
+                    addENASequenceNames(sourceAssembly.getChromosomes(), targetAssembly.getChromosomes());
+                    addENASequenceNames(sourceAssembly.getScaffolds(), targetAssembly.getScaffolds());
                 }
             }
         }
@@ -94,15 +94,19 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
                      .allMatch(sequence -> sequence.getEnaSequenceName() != null);
     }
 
-    private void putENASequenceNames(
+    private void addENASequenceNames(
             List<? extends SequenceEntity> sourceSequences, List<? extends SequenceEntity> targetSequences) {
-        Stream.concat(targetSequences.stream(), sourceSequences.stream())
-              .collect(Collectors.toMap(SequenceEntity::getGenbank, Function.identity(),
-                                        (targetSeq, sourceSeq) -> {
-                                            targetSeq.setEnaSequenceName(sourceSeq.getEnaSequenceName());
-                                            return targetSeq;
-                                        }));
-
+        Map<String, SequenceEntity> genbankToSequenceEntity = new HashMap<>();
+        for (SequenceEntity targetSeq : targetSequences) {
+            genbankToSequenceEntity.put(targetSeq.getGenbank(), targetSeq);
+        }
+        for (SequenceEntity sourceSeq : sourceSequences) {
+            String sourceGenbank = sourceSeq.getGenbank();
+            if (genbankToSequenceEntity.containsKey(sourceGenbank)) {
+                genbankToSequenceEntity.get(sourceGenbank).setEnaSequenceName(sourceSeq.getEnaSequenceName());
+            } else {
+                genbankToSequenceEntity.put(sourceGenbank, sourceSeq);
+            }
+        }
     }
-
 }

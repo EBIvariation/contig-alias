@@ -67,7 +67,7 @@ public class AssemblyService {
 
         Optional<AssemblyEntity> entities = getAssemblyByAccession(accession);
         if (entities.isPresent()) {
-            enaDataSource.getENASequenceNamesForAssembly(entities);
+            enaDataSource.addENASequenceNamesToAssembly(entities);
             return entities;
         }
         fetchAndInsertAssembly(accession);
@@ -112,7 +112,7 @@ public class AssemblyService {
             throw duplicateAssemblyInsertionException(accession, entity.get());
         }
         Optional<AssemblyEntity> fetchAssembly = ncbiDataSource.getAssemblyByAccession(accession);
-        enaDataSource.getENASequenceNamesForAssembly(fetchAssembly);
+        enaDataSource.addENASequenceNamesToAssembly(fetchAssembly);
         fetchAssembly.ifPresent(this::insertAssembly);
     }
 
