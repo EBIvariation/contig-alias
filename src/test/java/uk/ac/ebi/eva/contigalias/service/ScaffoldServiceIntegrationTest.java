@@ -72,10 +72,11 @@ public class ScaffoldServiceIntegrationTest {
     }
 
     void assertScaffoldIdenticalToEntity(ScaffoldEntity scaffoldEntity) {
-        assertEquals(entity.getName(), scaffoldEntity.getName());
+        assertEquals(entity.getGenbankSequenceName(), scaffoldEntity.getGenbankSequenceName());
         assertEquals(entity.getGenbank(), scaffoldEntity.getGenbank());
         assertEquals(entity.getRefseq(), scaffoldEntity.getRefseq());
         assertEquals(entity.getUcscName(), scaffoldEntity.getUcscName());
+        assertEquals(entity.getEnaSequenceName(), scaffoldEntity.getEnaSequenceName());
     }
 
 }

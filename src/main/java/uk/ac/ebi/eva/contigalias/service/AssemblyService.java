@@ -19,12 +19,12 @@ package uk.ac.ebi.eva.contigalias.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import uk.ac.ebi.eva.contigalias.datasource.AssemblyDataSource;
+import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
+import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
@@ -42,7 +42,9 @@ public class AssemblyService {
 
     private final AssemblyRepository repository;
 
-    private final AssemblyDataSource dataSource;
+    private final NCBIAssemblyDataSource ncbiDataSource;
+
+    private final ENAAssemblyDataSource enaDataSource;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -54,15 +56,18 @@ public class AssemblyService {
     private boolean enableCacheLimit = false;
 
     @Autowired
-    public AssemblyService(AssemblyRepository repository, @Qualifier("NCBIDataSource") AssemblyDataSource dataSource) {
+    public AssemblyService(
+            AssemblyRepository repository, NCBIAssemblyDataSource ncbiDataSource, ENAAssemblyDataSource enaDataSource) {
         this.repository = repository;
-        this.dataSource = dataSource;
+        this.ncbiDataSource = ncbiDataSource;
+        this.enaDataSource = enaDataSource;
     }
 
     public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
 
         Optional<AssemblyEntity> entities = getAssemblyByAccession(accession);
         if (entities.isPresent()) {
+            enaDataSource.addENASequenceNamesToAssembly(entities);
             return entities;
         }
         fetchAndInsertAssembly(accession);
@@ -106,7 +111,8 @@ public class AssemblyService {
         if (entity.isPresent()) {
             throw duplicateAssemblyInsertionException(accession, entity.get());
         }
-        Optional<AssemblyEntity> fetchAssembly = dataSource.getAssemblyByAccession(accession);
+        Optional<AssemblyEntity> fetchAssembly = ncbiDataSource.getAssemblyByAccession(accession);
+        enaDataSource.addENASequenceNamesToAssembly(fetchAssembly);
         fetchAssembly.ifPresent(this::insertAssembly);
     }
 

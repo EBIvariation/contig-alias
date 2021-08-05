@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
-import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_SEQUENCE_TYPE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_GENBANK_TYPE;
 import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_UCSC_TYPE;
 
 public class ContigAliasHandlerTest {
@@ -311,7 +311,7 @@ public class ContigAliasHandlerTest {
 
         void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosome) {
             assertNotNull(chromosome);
-            assertEquals(entity.getName(), chromosome.getName());
+            assertEquals(entity.getGenbankSequenceName(), chromosome.getGenbankSequenceName());
             assertEquals(entity.getGenbank(), chromosome.getGenbank());
             assertEquals(entity.getRefseq(), chromosome.getRefseq());
             assertEquals(entity.getUcscName(), chromosome.getUcscName());
@@ -355,20 +355,20 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockAssemblyService.getAssemblyByAccession(this.assemblyEntity.getRefseq()))
                    .thenReturn(optionalOfAssemblyEntity);
             String chrName = chromosomeEntities.get(0)
-                                               .getName();
+                                               .getGenbankSequenceName();
             Long asmTaxid = assemblyEntity.getTaxid();
             Mockito.when(
                     mockChromosomeService.getChromosomesByNameAndAssemblyTaxid(chrName, asmTaxid, DEFAULT_PAGE_REQUEST))
                    .thenReturn(new PageImpl<>(
                            chromosomeEntities
                                    .stream()
-                                   .filter(it -> it.getName().equals(chrName) &&
+                                   .filter(it -> it.getGenbankSequenceName().equals(chrName) &&
                                            it.getAssembly().getTaxid().equals(asmTaxid))
                                    .collect(Collectors.toList())));
 
             List<ChromosomeEntity> chromosomesByNameAndAssembly = chromosomeEntities
                     .stream()
-                    .filter(it -> it.getName().equals(chrName) &&
+                    .filter(it -> it.getGenbankSequenceName().equals(chrName) &&
                             it.getAssembly().equals(assemblyEntity))
                     .collect(Collectors.toList());
 
@@ -432,14 +432,14 @@ public class ContigAliasHandlerTest {
             Mockito.when(mockScaffoldService
                                  .getScaffoldsByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
-            Mockito.when(mockScaffoldService.getScaffoldsByNameAndAssemblyTaxid(scaffoldEntity.getName(), asmTaxid,
+            Mockito.when(mockScaffoldService.getScaffoldsByNameAndAssemblyTaxid(scaffoldEntity.getGenbankSequenceName(), asmTaxid,
                                                                                 DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
             Mockito.when(mockScaffoldService
                                  .getScaffoldsByUcscNameAndAssemblyTaxid(scaffoldEntity.getUcscName(), asmTaxid,
                                                                          DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
-            Mockito.when(mockScaffoldService.getScaffoldsByNameAndAssembly(scaffoldEntity.getName(), assemblyEntity,
+            Mockito.when(mockScaffoldService.getScaffoldsByNameAndAssembly(scaffoldEntity.getGenbankSequenceName(), assemblyEntity,
                                                                            DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
 
@@ -511,20 +511,20 @@ public class ContigAliasHandlerTest {
 
         @Test
         void getChromosomesByChromosomeNameAndAssemblyTaxid() {
-            String chrName = chromosomeEntities.get(0).getName();
+            String chrName = chromosomeEntities.get(0).getGenbankSequenceName();
             Long asmTaxid = assemblyEntity.getTaxid();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getSequencesBySequenceNameAndAssemblyTaxid(
-                            chrName, asmTaxid, NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
+                            chrName, asmTaxid, NAME_GENBANK_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 
         @Test
         void getChromosomesByChromosomeNameAndAssemblyAccession() {
-            String chrName = chromosomeEntities.get(0).getName();
+            String chrName = chromosomeEntities.get(0).getGenbankSequenceName();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getSequencesBySequenceNameAndAssemblyAccession(
-                            chrName, assemblyEntity.getGenbank(), NAME_SEQUENCE_TYPE, DEFAULT_PAGE_REQUEST);
+                            chrName, assemblyEntity.getGenbank(), NAME_GENBANK_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 

@@ -179,6 +179,15 @@ public class ContigAliasHandler {
             for (Pageable pageable : pageRequests[1]) {
                 pages.add(scaffoldService.getScaffoldsByUcscNameAndAssemblyTaxid(name, taxid, pageable));
             }
+        } else if (nameType.equals(ContigAliasController.NAME_ENA_TYPE)) {
+            long count = chromosomeService.countChromosomeEntitiesByEnaNameAndAssembly_Taxid(name, taxid);
+            List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+            for (Pageable pageable : pageRequests[0]) {
+                pages.add(chromosomeService.getChromosomesByEnaNameAndAssemblyTaxid(name, taxid, pageable));
+            }
+            for (Pageable pageable : pageRequests[1]) {
+                pages.add(scaffoldService.getScaffoldsByEnaNameAndAssemblyTaxid(name, taxid, pageable));
+            }
         } else {
             long count = chromosomeService.countChromosomeEntitiesByNameAndAssembly_Taxid(name, taxid);
             List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
@@ -207,6 +216,15 @@ public class ContigAliasHandler {
                 for (Pageable pageable : pageRequests[1]) {
                     pages.add(scaffoldService.getScaffoldsByUcscNameAndAssembly(name, assemblyEntity, pageable));
                 }
+            } else if (nameType.equals(ContigAliasController.NAME_ENA_TYPE)) {
+                long count = chromosomeService.countChromosomeEntitiesByEnaNameAndAssembly(name, assemblyEntity);
+                List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+                for (Pageable pageable : pageRequests[0]) {
+                    pages.add(chromosomeService.getChromosomesByEnaNameAndAssembly(name, assemblyEntity, pageable));
+                }
+                for (Pageable pageable : pageRequests[1]) {
+                    pages.add(scaffoldService.getScaffoldsByEnaNameAndAssembly(name, assemblyEntity, pageable));
+                }
             } else {
                 long count = chromosomeService.countChromosomeEntitiesByNameAndAssembly(name, assemblyEntity);
                 List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
@@ -232,6 +250,15 @@ public class ContigAliasHandler {
             }
             for (Pageable pageable : pageRequests[1]) {
                 pages.add(scaffoldService.getScaffoldsByUcscName(name, pageable));
+            }
+        } else if (nameType.equals(ContigAliasController.NAME_ENA_TYPE)) {
+            long count = chromosomeService.countChromosomeEntitiesByEnaName(name);
+            List<Pageable>[] pageRequests = createScaffoldsPageRequest(count, request);
+            for (Pageable pageable : pageRequests[0]) {
+                pages.add(chromosomeService.getChromosomesByEnaName(name, pageable));
+            }
+            for (Pageable pageable : pageRequests[1]) {
+                pages.add(scaffoldService.getScaffoldsByEnaName(name, pageable));
             }
         } else {
             long count = chromosomeService.countChromosomeEntitiesByName(name);

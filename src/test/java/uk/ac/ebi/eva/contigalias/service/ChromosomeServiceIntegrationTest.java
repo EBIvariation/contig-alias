@@ -86,10 +86,11 @@ public class ChromosomeServiceIntegrationTest {
     }
 
     void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
-        assertEquals(entity.getName(), chromosomeEntity.getName());
+        assertEquals(entity.getGenbankSequenceName(), chromosomeEntity.getGenbankSequenceName());
         assertEquals(entity.getGenbank(), chromosomeEntity.getGenbank());
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
         assertEquals(entity.getUcscName(), chromosomeEntity.getUcscName());
+        assertEquals(entity.getEnaSequenceName(), chromosomeEntity.getEnaSequenceName());
     }
 
 }

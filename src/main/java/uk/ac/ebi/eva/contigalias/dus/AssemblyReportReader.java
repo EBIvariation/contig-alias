@@ -23,18 +23,16 @@ import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
 
-public class AssemblyReportReader {
+public abstract class AssemblyReportReader {
 
-    private final BufferedReader reader;
+    protected final BufferedReader reader;
 
-    private AssemblyEntity assemblyEntity;
+    protected AssemblyEntity assemblyEntity;
 
-    private final boolean isScaffoldsEnabled;
+    protected final boolean isScaffoldsEnabled;
 
-    private boolean reportParsed = false;
+    protected boolean reportParsed = false;
 
     public AssemblyReportReader(InputStreamReader inputStreamReader, boolean isScaffoldsEnabled) {
         this.reader = new BufferedReader(inputStreamReader);
@@ -62,32 +60,7 @@ public class AssemblyReportReader {
      *
      * @throws IOException Passes IOException thrown by {@link BufferedReader#readLine()}
      */
-    private void parseReport() throws IOException, NullPointerException {
-        if (reader == null) {
-            throw new NullPointerException("Cannot use AssemblyReportReader without having a valid InputStreamReader.");
-        }
-        String line = reader.readLine();
-        while (line != null) {
-            if (line.startsWith("# ")) {
-                if (assemblyEntity == null) {
-                    assemblyEntity = new AssemblyEntity();
-                }
-                parseAssemblyData(line);
-            } else if (!line.startsWith("#")) {
-                String[] columns = line.split("\t", -1);
-                if (columns.length >= 6 && columns[5].equals("=")) {
-                    if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
-                        parseChromosomeLine(columns);
-                    } else if (isScaffoldsEnabled) {
-                        parseScaffoldLine(columns);
-                    }
-                }
-            }
-            line = reader.readLine();
-        }
-        reportParsed = true;
-        reader.close();
-    }
+    protected abstract void parseReport() throws IOException, NullPointerException;
 
     /**
      * Parses lines in assembly report containing Assembly metadata. Breaks line into a tag:tagData format and
@@ -95,71 +68,15 @@ public class AssemblyReportReader {
      *
      * @param line A line of assembly report file starting with "# ".
      */
-    private void parseAssemblyData(String line) {
-        int tagEnd = line.indexOf(':');
-        if (tagEnd == -1) {
-            return;
-        }
-        String tag = line.substring(2, tagEnd);
-        String tagData = line.substring(tagEnd + 1).trim();
-        switch (tag) {
-            case "Assembly name": {
-                assemblyEntity.setName(tagData);
-                break;
-            }
-            case "Organism name": {
-                assemblyEntity.setOrganism(tagData);
-                break;
-            }
-            case "Taxid": {
-                assemblyEntity.setTaxid(Long.parseLong(tagData));
-                break;
-            }
-            case "GenBank assembly accession": {
-                assemblyEntity.setGenbank(tagData);
-                break;
-            }
-            case "RefSeq assembly accession": {
-                assemblyEntity.setRefseq(tagData);
-                break;
-            }
-            case "RefSeq assembly and GenBank assemblies identical": {
-                assemblyEntity.setGenbankRefseqIdentical(tagData.equals("yes"));
-                break;
-            }
-        }
-    }
+    protected abstract void parseAssemblyData(String line);
 
     /**
      * Parses lines in assembly report containing Chromosome metadata. This array is used to set metadata to
-     * corresponding
-     * fields in {@link ChromosomeEntity}.
+     * corresponding fields in {@link ChromosomeEntity}.
      *
      * @param columns An array of fields in a line of the assembly report file not starting with "#".
      */
-    private void parseChromosomeLine(String[] columns) {
-        ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
-
-        chromosomeEntity.setName(columns[0]);
-        chromosomeEntity.setGenbank(columns[4]);
-        chromosomeEntity.setRefseq(columns[6]);
-
-        if (columns.length > 9 && !columns[9].equals("na")) {
-            chromosomeEntity.setUcscName(columns[9]);
-        }
-
-        if (assemblyEntity == null) {
-            assemblyEntity = new AssemblyEntity();
-        }
-        chromosomeEntity.setAssembly(this.assemblyEntity);
-
-        List<ChromosomeEntity> chromosomes = this.assemblyEntity.getChromosomes();
-        if (chromosomes == null) {
-            chromosomes = new LinkedList<>();
-            assemblyEntity.setChromosomes(chromosomes);
-        }
-        chromosomes.add(chromosomeEntity);
-    }
+    protected abstract void parseChromosomeLine(String[] columns);
 
     /**
      * Parses lines in assembly report containing Scaffold metadata. This array is used to set metadata to corresponding
@@ -167,32 +84,7 @@ public class AssemblyReportReader {
      *
      * @param columns An array of fields in a line of the assembly report file not starting with "#".
      */
-    private void parseScaffoldLine(String[] columns) {
-        ScaffoldEntity scaffoldEntity = new ScaffoldEntity();
-
-        scaffoldEntity.setName(columns[0]);
-        scaffoldEntity.setGenbank(columns[4]);
-        scaffoldEntity.setRefseq(columns[6]);
-
-        if (columns.length >= 10) {
-            String ucscName = columns[9];
-            if (!ucscName.equals("na")) {
-                scaffoldEntity.setUcscName(ucscName);
-            }
-        }
-
-        if (assemblyEntity == null) {
-            assemblyEntity = new AssemblyEntity();
-        }
-        scaffoldEntity.setAssembly(this.assemblyEntity);
-
-        List<ScaffoldEntity> scaffolds = this.assemblyEntity.getScaffolds();
-        if (scaffolds == null) {
-            scaffolds = new LinkedList<>();
-            assemblyEntity.setScaffolds(scaffolds);
-        }
-        scaffolds.add(scaffoldEntity);
-    }
+    protected abstract void parseScaffoldLine(String[] columns);
 
     public boolean ready() throws IOException {
         return reader.ready();

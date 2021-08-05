@@ -35,10 +35,11 @@ public class ChromosomeGenerator {
 
     public static ChromosomeEntity generate(long id) {
         return (ChromosomeEntity) new ChromosomeEntity()
-                .setName(PREFIX_NAME + id)
+                .setGenbankSequenceName(PREFIX_NAME + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
+                .setEnaSequenceName("ena" + id)
                 .setMd5checksum("md5" + id)
                 .setTrunc512checksum("trunc512" + id)
                 .setAssembly(null);
@@ -72,7 +73,7 @@ public class ChromosomeGenerator {
     void generateTest() {
         ChromosomeEntity entity = generate();
         int length = PREFIX_NAME.length();
-        String name = entity.getName();
+        String name = entity.getGenbankSequenceName();
         assertTrue(name.length() > length);
         String sId = name.substring(length);
         assertTrue(name.endsWith(sId));

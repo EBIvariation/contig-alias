@@ -35,10 +35,11 @@ public class ScaffoldGenerator {
 
     public static ScaffoldEntity generate(long id) {
         return (ScaffoldEntity) new ScaffoldEntity()
-                .setName(PREFIX_NAME + id)
+                .setGenbankSequenceName(PREFIX_NAME + id)
                 .setGenbank("genbank" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
+                .setEnaSequenceName("ena" + id)
                 .setAssembly(null);
     }
 
@@ -70,7 +71,7 @@ public class ScaffoldGenerator {
     void generateTest() {
         ScaffoldEntity entity = generate();
         int length = PREFIX_NAME.length();
-        String name = entity.getName();
+        String name = entity.getGenbankSequenceName();
         assertTrue(name.length() > length);
         String sId = name.substring(length);
         assertTrue(name.endsWith(sId));

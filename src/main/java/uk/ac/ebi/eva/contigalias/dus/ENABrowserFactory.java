@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 EMBL - European Bioinformatics Institute
+ * Copyright 2021 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,17 @@ package uk.ac.ebi.eva.contigalias.dus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 @Component
-public class AssemblyReportReaderFactory {
+public class ENABrowserFactory {
 
-    @Value("${config.scaffolds.enabled:false}")
-    private boolean SCAFFOLDS_ENABLED;
+    @Value("${ftp.proxy.host}")
+    private String ftpProxyHost;
 
-    public AssemblyReportReader build(InputStream inputStream) {
-        return new AssemblyReportReader(new InputStreamReader(inputStream), SCAFFOLDS_ENABLED);
-    }
+    @Value("${ftp.proxy.port}")
+    private Integer ftpProxyPort;
 
-    public AssemblyReportReader build(InputStreamReader inputStreamReader) {
-        return new AssemblyReportReader(inputStreamReader, SCAFFOLDS_ENABLED);
+    public ENABrowser build(){
+        return new ENABrowser(ftpProxyHost, ftpProxyPort);
     }
 
 }

@@ -35,11 +35,11 @@ public interface ScaffoldRepository extends JpaRepository<ScaffoldEntity, Long> 
 
     Page<ScaffoldEntity> findScaffoldEntitiesByAssembly_Refseq(String asmRefseq, Pageable request);
 
-    Page<ScaffoldEntity> findScaffoldEntitiesByName(String name, Pageable request);
+    Page<ScaffoldEntity> findScaffoldEntitiesByGenbankSequenceName(String genbankName, Pageable request);
 
-    Page<ScaffoldEntity> findScaffoldEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid, Pageable request);
+    Page<ScaffoldEntity> findScaffoldEntitiesByGenbankSequenceNameAndAssembly_Taxid(String genbankName, long asmTaxid, Pageable request);
 
-    Page<ScaffoldEntity> findScaffoldEntitiesByNameAndAssembly(String name, AssemblyEntity assembly, Pageable request);
+    Page<ScaffoldEntity> findScaffoldEntitiesByGenbankSequenceNameAndAssembly(String genbankName, AssemblyEntity assembly, Pageable request);
 
     Page<ScaffoldEntity> findScaffoldEntitiesByAssemblyGenbankOrAssemblyRefseq(String accession, String accession1,
                                                                                Pageable request);
@@ -52,6 +52,14 @@ public interface ScaffoldRepository extends JpaRepository<ScaffoldEntity, Long> 
     Page<ScaffoldEntity> findScaffoldEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
                                                                    Pageable request);
 
+    Page<ScaffoldEntity> findScaffoldEntitiesByEnaSequenceName(String enaName, Pageable request);
+
+    Page<ScaffoldEntity> findScaffoldEntitiesByEnaSequenceNameAndAssembly_Taxid(String enaName, long asmTaxid,
+                                                                                Pageable request);
+
+    Page<ScaffoldEntity> findScaffoldEntitiesByEnaSequenceNameAndAssembly(String enaName, AssemblyEntity assembly,
+                                                                          Pageable request);
+
     Page<ScaffoldEntity> findScaffoldEntitiesByGenbankOrRefseq(String accession, String accession1, Pageable request);
 
     long countScaffoldEntitiesByGenbank(String genbank);
@@ -62,15 +70,15 @@ public interface ScaffoldRepository extends JpaRepository<ScaffoldEntity, Long> 
 
     long countScaffoldEntitiesByAssembly_Refseq(String asmRefseq);
 
-    long countScaffoldEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid);
+    long countScaffoldEntitiesByGenbankSequenceNameAndAssembly_Taxid(String genbankName, long asmTaxid);
 
     long countScaffoldEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid);
 
-    long countScaffoldEntitiesByNameAndAssembly(String name, AssemblyEntity assembly);
+    long countScaffoldEntitiesByGenbankSequenceNameAndAssembly(String genbankName, AssemblyEntity assembly);
 
     long countScaffoldEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly);
 
-    long countScaffoldEntitiesByName(String name);
+    long countScaffoldEntitiesByGenbankSequenceName(String genbankName);
 
     long countScaffoldEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq);
 

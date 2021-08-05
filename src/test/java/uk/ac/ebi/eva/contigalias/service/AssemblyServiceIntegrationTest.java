@@ -28,6 +28,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.datasource.AssemblyDataSource;
+import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
+import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
@@ -62,16 +64,17 @@ public class AssemblyServiceIntegrationTest {
 
     @BeforeEach
     void setup() throws IOException {
-        AssemblyDataSource mockDataSource = mock(AssemblyDataSource.class);
+        NCBIAssemblyDataSource mockNcbiDataSource = mock(NCBIAssemblyDataSource.class);
+        ENAAssemblyDataSource mockEnaDataSource = mock(ENAAssemblyDataSource.class);
         for (int i = 0; i < entities.length; i++) {
             AssemblyEntity generate = AssemblyGenerator.generate(i);
             entities[i] = generate;
-            Mockito.when(mockDataSource.getAssemblyByAccession(generate.getGenbank()))
+            Mockito.when(mockNcbiDataSource.getAssemblyByAccession(generate.getGenbank()))
                    .thenReturn(Optional.of(generate));
-            Mockito.when(mockDataSource.getAssemblyByAccession(generate.getRefseq()))
+            Mockito.when(mockNcbiDataSource.getAssemblyByAccession(generate.getRefseq()))
                    .thenReturn(Optional.of(generate));
         }
-        service = new AssemblyService(repository, mockDataSource);
+        service = new AssemblyService(repository, mockNcbiDataSource, mockEnaDataSource);
     }
 
     @AfterEach
