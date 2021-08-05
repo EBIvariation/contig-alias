@@ -96,7 +96,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
     protected void parseChromosomeLine(String[] columns) {
         ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
 
-        chromosomeEntity.setName(columns[0]);
+        chromosomeEntity.setGenbankSequenceName(columns[0]);
         chromosomeEntity.setGenbank(columns[4]);
         chromosomeEntity.setRefseq(columns[6]);
 
@@ -120,7 +120,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
     protected void parseScaffoldLine(String[] columns) {
         ScaffoldEntity scaffoldEntity = new ScaffoldEntity();
 
-        scaffoldEntity.setName(columns[0]);
+        scaffoldEntity.setGenbankSequenceName(columns[0]);
         scaffoldEntity.setGenbank(columns[4]);
         scaffoldEntity.setRefseq(columns[6]);
 

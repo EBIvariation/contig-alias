@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.repo.ScaffoldRepository;
 
@@ -60,18 +59,18 @@ public class ScaffoldService {
     }
 
     public Page<ScaffoldEntity> getScaffoldsByName(String name, Pageable request) {
-        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByName(name, request);
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByGenbankSequenceName(name, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ScaffoldEntity> getScaffoldsByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
-        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByNameAndAssembly_Taxid(name, asmTaxid, request);
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByGenbankSequenceNameAndAssembly_Taxid(name, asmTaxid, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ScaffoldEntity> getScaffoldsByNameAndAssembly(
             String name, AssemblyEntity assembly, Pageable request) {
-        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByNameAndAssembly(name, assembly, request);
+        Page<ScaffoldEntity> page = repository.findScaffoldEntitiesByGenbankSequenceNameAndAssembly(name, assembly, request);
         assembly.setScaffolds(null);
         return injectAssemblyIntoScaffolds(page, assembly);
     }
@@ -225,7 +224,7 @@ public class ScaffoldService {
     }
 
     public long countScaffoldEntitiesByNameAndAssembly_Taxid(String name, long asmTaxid) {
-        return repository.countScaffoldEntitiesByNameAndAssembly_Taxid(name, asmTaxid);
+        return repository.countScaffoldEntitiesByGenbankSequenceNameAndAssembly_Taxid(name, asmTaxid);
     }
 
     public long countScaffoldEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid) {
@@ -233,7 +232,7 @@ public class ScaffoldService {
     }
 
     public long countScaffoldEntitiesByNameAndAssembly(String name, AssemblyEntity assembly) {
-        return repository.countScaffoldEntitiesByNameAndAssembly(name, assembly);
+        return repository.countScaffoldEntitiesByGenbankSequenceNameAndAssembly(name, assembly);
     }
 
     public long countScaffoldEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly) {
@@ -241,7 +240,7 @@ public class ScaffoldService {
     }
 
     public long countScaffoldEntitiesByName(String name) {
-        return repository.countScaffoldEntitiesByName(name);
+        return repository.countScaffoldEntitiesByGenbankSequenceName(name);
     }
 
     public long countScaffoldEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq) {

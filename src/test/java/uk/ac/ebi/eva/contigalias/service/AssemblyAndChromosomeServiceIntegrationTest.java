@@ -50,7 +50,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
     private AssemblyService assemblyService;
 
     void assertChromosomeEntityIdentical(ChromosomeEntity expected, ChromosomeEntity actual) {
-        assertEquals(expected.getName(), actual.getName());
+        assertEquals(expected.getGenbankSequenceName(), actual.getGenbankSequenceName());
         assertEquals(expected.getGenbank(), actual.getGenbank());
         assertEquals(expected.getRefseq(), actual.getRefseq());
         assertEquals(expected.getUcscName(), actual.getUcscName());
@@ -166,12 +166,12 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
 
             // Same name as previous and linked to 1st assembly
             ChromosomeEntity nameSameAs0thAsm1 = ChromosomeGenerator.generate(assemblyEntities[1]);
-            nameSameAs0thAsm1.setName(chromosomeEntities[0].getName());
+            nameSameAs0thAsm1.setGenbankSequenceName(chromosomeEntities[0].getGenbankSequenceName());
             chromosomeEntities[1] = nameSameAs0thAsm1;
 
             // Same name as previous and linked to 2nd assembly
             ChromosomeEntity nameSameAs1stAsm1 = ChromosomeGenerator.generate(assemblyEntities[2]);
-            nameSameAs1stAsm1.setName(chromosomeEntities[0].getName());
+            nameSameAs1stAsm1.setGenbankSequenceName(chromosomeEntities[0].getGenbankSequenceName());
             chromosomeEntities[2] = nameSameAs1stAsm1;
 
             // New chromosome linked to 2nd assembly
@@ -198,7 +198,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         @Test
         void getChromosomesByNameAndAssemblySameNameSameTaxid() {
             Page<ChromosomeEntity> page = service.getChromosomesByNameAndAssemblyTaxid(
-                    chromosomeEntities[0].getName(), assemblyEntities[0].getTaxid(), DEFAULT_PAGE_REQUEST);
+                    chromosomeEntities[0].getGenbankSequenceName(), assemblyEntities[0].getTaxid(), DEFAULT_PAGE_REQUEST);
             assertNotNull(page);
             assertEquals(2, page.getTotalElements());
             List<ChromosomeEntity> entityList = page.get().collect(Collectors.toList());
@@ -213,7 +213,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         void getChromosomesByNameAndAssemblySameNameDiffTaxid() {
             ChromosomeEntity chromosomeEntity = chromosomeEntities[2];
             Page<ChromosomeEntity> page = service.getChromosomesByNameAndAssemblyTaxid(
-                    chromosomeEntity.getName(), assemblyEntities[2].getTaxid(), DEFAULT_PAGE_REQUEST);
+                    chromosomeEntity.getGenbankSequenceName(), assemblyEntities[2].getTaxid(), DEFAULT_PAGE_REQUEST);
             assertNotNull(page);
             assertEquals(1, page.getNumberOfElements());
             assertChromosomePageIdentical(page, chromosomeEntity);
@@ -227,7 +227,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         void getChromosomesByNameAndAssemblyDiffNameSameTaxid() {
             ChromosomeEntity chromosomeEntity = chromosomeEntities[3];
             Page<ChromosomeEntity> page = service.getChromosomesByNameAndAssemblyTaxid(
-                    chromosomeEntity.getName(), assemblyEntities[2].getTaxid(), DEFAULT_PAGE_REQUEST);
+                    chromosomeEntity.getGenbankSequenceName(), assemblyEntities[2].getTaxid(), DEFAULT_PAGE_REQUEST);
             assertNotNull(page);
             assertEquals(1, page.getNumberOfElements());
             assertChromosomePageIdentical(page, chromosomeEntity);
@@ -237,7 +237,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         void getChromosomeByNameAndAssembly() {
             ChromosomeEntity chromosomeEntity = chromosomeEntities[0];
             Page<ChromosomeEntity> page = service.getChromosomesByNameAndAssembly(
-                    chromosomeEntity.getName(), assemblyEntities[0], DEFAULT_PAGE_REQUEST);
+                    chromosomeEntity.getGenbankSequenceName(), assemblyEntities[0], DEFAULT_PAGE_REQUEST);
             assertNotNull(page);
             assertEquals(1, page.getNumberOfElements());
             assertChromosomePageIdentical(page, chromosomeEntity);

@@ -57,7 +57,7 @@ public class ContigAliasController {
 
     public static final String AUTHORITY_NONE = "none";
 
-    public static final String NAME_SEQUENCE_TYPE = "chromosome";
+    public static final String NAME_GENBANK_TYPE = "genbank";
 
     public static final String NAME_ENA_TYPE = "ena";
 
@@ -294,10 +294,10 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "accession") @ApiParam(value = "Genbank or Refseq assembly " +
                     "accession. Eg: GCA_000001405.10") Optional<String> asmAccession,
             @RequestParam(required = false, name = "name") @ApiParam(value = "Specify if the provided name is an " +
-                    "NCBI chromosome name, ENA name, or a UCSC style name. The acceptable param values are " +
-                    NAME_SEQUENCE_TYPE + ", " + NAME_ENA_TYPE + ", and " +
+                    "GenBank chromosome name, ENA name, or a UCSC style name. The acceptable param values are " +
+                    NAME_GENBANK_TYPE + ", " + NAME_ENA_TYPE + ", and " +
                     NAME_UCSC_TYPE + " respectively. If this parameter is omitted then the name is assumed " +
-                    "to be a " + NAME_SEQUENCE_TYPE + " name by default.") Optional<String> nameTypeOpt,
+                    "to be a " + NAME_GENBANK_TYPE + " name by default.") Optional<String> nameTypeOpt,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         boolean isNameValid = name != null && !name.isEmpty();
@@ -308,7 +308,7 @@ public class ContigAliasController {
         }
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<SequenceEntity>> pagedModel;
-        String nameType = nameTypeOpt.orElse(NAME_SEQUENCE_TYPE);
+        String nameType = nameTypeOpt.orElse(NAME_GENBANK_TYPE);
         if (!isTaxidValid && !isAccessionValid) {
             pagedModel = handler.getSequencesByName(name, nameType, pageRequest);
         } else if (isTaxidValid) {

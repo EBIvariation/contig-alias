@@ -80,7 +80,7 @@ class NCBIAssemblyReportReaderTest {
         streamReader = new InputStreamReader(stream);
         reader = readerFactory.build(streamReader);
         scaffoldEntity = (ScaffoldEntity) new ScaffoldEntity()
-                .setName("ChrU_1")
+                .setGenbankSequenceName("ChrU_1")
                 .setGenbank("GJ057137.1")
                 .setRefseq("NW_003097882.1")
                 .setUcscName(null);
@@ -125,7 +125,7 @@ class NCBIAssemblyReportReaderTest {
         AssemblyEntity assembly = getAssemblyEntity();
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         ChromosomeEntity chromosome = chromosomes.get(0);
-        assertEquals(CHROMOSOME_CHR1_SEQUENCE_NAME, chromosome.getName());
+        assertEquals(CHROMOSOME_CHR1_SEQUENCE_NAME, chromosome.getGenbankSequenceName());
         assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getGenbank());
         assertEquals(CHROMOSOME_CHR1_REFSEQ_ACCESSION, chromosome.getRefseq());
         assertNull(chromosome.getUcscName());
@@ -146,7 +146,7 @@ class NCBIAssemblyReportReaderTest {
         assertTrue(scaffolds.size() > 0);
         ScaffoldEntity scaffold = scaffolds.get(0);
         assertNotNull(scaffold);
-        assertEquals(scaffoldEntity.getName(), scaffold.getName());
+        assertEquals(scaffoldEntity.getGenbankSequenceName(), scaffold.getGenbankSequenceName());
         assertEquals(scaffoldEntity.getGenbank(), scaffold.getGenbank());
         assertEquals(scaffoldEntity.getRefseq(), scaffold.getRefseq());
         assertEquals(scaffoldEntity.getUcscName(), scaffold.getUcscName());
