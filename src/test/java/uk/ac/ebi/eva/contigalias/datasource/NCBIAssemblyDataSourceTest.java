@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class NCBIAssemblyDataSourceTest {
 
-    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.3";
+    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.5";
 
     private static final String GCF_ACCESSION_NO_CHROMOSOMES = "GCF_006125015.1";
 
