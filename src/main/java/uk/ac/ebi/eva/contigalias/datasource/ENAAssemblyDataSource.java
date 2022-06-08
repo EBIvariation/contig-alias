@@ -30,9 +30,11 @@ import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -80,16 +82,24 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
                 if (enaAssembly.isPresent()) {
                     AssemblyEntity sourceAssembly = enaAssembly.get();
-                    addENASequenceNames(sourceAssembly.getChromosomes(), targetAssembly.getChromosomes());
-                    addENASequenceNames(sourceAssembly.getScaffolds(), targetAssembly.getScaffolds());
+                    addENASequenceNames(Objects.nonNull(sourceAssembly.getChromosomes()) ?
+                            sourceAssembly.getChromosomes() : Collections.emptyList(),
+                            Objects.nonNull(targetAssembly.getChromosomes()) ?
+                            targetAssembly.getChromosomes() :  Collections.emptyList());
+                    addENASequenceNames(Objects.nonNull(sourceAssembly.getScaffolds()) ?
+                            sourceAssembly.getScaffolds() : Collections.emptyList(),
+                            Objects.nonNull(targetAssembly.getScaffolds()) ?
+                            targetAssembly.getScaffolds() : Collections.emptyList());
                 }
             }
         }
     }
 
     public boolean hasAllEnaSequenceNames(AssemblyEntity assembly) {
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
-        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        List<ChromosomeEntity> chromosomes = Objects.nonNull(assembly.getChromosomes()) ?
+                assembly.getChromosomes() : Collections.emptyList();
+        List<ScaffoldEntity> scaffolds = Objects.nonNull(assembly.getScaffolds()) ?
+                assembly.getScaffolds() : Collections.emptyList();
         return Stream.concat(chromosomes.stream(), scaffolds.stream())
                      .allMatch(sequence -> sequence.getEnaSequenceName() != null);
     }
