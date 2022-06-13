@@ -17,11 +17,13 @@
 package uk.ac.ebi.eva.contigalias.dus;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPFileFilters;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -87,14 +89,21 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         path += accession.substring(0, 3) + "/";
 
         String currPath = PATH_GENOMES_ALL + path;
-        FTPFile[] ftpFiles = super.listDirectories(currPath);
+        FTPFile[] ftpFiles = super.listFiles(currPath, FTPFileFilters.ALL);
 
         if (ftpFiles.length > 0) {
-            Optional<FTPFile> dir = Arrays.stream(ftpFiles).filter(it -> it.getName().contains(rawQuery)).findFirst();
+            // We're assuming that the directory will always have a suffix stating with an underscore GCA_004051055.1_
+            Optional<FTPFile> dir = Arrays.stream(ftpFiles).filter(it -> it.getName().startsWith(rawQuery+"_")).findFirst();
             if (dir.isPresent()) {
-                // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
-                path += dir.get().getName() + "/";
-                return Optional.of(PATH_GENOMES_ALL + path);
+                if (dir.get().isSymbolicLink()) {
+                    // symbolic link relative to current path Optional
+                    // symlink = "../../../../../archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
+                    // path = "/genomes/archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
+                    return Optional.of(Paths.get(currPath + dir.get().getLink()).normalize().toString() + "/");
+                } else if (dir.get().isDirectory()) {
+                    // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
+                    return Optional.of(currPath + dir.get().getName() + "/");
+                }
             }
         }
 
