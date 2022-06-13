@@ -92,13 +92,15 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         FTPFile[] ftpFiles = super.listFiles(currPath, FTPFileFilters.ALL);
 
         if (ftpFiles.length > 0) {
+            // We're assuming that the directory will always have a suffix stating with an underscore GCA_004051055.1_
             Optional<FTPFile> dir = Arrays.stream(ftpFiles).filter(it -> it.getName().startsWith(rawQuery+"_")).findFirst();
             if (dir.isPresent()) {
-                if(dir.get().isSymbolicLink()){
+                if (dir.get().isSymbolicLink()) {
                     // symbolic link relative to current path Optional
-                    // curr_path = "/genomes/all/GCA/004/051/055/../../../../../archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
+                    // symlink = "../../../../../archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
+                    // path = "/genomes/archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
                     return Optional.of(Paths.get(currPath + dir.get().getLink()).normalize().toString() + "/");
-                }else if(dir.get().isDirectory()) {
+                } else if (dir.get().isDirectory()) {
                     // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
                     return Optional.of(currPath + dir.get().getName() + "/");
                 }
