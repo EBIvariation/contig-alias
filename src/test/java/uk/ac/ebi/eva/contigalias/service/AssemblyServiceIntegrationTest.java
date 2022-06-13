@@ -33,6 +33,7 @@ import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_REQUEST;
@@ -85,11 +87,15 @@ public class AssemblyServiceIntegrationTest {
     }
 
     @Test
-    void getAssemblyOrFetchByAccession() throws IOException {
-        Optional<AssemblyEntity> entity = service.getAssemblyOrFetchByAccession(this.entities[0].getGenbank());
-        assertNotNull(entity);
-        assertTrue(entity.isPresent());
-        service.deleteAssembly(entity.get());
+    void getAssemblyOrFetchByAccession() {
+        AssemblyNotFoundException thrown = assertThrows(
+                AssemblyNotFoundException.class,
+                () -> service.getAssemblyOrFetchByAccession(this.entities[0].getGenbank()),
+                "Expected an Exception to throw, but it didn't"
+        );
+
+        assertEquals("No assembly corresponding to accession " + this.entities[0].getGenbank()
+                + " found in the database", thrown.getMessage());
     }
 
     @Test
