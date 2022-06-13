@@ -28,6 +28,7 @@ import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
@@ -69,11 +70,11 @@ public class AssemblyService {
         if (entities.isPresent()) {
             enaDataSource.addENASequenceNamesToAssembly(entities);
             return entities;
+        } else {
+            throw new AssemblyNotFoundException(
+                    "No assembly corresponding to accession " + accession + " found in the database");
         }
-        fetchAndInsertAssembly(accession);
 
-        entities = getAssemblyByAccession(accession);
-        return entities;
     }
 
     public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {

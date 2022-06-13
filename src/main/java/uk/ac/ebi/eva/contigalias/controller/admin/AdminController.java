@@ -52,16 +52,10 @@ public class AdminController {
         this.handler = handler;
     }
 
-    @ApiOperation(value = "Get or fetch an assembly using its INSDC or RefSeq accession.",
-            notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
-                    ". The accession can be either a INSDC or a RefSeq accession and the software will " +
-                    "automatically fetch a result from the database for any assembly having the aforementioned " +
-                    "accession as its INSDC or RefSeq accession. This endpoint will first look for the assembly in " +
-                    "local database and return the result. If local search fails, it will search for the target " +
-                    "assembly at a remote source (NCBI by default). If the desired assembly is found at the remote " +
-                    "source, it will fetch and add it to the local database and also return the result to the user. " +
-                    "This endpoint will either return a list containing a single result or an HTTP status code of 404" +
-                    ". ")
+    @ApiOperation(value = "Get an assembly using its INSDC or RefSeq accession.",
+            notes = "Given an assembly's accession, this endpoint will return an assembly that matches that " +
+                    "accession. The accession can be either a INSDC or a RefSeq accession."  +
+                    "This endpoint will either return a list containing a single result or an HTTP status code of 404.")
     @GetMapping(value = "assemblies/{accession}", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyOrFetchByAccession(
             @PathVariable(name = "accession") @ApiParam(value = "INSDC or Refseq assembly accession. Eg: " +
