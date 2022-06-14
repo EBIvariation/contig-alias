@@ -35,6 +35,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
 import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
@@ -87,7 +88,7 @@ public class AdminController {
         try {
             handler.fetchAndInsertAssemblyByAccession(asmAccession);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -104,14 +105,14 @@ public class AdminController {
                     " endpoint does not return any data and processes elements in the given list in an asynchronous " +
                     "parallel manner.")
     @PutMapping(value = "assemblies")
-    public ResponseEntity<Void> fetchAndInsertAssemblyByAccession(
+    public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
             @RequestBody(required = false) @ApiParam(value = "A JSON array of GenBank or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        handler.fetchAndInsertAssemblyByAccession(accessions);
-        return new ResponseEntity<>(HttpStatus.OK);
+        Map<String, List<String>> accessionResult = handler.fetchAndInsertAssemblyByAccession(accessions);
+        return new ResponseEntity<>("Accession Processing Result : " + accessionResult, HttpStatus.MULTI_STATUS);
     }
 
 //    This endpoint can be enabled in the future when checksums for assemblies are added to the project.

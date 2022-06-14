@@ -95,7 +95,7 @@ public class AssemblyServiceIntegrationTest {
         );
 
         assertEquals("No assembly corresponding to accession " + this.entities[0].getGenbank()
-                + " found in the database", thrown.getMessage());
+                + " could be found", thrown.getMessage());
     }
 
     @Test

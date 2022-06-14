@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.contigalias.service.ScaffoldService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static uk.ac.ebi.eva.contigalias.controller.BaseHandler.convertToPage;
@@ -66,8 +67,8 @@ public class AdminHandler {
         assemblyService.fetchAndInsertAssembly(accession);
     }
 
-    public void fetchAndInsertAssemblyByAccession(List<String> accessions) {
-        assemblyService.fetchAndInsertAssembly(accessions);
+    public Map<String, List<String>> fetchAndInsertAssemblyByAccession(List<String> accessions) {
+        return assemblyService.fetchAndInsertAssembly(accessions);
     }
 
     public void deleteAssemblyByAccession(String accession) {
