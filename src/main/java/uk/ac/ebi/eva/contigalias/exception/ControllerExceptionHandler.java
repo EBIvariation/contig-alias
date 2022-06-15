@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
-import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
@@ -20,6 +18,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DuplicateAssemblyException.class)
     public ResponseEntity<String> handleExceptions(DuplicateAssemblyException exception, WebRequest webRequest){
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IncorrectAccessionException.class)
+    public ResponseEntity<String> handleExceptions(IncorrectAccessionException exception, WebRequest webRequest){
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
 }

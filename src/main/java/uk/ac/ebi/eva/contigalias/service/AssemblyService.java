@@ -121,7 +121,7 @@ public class AssemblyService {
             stripAssemblyFromChromosomesAndScaffolds(entity);
             return entity;
         } else {
-            throw new AssemblyNotFoundException("No assembly corresponding to accession " + accession + " could be found");
+            throw new AssemblyNotFoundException(accession);
         }
     }
 
