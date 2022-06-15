@@ -64,19 +64,6 @@ public class AssemblyService {
         this.enaDataSource = enaDataSource;
     }
 
-    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
-
-        Optional<AssemblyEntity> entities = getAssemblyByAccession(accession);
-        if (entities.isPresent()) {
-            enaDataSource.addENASequenceNamesToAssembly(entities);
-            return entities;
-        } else {
-            throw new AssemblyNotFoundException(
-                    "No assembly corresponding to accession " + accession + " found in the database");
-        }
-
-    }
-
     public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
         stripAssemblyFromChromosomesAndScaffolds(entity);
@@ -119,8 +106,12 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
-        stripAssemblyFromChromosomesAndScaffolds(entity);
-        return entity;
+        if (entity.isPresent()) {
+            stripAssemblyFromChromosomesAndScaffolds(entity);
+            return entity;
+        } else {
+            throw new AssemblyNotFoundException("No assembly corresponding to accession " + accession + " could be found");
+        }
     }
 
     public void stripAssemblyFromChromosomesAndScaffolds(Optional<AssemblyEntity> optional) {
@@ -231,7 +222,7 @@ public class AssemblyService {
             exception.append("\n");
             exception.append("Assembly already present");
             exception.append("\t");
-            exception.append(present.toString());
+            exception.append(present);
         }
         return new IllegalArgumentException(exception.toString());
     }
