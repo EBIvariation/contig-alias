@@ -57,12 +57,6 @@ public class AdminHandler {
         this.assemblyAssembler = assemblyAssembler;
     }
 
-    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyOrFetchByAccession(String accession) throws IOException {
-        Optional<AssemblyEntity> entity = assemblyService.getAssemblyOrFetchByAccession(accession);
-        entity.ifPresent(it -> it.setChromosomes(null));
-        return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
-    }
-
     public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {
         assemblyService.fetchAndInsertAssembly(accession);
     }

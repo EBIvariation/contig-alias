@@ -87,18 +87,6 @@ public class AssemblyServiceIntegrationTest {
     }
 
     @Test
-    void getAssemblyOrFetchByAccession() {
-        AssemblyNotFoundException thrown = assertThrows(
-                AssemblyNotFoundException.class,
-                () -> service.getAssemblyOrFetchByAccession(this.entities[0].getGenbank()),
-                "Expected an Exception to throw, but it didn't"
-        );
-
-        assertEquals("No assembly corresponding to accession " + this.entities[0].getGenbank()
-                + " could be found", thrown.getMessage());
-    }
-
-    @Test
     void cacheLimitTest() throws IOException {
         int cacheSize = service.getCacheSize();
         service.setCacheSize(10);
@@ -119,9 +107,12 @@ public class AssemblyServiceIntegrationTest {
             assertOptionalValid(assembly);
         }
 
-        Optional<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
-        assertNotNull(targetGenbankEntity);
-        assertFalse(targetGenbankEntity.isPresent());
+        try {
+            Optional<AssemblyEntity> targetGenbankEntity = service.getAssemblyByAccession(targetGenbank);
+        } catch (AssemblyNotFoundException e){
+            assertEquals(e.getMessage(), "No assembly corresponding to accession genbank0 could be found");
+        }
+
 
         for (int i = 1; i < TEST_ENTITIES_NUMBERS; i++) {
             String genbank = entities[i].getGenbank();

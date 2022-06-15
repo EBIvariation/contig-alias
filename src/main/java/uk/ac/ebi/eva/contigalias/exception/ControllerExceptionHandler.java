@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.contigalias.controller.admin;
+package uk.ac.ebi.eva.contigalias.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,7 @@ import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 
 @ControllerAdvice
-public class AdminControllerExceptionHandler extends ResponseEntityExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AssemblyNotFoundException.class)
     public ResponseEntity<String> handleExceptions(AssemblyNotFoundException exception, WebRequest webRequest) {
