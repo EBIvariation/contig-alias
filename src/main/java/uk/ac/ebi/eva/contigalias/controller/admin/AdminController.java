@@ -18,12 +18,9 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,16 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
-
 import java.io.IOException;
 import java.util.List;
-
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_NUMBER_DESCRIPTION;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.PAGE_SIZE_DESCRIPTION;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.createAppropriateResponseEntity;
-import static uk.ac.ebi.eva.contigalias.controller.BaseController.paramsValidForSingleResponseQuery;
-import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.linkPagedModelGetSequencesByAssemblyAccession;
 
 @RequestMapping("/v1/admin")
 @RestController
@@ -50,29 +39,6 @@ public class AdminController {
 
     public AdminController(AdminHandler handler) {
         this.handler = handler;
-    }
-
-    @ApiOperation(value = "Get or fetch an assembly using its INSDC or RefSeq accession.",
-            notes = "Given an assembly's accession, this endpoint will return an assembly that matches that accession" +
-                    ". The accession can be either a INSDC or a RefSeq accession and the software will " +
-                    "automatically fetch a result from the database for any assembly having the aforementioned " +
-                    "accession as its INSDC or RefSeq accession. This endpoint will first look for the assembly in " +
-                    "local database and return the result. If local search fails, it will search for the target " +
-                    "assembly at a remote source (NCBI by default). If the desired assembly is found at the remote " +
-                    "source, it will fetch and add it to the local database and also return the result to the user. " +
-                    "This endpoint will either return a list containing a single result or an HTTP status code of 404" +
-                    ". ")
-    @GetMapping(value = "assemblies/{accession}", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyOrFetchByAccession(
-            @PathVariable(name = "accession") @ApiParam(value = "INSDC or Refseq assembly accession. Eg: " +
-                    "GCA_000001405.10") String asmAccession,
-            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
-            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) throws IOException {
-        if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyOrFetchByAccession(asmAccession);
-            linkPagedModelGetSequencesByAssemblyAccession(asmAccession, pageNumber, pageSize, pagedModel, "");
-            return createAppropriateResponseEntity(pagedModel);
-        } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
     @ApiOperation(value = "Fetch an assembly from remote server using its INSDC or RefSeq accession and insert " +

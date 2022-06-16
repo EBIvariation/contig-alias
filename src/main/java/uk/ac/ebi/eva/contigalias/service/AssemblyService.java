@@ -28,6 +28,7 @@ import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
@@ -61,19 +62,6 @@ public class AssemblyService {
         this.repository = repository;
         this.ncbiDataSource = ncbiDataSource;
         this.enaDataSource = enaDataSource;
-    }
-
-    public Optional<AssemblyEntity> getAssemblyOrFetchByAccession(String accession) throws IOException {
-
-        Optional<AssemblyEntity> entities = getAssemblyByAccession(accession);
-        if (entities.isPresent()) {
-            enaDataSource.addENASequenceNamesToAssembly(entities);
-            return entities;
-        }
-        fetchAndInsertAssembly(accession);
-
-        entities = getAssemblyByAccession(accession);
-        return entities;
     }
 
     public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
@@ -118,8 +106,12 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
-        stripAssemblyFromChromosomesAndScaffolds(entity);
-        return entity;
+        if (entity.isPresent()) {
+            stripAssemblyFromChromosomesAndScaffolds(entity);
+            return entity;
+        } else {
+            throw new AssemblyNotFoundException("No assembly corresponding to accession " + accession + " could be found");
+        }
     }
 
     public void stripAssemblyFromChromosomesAndScaffolds(Optional<AssemblyEntity> optional) {
@@ -230,7 +222,7 @@ public class AssemblyService {
             exception.append("\n");
             exception.append("Assembly already present");
             exception.append("\t");
-            exception.append(present.toString());
+            exception.append(present);
         }
         return new IllegalArgumentException(exception.toString());
     }
