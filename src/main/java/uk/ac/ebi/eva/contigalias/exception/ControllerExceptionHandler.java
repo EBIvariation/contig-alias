@@ -22,7 +22,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IncorrectAccessionException.class)
     public ResponseEntity<String> handleExceptions(IncorrectAccessionException exception, WebRequest webRequest){
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
 }
