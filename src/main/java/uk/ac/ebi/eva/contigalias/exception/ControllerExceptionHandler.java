@@ -15,4 +15,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(DuplicateAssemblyException.class)
+    public ResponseEntity<String> handleExceptions(DuplicateAssemblyException exception, WebRequest webRequest){
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IncorrectAccessionException.class)
+    public ResponseEntity<String> handleExceptions(IncorrectAccessionException exception, WebRequest webRequest){
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
 }

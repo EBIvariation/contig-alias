@@ -18,6 +18,7 @@ package uk.ac.ebi.eva.contigalias.dus;
 
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilters;
+import uk.ac.ebi.eva.contigalias.exception.IncorrectAccessionException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,7 +64,7 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
     public Optional<String> getGenomeReportDirectory(String accession) throws IOException, IllegalArgumentException {
 
         if (accession.length() < 15) {
-            throw new IllegalArgumentException("Accession should be at least 15 characters long!");
+            throw new IncorrectAccessionException("Accession should be at least 15 characters long!");
         }
 
         //GCA_004051055.1
