@@ -16,9 +16,10 @@
 
 package uk.ac.ebi.eva.contigalias.datasource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReader;
 import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowser;
@@ -27,6 +28,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
+import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +42,8 @@ import java.util.stream.Stream;
 
 @Repository("ENADataSource")
 public class ENAAssemblyDataSource implements AssemblyDataSource {
+
+    private final Logger logger = LoggerFactory.getLogger(ENAAssemblyDataSource.class);
 
     private final ENABrowserFactory factory;
 
@@ -59,6 +63,10 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
         AssemblyEntity assemblyEntity;
         try (InputStream stream = enaBrowser.getAssemblyReportInputStream(accession)) {
+            if (Objects.isNull(stream)) {
+                logger.warn("Could not fetch assembly report from ENA for accession : " + accession);
+                return Optional.empty();
+            }
             ENAAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
@@ -83,13 +91,13 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
                 if (enaAssembly.isPresent()) {
                     AssemblyEntity sourceAssembly = enaAssembly.get();
                     addENASequenceNames(Objects.nonNull(sourceAssembly.getChromosomes()) ?
-                            sourceAssembly.getChromosomes() : Collections.emptyList(),
+                                    sourceAssembly.getChromosomes() : Collections.emptyList(),
                             Objects.nonNull(targetAssembly.getChromosomes()) ?
-                            targetAssembly.getChromosomes() :  Collections.emptyList());
+                                    targetAssembly.getChromosomes() : Collections.emptyList());
                     addENASequenceNames(Objects.nonNull(sourceAssembly.getScaffolds()) ?
-                            sourceAssembly.getScaffolds() : Collections.emptyList(),
+                                    sourceAssembly.getScaffolds() : Collections.emptyList(),
                             Objects.nonNull(targetAssembly.getScaffolds()) ?
-                            targetAssembly.getScaffolds() : Collections.emptyList());
+                                    targetAssembly.getScaffolds() : Collections.emptyList());
                 }
             }
         }
@@ -101,7 +109,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         List<ScaffoldEntity> scaffolds = Objects.nonNull(assembly.getScaffolds()) ?
                 assembly.getScaffolds() : Collections.emptyList();
         return Stream.concat(chromosomes.stream(), scaffolds.stream())
-                     .allMatch(sequence -> sequence.getEnaSequenceName() != null);
+                .allMatch(sequence -> sequence.getEnaSequenceName() != null);
     }
 
     private void addENASequenceNames(
