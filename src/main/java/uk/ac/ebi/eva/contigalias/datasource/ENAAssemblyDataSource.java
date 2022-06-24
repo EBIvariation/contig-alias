@@ -28,7 +28,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
-import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +69,11 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
             ENAAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
-            enaBrowser.disconnect();
+            try {
+                enaBrowser.disconnect();
+            } catch (Exception e){
+                logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
+            }
         }
         return Optional.of(assemblyEntity);
     }
