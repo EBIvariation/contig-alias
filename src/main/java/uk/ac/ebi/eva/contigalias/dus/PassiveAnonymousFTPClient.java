@@ -62,7 +62,7 @@ public class PassiveAnonymousFTPClient extends FTPClient {
             logger.error("Could not connect to FTP server '{}'. {}.", address, getStatusString());
             try {
                 this.disconnect();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 logger.warn("Error while trying to disconnect : " + ex);
             }
             throw e;

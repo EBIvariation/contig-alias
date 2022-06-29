@@ -71,7 +71,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         } finally {
             try {
                 enaBrowser.disconnect();
-            } catch (Exception e){
+            } catch (IOException e){
                 logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
             }
         }
