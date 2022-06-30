@@ -16,6 +16,8 @@
 
 package uk.ac.ebi.eva.contigalias.datasource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -31,6 +33,8 @@ import java.util.Optional;
 
 @Repository("NCBIDataSource")
 public class NCBIAssemblyDataSource implements AssemblyDataSource {
+
+    private final Logger logger = LoggerFactory.getLogger(NCBIAssemblyDataSource.class);
 
     private final NCBIBrowserFactory factory;
 
@@ -57,7 +61,11 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
             NCBIAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
         } finally {
-            ncbiBrowser.disconnect();
+            try {
+                ncbiBrowser.disconnect();
+            } catch (IOException e) {
+                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
+            }
         }
         return Optional.of(assemblyEntity);
     }
