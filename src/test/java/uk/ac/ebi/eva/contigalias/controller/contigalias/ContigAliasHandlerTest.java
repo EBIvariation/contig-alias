@@ -60,38 +60,6 @@ public class ContigAliasHandlerTest {
     private ContigAliasHandler handler;
 
     @Nested
-    class ManualPaginationTests {
-
-        private final long TOTAL_CHROMOSOMES = 27;
-
-        @BeforeEach
-        public void setup() {
-            handler = new ContigAliasHandler(null, null, null, null);
-        }
-
-        @Test
-        void createScaffoldsPageRequestTestOnlyChromosomes() {
-            PageRequest request = PageRequest.of(1, 10);
-            Pageable pageRequest = handler.createPageRequest(TOTAL_CHROMOSOMES, request);
-
-            assertNotNull(pageRequest);
-            assertEquals(1, pageRequest.getPageNumber());
-            assertEquals(10, pageRequest.getPageSize());
-        }
-
-        @Test
-        void createScaffoldsPageRequestTestBothCombined() {
-            PageRequest request = PageRequest.of(2, 10);
-            Pageable chrRequest = handler.createPageRequest(TOTAL_CHROMOSOMES, request);
-
-            assertNotNull(chrRequest);
-            assertEquals(2, chrRequest.getPageNumber());
-            assertEquals(7, chrRequest.getPageSize());
-        }
-
-    }
-
-    @Nested
     class AssemblyServiceTests {
 
         private final AssemblyEntity entity = AssemblyGenerator.generate();
