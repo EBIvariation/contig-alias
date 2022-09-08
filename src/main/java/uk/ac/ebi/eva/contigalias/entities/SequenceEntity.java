@@ -22,6 +22,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -65,6 +67,7 @@ public class SequenceEntity {
     }
 
     @ApiModelProperty(value = "Type of contig: chromosome (or) scaffold")
+    @Enumerated(EnumType.STRING)
     private ContigType contigType;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
