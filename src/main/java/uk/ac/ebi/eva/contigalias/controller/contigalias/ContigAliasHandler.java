@@ -219,7 +219,9 @@ public class ContigAliasHandler {
             int chrResultOffset = (int) (totalChromosomes % currentPageSize); // 7
 
             if (maxFilledPageSize <= maxFilledChrPageSize) {
-                return PageRequest.of(request.getPageNumber(), chrResultOffset);
+                if (chrResultOffset != 0) {
+                    return PageRequest.of(request.getPageNumber(), chrResultOffset);
+                }
             }
         }
         return request;

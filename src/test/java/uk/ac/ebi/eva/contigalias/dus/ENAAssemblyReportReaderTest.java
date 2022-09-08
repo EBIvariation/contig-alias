@@ -25,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -86,7 +88,7 @@ class ENAAssemblyReportReaderTest {
         AssemblyEntity assembly = getAssemblyEntity();
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         assertNotNull(chromosomes);
-        assertEquals(30, chromosomes.size());
+        assertEquals(3316, chromosomes.size());
     }
 
     @Test
@@ -98,4 +100,27 @@ class ENAAssemblyReportReaderTest {
         assertEquals(CHROMOSOME_GENBANK_ACCESSION, chromosome.getGenbank());
         assertNull(chromosome.getUcscName());
     }
+
+    @Test
+    void verifyAssemblyHasScaffolds() throws IOException {
+        AssemblyEntity assembly = getAssemblyEntity();
+        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+                .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
+        assertNotNull(scaffolds);
+        assertEquals(3286, scaffolds.size());
+    }
+
+    @Test
+    void assertParsedScaffoldValid() throws IOException {
+        AssemblyEntity assembly = getAssemblyEntity();
+        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+                .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
+        assertNotNull(scaffolds);
+        assertTrue(scaffolds.size() > 0);
+        ChromosomeEntity scaffold = scaffolds.get(0);
+        assertNotNull(scaffold);
+        assertEquals(SCAFFOLD_SEQUENCE_NAME, scaffold.getEnaSequenceName());
+        assertEquals(SCAFFOLD_GENBANK_ACCESSION, scaffold.getGenbank());
+    }
+
 }
