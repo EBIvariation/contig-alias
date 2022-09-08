@@ -18,7 +18,6 @@ package uk.ac.ebi.eva.contigalias.dus;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -80,7 +79,7 @@ public abstract class AssemblyReportReader {
 
     /**
      * Parses lines in assembly report containing Scaffold metadata. This array is used to set metadata to corresponding
-     * fields in {@link ScaffoldEntity}.
+     * fields in {@link ChromosomeEntity}.
      *
      * @param columns An array of fields in a line of the assembly report file not starting with "#".
      */

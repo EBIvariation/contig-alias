@@ -18,7 +18,7 @@ package uk.ac.ebi.eva.contigalias.dus;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -108,6 +108,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
             assemblyEntity = new AssemblyEntity();
         }
         chromosomeEntity.setAssembly(this.assemblyEntity);
+        chromosomeEntity.setContigType(SequenceEntity.ContigType.CHROMOSOME);
 
         List<ChromosomeEntity> chromosomes = this.assemblyEntity.getChromosomes();
         if (chromosomes == null) {
@@ -118,7 +119,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
     }
 
     protected void parseScaffoldLine(String[] columns) {
-        ScaffoldEntity scaffoldEntity = new ScaffoldEntity();
+        ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
 
         scaffoldEntity.setGenbankSequenceName(columns[0]);
         scaffoldEntity.setGenbank(columns[4]);
@@ -135,11 +136,12 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
             assemblyEntity = new AssemblyEntity();
         }
         scaffoldEntity.setAssembly(this.assemblyEntity);
+        scaffoldEntity.setContigType(SequenceEntity.ContigType.SCAFFOLD);
 
-        List<ScaffoldEntity> scaffolds = this.assemblyEntity.getScaffolds();
+        List<ChromosomeEntity> scaffolds = this.assemblyEntity.getChromosomes();
         if (scaffolds == null) {
             scaffolds = new LinkedList<>();
-            assemblyEntity.setScaffolds(scaffolds);
+            assemblyEntity.setChromosomes(scaffolds);
         }
         scaffolds.add(scaffoldEntity);
     }

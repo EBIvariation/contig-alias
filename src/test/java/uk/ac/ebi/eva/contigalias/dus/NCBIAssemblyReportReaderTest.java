@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -62,7 +63,7 @@ class NCBIAssemblyReportReaderTest {
 
     private static final String CHROMOSOME_CHR1_REFSEQ_ACCESSION = "AC_000158.1";
 
-    private ScaffoldEntity scaffoldEntity;
+    private ChromosomeEntity scaffoldEntity;
 
     private InputStreamReader streamReader;
 
@@ -79,7 +80,7 @@ class NCBIAssemblyReportReaderTest {
                 new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
         streamReader = new InputStreamReader(stream);
         reader = readerFactory.build(streamReader);
-        scaffoldEntity = (ScaffoldEntity) new ScaffoldEntity()
+        scaffoldEntity = (ChromosomeEntity) new ChromosomeEntity()
                 .setGenbankSequenceName("ChrU_1")
                 .setGenbank("GJ057137.1")
                 .setRefseq("NW_003097882.1")
@@ -117,7 +118,7 @@ class NCBIAssemblyReportReaderTest {
         AssemblyEntity assembly = getAssemblyEntity();
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         assertNotNull(chromosomes);
-        assertEquals(30, chromosomes.size());
+        assertEquals(3316, chromosomes.size());
     }
 
     @Test
@@ -134,17 +135,20 @@ class NCBIAssemblyReportReaderTest {
     @Test
     void verifyAssemblyHasScaffolds() throws IOException {
         AssemblyEntity assembly = getAssemblyEntity();
-        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
+        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+                .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
         assertNotNull(scaffolds);
         assertEquals(3286, scaffolds.size());
     }
 
     @Test
     void assertParsedScaffoldValid() throws IOException {
-        List<ScaffoldEntity> scaffolds = getAssemblyEntity().getScaffolds();
+        AssemblyEntity assembly = getAssemblyEntity();
+        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+                .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
         assertNotNull(scaffolds);
         assertTrue(scaffolds.size() > 0);
-        ScaffoldEntity scaffold = scaffolds.get(0);
+        ChromosomeEntity scaffold = scaffolds.get(0);
         assertNotNull(scaffold);
         assertEquals(scaffoldEntity.getGenbankSequenceName(), scaffold.getGenbankSequenceName());
         assertEquals(scaffoldEntity.getGenbank(), scaffold.getGenbank());

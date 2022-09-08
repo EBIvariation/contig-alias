@@ -113,17 +113,6 @@ public class AdminController {
         handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
     }
 
-    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to all scaffolds by accession.",
-            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
-                    "add the given checksums to all scaffolds that match the given INSDC or RefSeq accession.")
-    @PutMapping(value = "scaffolds/{accession}/checksum")
-    public void putScaffoldChecksumsByAccession(
-            @PathVariable @ApiParam(value = "INSDC or Refseq scaffold accession. Eg: NC_000001.11") String accession,
-            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the scaffolds.") String md5,
-            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the scaffolds.") String trunc512) {
-        handler.putScaffoldChecksumsByAccession(accession, md5, trunc512);
-    }
-
     @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
             notes = "Given an assembly's accession this endpoint will delete the assembly that matches that " +
                     "accession from the local database. The accession can be either a INSDC or RefSeq accession and" +

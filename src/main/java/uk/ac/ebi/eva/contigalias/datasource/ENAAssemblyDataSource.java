@@ -26,7 +26,6 @@ import uk.ac.ebi.eva.contigalias.dus.ENABrowser;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
@@ -37,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Repository("ENADataSource")
 public class ENAAssemblyDataSource implements AssemblyDataSource {
@@ -97,10 +95,6 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
                                     sourceAssembly.getChromosomes() : Collections.emptyList(),
                             Objects.nonNull(targetAssembly.getChromosomes()) ?
                                     targetAssembly.getChromosomes() : Collections.emptyList());
-                    addENASequenceNames(Objects.nonNull(sourceAssembly.getScaffolds()) ?
-                                    sourceAssembly.getScaffolds() : Collections.emptyList(),
-                            Objects.nonNull(targetAssembly.getScaffolds()) ?
-                                    targetAssembly.getScaffolds() : Collections.emptyList());
                 }
             }
         }
@@ -109,10 +103,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     public boolean hasAllEnaSequenceNames(AssemblyEntity assembly) {
         List<ChromosomeEntity> chromosomes = Objects.nonNull(assembly.getChromosomes()) ?
                 assembly.getChromosomes() : Collections.emptyList();
-        List<ScaffoldEntity> scaffolds = Objects.nonNull(assembly.getScaffolds()) ?
-                assembly.getScaffolds() : Collections.emptyList();
-        return Stream.concat(chromosomes.stream(), scaffolds.stream())
-                .allMatch(sequence -> sequence.getEnaSequenceName() != null);
+        return chromosomes.stream().allMatch(sequence -> sequence.getEnaSequenceName() != null);
     }
 
     private void addENASequenceNames(

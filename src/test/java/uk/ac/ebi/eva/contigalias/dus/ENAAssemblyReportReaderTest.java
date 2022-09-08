@@ -25,7 +25,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -99,24 +98,4 @@ class ENAAssemblyReportReaderTest {
         assertEquals(CHROMOSOME_GENBANK_ACCESSION, chromosome.getGenbank());
         assertNull(chromosome.getUcscName());
     }
-
-    @Test
-    void verifyAssemblyHasScaffolds() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
-        assertNotNull(scaffolds);
-        assertEquals(3286, scaffolds.size());
-    }
-
-    @Test
-    void assertParsedScaffoldValid() throws IOException {
-        List<ScaffoldEntity> scaffolds = getAssemblyEntity().getScaffolds();
-        assertNotNull(scaffolds);
-        assertTrue(scaffolds.size() > 0);
-        ScaffoldEntity scaffold = scaffolds.get(0);
-        assertNotNull(scaffold);
-        assertEquals(SCAFFOLD_SEQUENCE_NAME, scaffold.getEnaSequenceName());
-        assertEquals(SCAFFOLD_GENBANK_ACCESSION, scaffold.getGenbank());
-    }
-
 }

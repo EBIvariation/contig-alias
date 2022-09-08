@@ -28,7 +28,6 @@ import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
@@ -75,13 +74,13 @@ public class AssemblyService {
 
     public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
-        stripAssemblyFromChromosomesAndScaffolds(entity);
+        stripAssemblyFromChromosomes(entity);
         return entity;
     }
 
     public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByRefseq(refseq);
-        stripAssemblyFromChromosomesAndScaffolds(entity);
+        stripAssemblyFromChromosomes(entity);
         return entity;
     }
 
@@ -118,18 +117,17 @@ public class AssemblyService {
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = repository.findAssemblyEntityByAccession(accession);
         if (entity.isPresent()) {
-            stripAssemblyFromChromosomesAndScaffolds(entity);
+            stripAssemblyFromChromosomes(entity);
             return entity;
         } else {
             throw new AssemblyNotFoundException(accession);
         }
     }
 
-    public void stripAssemblyFromChromosomesAndScaffolds(Optional<AssemblyEntity> optional) {
+    public void stripAssemblyFromChromosomes(Optional<AssemblyEntity> optional) {
         if (optional.isPresent()) {
             AssemblyEntity entity = optional.get();
             stripAssemblyFromChromosomes(entity);
-            stripAssemblyFromScaffolds(entity);
         }
     }
 
@@ -139,15 +137,6 @@ public class AssemblyService {
             chromosomes.forEach(it -> it.setAssembly(null));
         } else {
             assembly.setChromosomes(Collections.emptyList());
-        }
-    }
-
-    private void stripAssemblyFromScaffolds(AssemblyEntity assembly) {
-        List<ScaffoldEntity> scaffolds = assembly.getScaffolds();
-        if (scaffolds != null && scaffolds.size() > 0) {
-            scaffolds.forEach(it -> it.setAssembly(null));
-        } else {
-            assembly.setScaffolds(Collections.emptyList());
         }
     }
 
