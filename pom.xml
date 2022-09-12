@@ -26,7 +26,7 @@
     </parent>
     <groupId>uk.ac.ebi.eva</groupId>
     <artifactId>contig-alias</artifactId>
-    <version>0.1.4</version>
+    <version>0.1.5-SNAPSHOT</version>
     <name>contig-alias</name>
     <description>Service to provide synonyms of chromosome/contig identifiers</description>
     <packaging>war</packaging>
