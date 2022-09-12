@@ -153,19 +153,9 @@ public class ChromosomeService {
 
     private Page<ChromosomeEntity> stripChromosomesAndScaffoldsFromAssembly(Page<ChromosomeEntity> page) {
         if (page != null && page.getTotalElements() > 0) {
-            page.forEach(it -> {
-                stripChromosomeFromAssembly(it);
-                stripScaffoldFromAssembly(it);
-            });
+            page.forEach(this::stripChromosomeFromAssembly);
         }
         return page;
-    }
-
-    private void stripScaffoldFromAssembly(ChromosomeEntity chromosome) {
-        AssemblyEntity assembly = chromosome.getAssembly();
-        if (assembly != null) {
-            assembly.setScaffolds(null);
-        }
     }
 
     private void stripChromosomeFromAssembly(ChromosomeEntity chromosome) {

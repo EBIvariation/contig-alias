@@ -23,14 +23,16 @@ import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
@@ -57,8 +59,10 @@ public class NCBIAssemblyDataSourceTest {
     public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
         Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
         assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNull(chromosomes);
+        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes().stream()
+                .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.CHROMOSOME))
+                .collect(Collectors.toList());
+        assertEquals(0, chromosomes.size());
     }
 
 }

@@ -22,6 +22,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -58,6 +60,15 @@ public class SequenceEntity {
 
     @ApiModelProperty(value = "Sequence's TRUNC512 checksum value.")
     private String trunc512checksum;
+
+    public enum ContigType {
+        SCAFFOLD,
+        CHROMOSOME
+    }
+
+    @ApiModelProperty(value = "Type of contig: chromosome (or) scaffold")
+    @Enumerated(EnumType.STRING)
+    private ContigType contigType;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this sequence belongs to.")
@@ -130,6 +141,14 @@ public class SequenceEntity {
     public SequenceEntity setTrunc512checksum(String trunc512checksum) {
         this.trunc512checksum = trunc512checksum;
         return this;
+    }
+
+    public ContigType getContigType() {
+        return contigType;
+    }
+
+    public void setContigType(ContigType contigType) {
+        this.contigType = contigType;
     }
 
     public AssemblyEntity getAssembly() {

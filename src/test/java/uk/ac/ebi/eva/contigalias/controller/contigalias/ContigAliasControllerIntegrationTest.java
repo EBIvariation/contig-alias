@@ -31,11 +31,9 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.ScaffoldEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
-import uk.ac.ebi.eva.contigalias.entitygenerator.ScaffoldGenerator;
 import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
 
 import java.util.Collections;
@@ -68,8 +66,6 @@ public class ContigAliasControllerIntegrationTest {
     private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
 
     private final ChromosomeEntity chromosomeEntity = ChromosomeGenerator.generate();
-
-    private final ScaffoldEntity scaffoldEntity = ScaffoldGenerator.generate();
 
     @Autowired
     private MockMvc mockMvc;
@@ -134,12 +130,6 @@ public class ContigAliasControllerIntegrationTest {
                 .thenReturn(chromosomePagedModel);
         when(mockHandler.getSequencesByAssemblyAccession(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
                 .thenReturn(chromosomePagedModel);
-
-        PagedResourcesAssembler<ScaffoldEntity> scaffoldAssembler = mock(PagedResourcesAssembler.class);
-        PagedModel<EntityModel<ScaffoldEntity>> scaffoldPagedModel = new PagedModel<>(
-                Collections.singletonList(new EntityModel<>(scaffoldEntity)), null);
-        Mockito.when(scaffoldAssembler.toModel(any()))
-               .thenReturn(scaffoldPagedModel);
 
         when(mockHandler.getAssemblyByAccession(assemblyEntity.getGenbank()))
                 .thenReturn(assemblyPagedModel);
