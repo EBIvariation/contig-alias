@@ -4,5 +4,5 @@ import java.io.Serializable;
 
 public class ChromosomeId implements Serializable {
     private String insdcAccession;
-    private AssemblyEntity assembly;
+    private String assembly;
 }
