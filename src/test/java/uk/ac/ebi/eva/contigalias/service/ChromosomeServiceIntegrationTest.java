@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +38,7 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_R
 @SpringBootTest
 public class ChromosomeServiceIntegrationTest {
 
-    private final ChromosomeEntity entity = ChromosomeGenerator.generate();
+    private final ChromosomeEntity entity = ChromosomeGenerator.generate(AssemblyGenerator.generate());
 
     @Autowired
     private ChromosomeService service;

@@ -63,6 +63,8 @@ class NCBIAssemblyReportReaderTest {
 
     private static final String CHROMOSOME_CHR1_REFSEQ_ACCESSION = "AC_000158.1";
 
+    private static final Long CHROMOSOME_CHR1_SEQ_LENGTH = 158337067l;
+
     private ChromosomeEntity scaffoldEntity;
 
     private InputStreamReader streamReader;
@@ -84,6 +86,7 @@ class NCBIAssemblyReportReaderTest {
                 .setGenbankSequenceName("ChrU_1")
                 .setInsdcAccession("GJ057137.1")
                 .setRefseq("NW_003097882.1")
+                .setSeqLength(1050l)
                 .setUcscName(null);
     }
 
@@ -129,6 +132,7 @@ class NCBIAssemblyReportReaderTest {
         assertEquals(CHROMOSOME_CHR1_SEQUENCE_NAME, chromosome.getGenbankSequenceName());
         assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getInsdcAccession());
         assertEquals(CHROMOSOME_CHR1_REFSEQ_ACCESSION, chromosome.getRefseq());
+        assertEquals(CHROMOSOME_CHR1_SEQ_LENGTH, chromosome.getSeqLength());
         assertNull(chromosome.getUcscName());
     }
 
@@ -153,6 +157,7 @@ class NCBIAssemblyReportReaderTest {
         assertEquals(scaffoldEntity.getGenbankSequenceName(), scaffold.getGenbankSequenceName());
         assertEquals(scaffoldEntity.getInsdcAccession(), scaffold.getInsdcAccession());
         assertEquals(scaffoldEntity.getRefseq(), scaffold.getRefseq());
+        assertEquals(scaffoldEntity.getSeqLength(), scaffold.getSeqLength());
         assertEquals(scaffoldEntity.getUcscName(), scaffold.getUcscName());
     }
 

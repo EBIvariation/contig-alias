@@ -36,7 +36,7 @@ public class ChromosomeGenerator {
     public static ChromosomeEntity generate(long id) {
         return (ChromosomeEntity) new ChromosomeEntity()
                 .setGenbankSequenceName(PREFIX_NAME + id)
-                .setInsdcAccession("genbank" + id)
+                .setInsdcAccession("insdc" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
                 .setEnaSequenceName("ena" + id)

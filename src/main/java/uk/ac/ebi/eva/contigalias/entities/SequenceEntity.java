@@ -45,6 +45,9 @@ public class SequenceEntity {
     @ApiModelProperty(value = "Sequence's RefSeq accession.")
     private String refseq;
 
+    @ApiModelProperty(value = "Sequence's length")
+    private Long seqLength;
+
     @ApiModelProperty(value = "Sequence's UCSC style name")
     private String ucscName;
 
@@ -103,6 +106,15 @@ public class SequenceEntity {
 
     public SequenceEntity setRefseq(String refseq) {
         this.refseq = refseq;
+        return this;
+    }
+
+    public Long getSeqLength() {
+        return seqLength;
+    }
+
+    public SequenceEntity setSeqLength(Long seqLength) {
+        this.seqLength = seqLength;
         return this;
     }
 
