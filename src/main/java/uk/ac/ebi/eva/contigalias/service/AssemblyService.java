@@ -59,11 +59,6 @@ public class AssemblyService {
 
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
-    private int CACHE_SIZE = 10;
-
-    // TODO allow configuring this from application.properties, or remove cache limit feature
-    private boolean enableCacheLimit = false;
-
     @Autowired
     public AssemblyService(
             AssemblyRepository repository, NCBIAssemblyDataSource ncbiDataSource, ENAAssemblyDataSource enaDataSource) {
@@ -72,8 +67,8 @@ public class AssemblyService {
         this.enaDataSource = enaDataSource;
     }
 
-    public Optional<AssemblyEntity> getAssemblyByGenbank(String genbank) {
-        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByGenbank(genbank);
+    public Optional<AssemblyEntity> getAssemblyByInsdcAccession(String insdcAccession) {
+        Optional<AssemblyEntity> entity = repository.findAssemblyEntityByInsdcAccession(insdcAccession);
         stripAssemblyFromChromosomes(entity);
         return entity;
     }
@@ -141,8 +136,6 @@ public class AssemblyService {
     }
 
     public void insertAssembly(AssemblyEntity entity) {
-        setCacheSizeLimit();
-
         if (isEntityPresent(entity)) {
             throw duplicateAssemblyInsertionException(null, entity);
         } else {
@@ -150,35 +143,16 @@ public class AssemblyService {
         }
     }
 
-    /**
-     * Limits the size of the cache to a maximum of CACHE_SIZE assemblies
-     * <p>
-     * I'm using a while loop instead of an if statement because
-     * if two requests reach at once, they both might read cache
-     * size < CACHE_SIZE and add an entry leading to cache having more than
-     * 10 entries. While loop on next run deletes entities till cache
-     * size < CACHE_SIZE. Now of course the same problem can arise if two
-     * requests start deleting at the same time but all that will lead
-     * to is the cache getting completely emptied.
-     * </p>
-     */
-    private void setCacheSizeLimit() {
-        if (enableCacheLimit) {
-            while (repository.count() >= CACHE_SIZE) {
-                repository.findTopByIdNotNullOrderById().ifPresent(it -> repository.deleteById(it.getId()));
-            }
-        }
-    }
 
     public boolean isEntityPresent(AssemblyEntity entity) {
-        String genbank = entity.getGenbank();
+        String insdcAccession = entity.getInsdcAccession();
         String refseq = entity.getRefseq();
-        if (genbank == null && refseq == null) {
+        if (insdcAccession == null && refseq == null) {
             return false;
         }
-        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByGenbankOrRefseq(
+        Optional<AssemblyEntity> existingAssembly = repository.findAssemblyEntityByInsdcAccessionOrRefseq(
                 // Setting to invalid prevents finding random accessions with null GCA/GCF
-                genbank == null ? "##########" : genbank,
+                insdcAccession == null ? "##########" : insdcAccession,
                 refseq == null ? "##########" : refseq);
         return existingAssembly.isPresent();
     }
@@ -220,8 +194,8 @@ public class AssemblyService {
         return accessionResult;
     }
 
-    public void deleteAssemblyByGenbank(String genbank) {
-        repository.deleteAssemblyEntityByGenbank(genbank);
+    public void deleteAssemblyByInsdcAccession(String insdcAccession) {
+        repository.deleteAssemblyEntityByInsdcAccession(insdcAccession);
     }
 
     public void deleteAssemblyByRefseq(String refseq) {
@@ -254,19 +228,4 @@ public class AssemblyService {
         return new DuplicateAssemblyException(exception.toString());
     }
 
-    public int getCacheSize() {
-        return CACHE_SIZE;
-    }
-
-    public void setCacheSize(int CACHE_SIZE) {
-        this.CACHE_SIZE = CACHE_SIZE;
-    }
-
-    public boolean isEnableCacheLimit() {
-        return enableCacheLimit;
-    }
-
-    public void setEnableCacheLimit(boolean enableCacheLimit) {
-        this.enableCacheLimit = enableCacheLimit;
-    }
 }

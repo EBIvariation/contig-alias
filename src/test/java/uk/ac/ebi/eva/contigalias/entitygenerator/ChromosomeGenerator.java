@@ -36,7 +36,7 @@ public class ChromosomeGenerator {
     public static ChromosomeEntity generate(long id) {
         return (ChromosomeEntity) new ChromosomeEntity()
                 .setGenbankSequenceName(PREFIX_NAME + id)
-                .setGenbank("genbank" + id)
+                .setInsdcAccession("genbank" + id)
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
                 .setEnaSequenceName("ena" + id)
@@ -77,7 +77,7 @@ public class ChromosomeGenerator {
         assertTrue(name.length() > length);
         String sId = name.substring(length);
         assertTrue(name.endsWith(sId));
-        assertTrue(entity.getGenbank().endsWith(sId));
+        assertTrue(entity.getInsdcAccession().endsWith(sId));
         assertTrue(entity.getRefseq().endsWith(sId));
         assertTrue(entity.getUcscName().endsWith(sId));
         assertTrue(entity.getMd5checksum().endsWith(sId));

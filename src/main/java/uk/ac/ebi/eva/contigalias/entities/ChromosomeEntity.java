@@ -17,13 +17,15 @@
 package uk.ac.ebi.eva.contigalias.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 
 @Entity
 @Table(name = "chromosome")
-public class ChromosomeEntity extends SequenceEntity {
-
+@IdClass(ChromosomeId.class)
+public class ChromosomeEntity extends SequenceEntity implements Serializable {
     public ChromosomeEntity() {
     }
 }

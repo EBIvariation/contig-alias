@@ -79,7 +79,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
                 break;
             }
             case "GenBank assembly accession": {
-                assemblyEntity.setGenbank(tagData);
+                assemblyEntity.setInsdcAccession(tagData);
                 break;
             }
             case "RefSeq assembly accession": {
@@ -97,7 +97,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
         ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
 
         chromosomeEntity.setGenbankSequenceName(columns[0]);
-        chromosomeEntity.setGenbank(columns[4]);
+        chromosomeEntity.setInsdcAccession(columns[4]);
         chromosomeEntity.setRefseq(columns[6]);
 
         if (columns.length > 9 && !columns[9].equals("na")) {
@@ -122,7 +122,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
         ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
 
         scaffoldEntity.setGenbankSequenceName(columns[0]);
-        scaffoldEntity.setGenbank(columns[4]);
+        scaffoldEntity.setInsdcAccession(columns[4]);
         scaffoldEntity.setRefseq(columns[6]);
 
         if (columns.length >= 10) {

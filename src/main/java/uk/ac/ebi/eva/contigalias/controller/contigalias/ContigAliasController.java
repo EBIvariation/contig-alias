@@ -109,14 +109,14 @@ public class ContigAliasController {
                     "accession. This endpoint will either return a list containing a single result or an HTTP status " +
                     "code of 404. ")
     @GetMapping(value = "assemblies/insdc/{insdc}", produces = "application/json")
-    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByGenbank(
-            @PathVariable(name = "insdc") @ApiParam(value = "INSDC assembly accession. Eg: GCA_000001405.10") String asmGenbank,
+    public ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> getAssemblyByInsdcAccession(
+            @PathVariable(name = "insdc") @ApiParam(value = "INSDC assembly accession. Eg: GCA_000001405.10") String asmInsdcAccession,
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByGenbank(asmGenbank);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssemblyByInsdcAccession(asmInsdcAccession);
             linkPagedModelGetSequencesByAssemblyAccession(
-                    asmGenbank, pageNumber, pageSize, pagedModel, AUTHORITY_INSDC);
+                    asmInsdcAccession, pageNumber, pageSize, pagedModel, AUTHORITY_INSDC);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -165,7 +165,7 @@ public class ContigAliasController {
              @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
              @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         if (paramsValidForSingleResponseQuery(pageNumber, pageSize)) {
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesBySequenceGenbank(genbank);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = handler.getAssembliesBySequenceInsdcAccession(genbank);
             return createAppropriateResponseEntity(pagedModel);
         } else return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
     }
@@ -197,7 +197,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
-        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getSequencesByGenbank(genbank, pageRequest);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getSequencesByInsdcAccession(genbank, pageRequest);
         return createAppropriateResponseEntity(pagedModel);
     }
 
@@ -234,7 +234,7 @@ public class ContigAliasController {
         PagedModel<EntityModel<SequenceEntity>> pagedModel;
         if (asmAuthority != null && !asmAuthority.isEmpty()) {
             if (asmAuthority.toLowerCase().equals(AUTHORITY_INSDC)) {
-                pagedModel = handler.getSequencesByAssemblyGenbank(asmAccession, pageRequest);
+                pagedModel = handler.getSequencesByAssemblyInsdcAccession(asmAccession, pageRequest);
                 linkPagedModelGetAssemblyByAuthority(asmAccession, AUTHORITY_INSDC, pagedModel);
             } else if (asmAuthority.toLowerCase().equals(AUTHORITY_REFSEQ)) {
                 pagedModel = handler.getSequencesByAssemblyRefseq(asmAccession, pageRequest);
@@ -259,7 +259,7 @@ public class ContigAliasController {
             @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
         PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
         PagedModel<EntityModel<SequenceEntity>> pagedModel
-                = handler.getSequencesByAssemblyGenbank(genbank, pageRequest);
+                = handler.getSequencesByAssemblyInsdcAccession(genbank, pageRequest);
         linkPagedModelGetAssemblyByAuthority(genbank, AUTHORITY_INSDC, pagedModel);
         return createAppropriateResponseEntity(pagedModel);
     }
@@ -327,7 +327,7 @@ public class ContigAliasController {
         ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;
         if (authority.equals(AUTHORITY_INSDC)) {
             method = methodOn(ContigAliasController.class)
-                    .getAssemblyByGenbank(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
+                    .getAssemblyByInsdcAccession(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);
         } else if (authority.equals(AUTHORITY_REFSEQ)) {
             method = methodOn(ContigAliasController.class)
                     .getAssemblyByRefseq(accession, DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE);

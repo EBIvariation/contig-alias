@@ -35,7 +35,7 @@ public class AssemblyGenerator {
         return new AssemblyEntity()
                 .setName(PREFIX_NAME + id)
                 .setOrganism("organism" + id)
-                .setGenbank("genbank" + id)
+                .setInsdcAccession("insdc" + id)
                 .setRefseq("refseq" + id)
                 .setTaxid(id)
                 .setGenbankRefseqIdentical(new Random().nextBoolean())
@@ -58,7 +58,7 @@ public class AssemblyGenerator {
         String sId = name.substring(length);
         assertTrue(name.endsWith(sId));
         assertTrue(entity.getOrganism().endsWith(sId));
-        assertTrue(entity.getGenbank().endsWith(sId));
+        assertTrue(entity.getInsdcAccession().endsWith(sId));
         assertTrue(entity.getRefseq().endsWith(sId));
         assertTrue(entity.getMd5checksum().endsWith(sId));
         assertTrue(entity.getTrunc512checksum().endsWith(sId));
@@ -73,7 +73,7 @@ public class AssemblyGenerator {
         assertTrue(entity.getName().endsWith(sId));
         assertTrue(entity.getOrganism().endsWith(sId));
         assertEquals(entity.getTaxid(), id);
-        assertTrue(entity.getGenbank().endsWith(sId));
+        assertTrue(entity.getInsdcAccession().endsWith(sId));
         assertTrue(entity.getRefseq().endsWith(sId));
         assertTrue(entity.getMd5checksum().endsWith(sId));
         assertTrue(entity.getTrunc512checksum().endsWith(sId));

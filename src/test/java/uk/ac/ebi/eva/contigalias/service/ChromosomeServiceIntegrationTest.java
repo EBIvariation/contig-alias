@@ -54,8 +54,8 @@ public class ChromosomeServiceIntegrationTest {
 
     @Test
     void getChromosomeByGenbank() {
-        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(
-                entity.getGenbank(), DEFAULT_PAGE_REQUEST);
+        Page<ChromosomeEntity> page = service.getChromosomesByInsdcAccession(
+                entity.getInsdcAccession(), DEFAULT_PAGE_REQUEST);
         assertChromosomePageIdenticalToEntity(page);
     }
 
@@ -70,8 +70,8 @@ public class ChromosomeServiceIntegrationTest {
     void putChromosomeChecksumsByAccession() {
         String md5 = "MyCustomMd5ChecksumForTesting";
         String trunc512 = "MyCustomTrunc512ChecksumForTesting";
-        service.putChromosomeChecksumsByAccession(entity.getGenbank(), md5, trunc512);
-        Page<ChromosomeEntity> page = service.getChromosomesByGenbank(entity.getGenbank(), Pageable.unpaged());
+        service.putChromosomeChecksumsByAccession(entity.getInsdcAccession(), md5, trunc512);
+        Page<ChromosomeEntity> page = service.getChromosomesByInsdcAccession(entity.getInsdcAccession(), Pageable.unpaged());
         assertChromosomePageIdenticalToEntity(page);
         page.forEach(chromosomeEntity -> {
             assertEquals(md5, chromosomeEntity.getMd5checksum());
@@ -87,7 +87,7 @@ public class ChromosomeServiceIntegrationTest {
 
     void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity) {
         assertEquals(entity.getGenbankSequenceName(), chromosomeEntity.getGenbankSequenceName());
-        assertEquals(entity.getGenbank(), chromosomeEntity.getGenbank());
+        assertEquals(entity.getInsdcAccession(), chromosomeEntity.getInsdcAccession());
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
         assertEquals(entity.getUcscName(), chromosomeEntity.getUcscName());
         assertEquals(entity.getEnaSequenceName(), chromosomeEntity.getEnaSequenceName());

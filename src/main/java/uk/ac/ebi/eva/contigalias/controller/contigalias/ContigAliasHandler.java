@@ -68,8 +68,8 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
 
-    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByGenbank(String genbank) {
-        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByGenbank(genbank);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssemblyByInsdcAccession(String insdcAccession) {
+        Optional<AssemblyEntity> entity = assemblyService.getAssemblyByInsdcAccession(insdcAccession);
         entity.ifPresent(it -> it.setChromosomes(null));
         return generatePagedModelFromPage(convertToPage(entity), assemblyAssembler);
     }
@@ -86,8 +86,8 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(page, assemblyAssembler);
     }
 
-    public PagedModel<EntityModel<AssemblyEntity>> getAssembliesBySequenceGenbank(String genbank) {
-        List<AssemblyEntity> assemblies = chromosomeService.getAssembliesByChromosomeGenbank(genbank);
+    public PagedModel<EntityModel<AssemblyEntity>> getAssembliesBySequenceInsdcAccession(String insdcAccession) {
+        List<AssemblyEntity> assemblies = chromosomeService.getAssembliesByChromosomeInsdcAccession(insdcAccession);
         return generatePagedModelFromPage(new PageImpl<>(assemblies), assemblyAssembler);
     }
 
@@ -96,8 +96,8 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(new PageImpl<>(assemblies), assemblyAssembler);
     }
 
-    public PagedModel<EntityModel<SequenceEntity>> getSequencesByGenbank(String genbank, Pageable request) {
-        Page<ChromosomeEntity> chrPage = chromosomeService.getChromosomesByGenbank(genbank, request);
+    public PagedModel<EntityModel<SequenceEntity>> getSequencesByInsdcAccession(String insdcAccession, Pageable request) {
+        Page<ChromosomeEntity> chrPage = chromosomeService.getChromosomesByInsdcAccession(insdcAccession, request);
         return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
     }
 
@@ -106,8 +106,8 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
     }
 
-    public PagedModel<EntityModel<SequenceEntity>> getSequencesByAssemblyGenbank(String genbank, Pageable request) {
-        Page<ChromosomeEntity> chrPage = chromosomeService.getChromosomesByAssemblyGenbank(genbank, request);
+    public PagedModel<EntityModel<SequenceEntity>> getSequencesByAssemblyInsdcAccession(String insdcAccession, Pageable request) {
+        Page<ChromosomeEntity> chrPage = chromosomeService.getChromosomesByAssemblyInsdcAccession(insdcAccession, request);
         return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
     }
 

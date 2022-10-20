@@ -97,7 +97,7 @@ class ENAAssemblyReportReaderTest {
         List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
         ChromosomeEntity chromosome = chromosomes.get(0);
         assertEquals(CHROMOSOME_ENA_SEQUENCE_NAME, chromosome.getEnaSequenceName());
-        assertEquals(CHROMOSOME_GENBANK_ACCESSION, chromosome.getGenbank());
+        assertEquals(CHROMOSOME_GENBANK_ACCESSION, chromosome.getInsdcAccession());
         assertNull(chromosome.getUcscName());
     }
 
@@ -120,7 +120,7 @@ class ENAAssemblyReportReaderTest {
         ChromosomeEntity scaffold = scaffolds.get(0);
         assertNotNull(scaffold);
         assertEquals(SCAFFOLD_SEQUENCE_NAME, scaffold.getEnaSequenceName());
-        assertEquals(SCAFFOLD_GENBANK_ACCESSION, scaffold.getGenbank());
+        assertEquals(SCAFFOLD_GENBANK_ACCESSION, scaffold.getInsdcAccession());
     }
 
 }

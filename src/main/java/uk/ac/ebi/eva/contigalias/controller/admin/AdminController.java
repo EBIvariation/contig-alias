@@ -78,7 +78,7 @@ public class AdminController {
                     "parallel manner.")
     @PutMapping(value = "assemblies")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
-            @RequestBody(required = false) @ApiParam(value = "A JSON array of GenBank or RefSeq assembly accessions. " +
+            @RequestBody(required = false) @ApiParam(value = "A JSON array of INSDC assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -113,7 +113,7 @@ public class AdminController {
         handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
     }
 
-    @ApiOperation(value = "Delete an assembly from local database using its GenBank or RefSeq accession.",
+    @ApiOperation(value = "Delete an assembly from local database using its INSDC or RefSeq accession.",
             notes = "Given an assembly's accession this endpoint will delete the assembly that matches that " +
                     "accession from the local database. The accession can be either a INSDC or RefSeq accession and" +
                     " the endpoint will automatically deletes the correct assembly from the database. Deleting an " +

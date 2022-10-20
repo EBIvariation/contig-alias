@@ -32,23 +32,21 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
         JpaSpecificationExecutor<AssemblyEntity> {
 
     default Optional<AssemblyEntity> findAssemblyEntityByAccession(String accession) {
-        return this.findAssemblyEntityByGenbankOrRefseq(accession, accession);
+        return this.findAssemblyEntityByInsdcAccessionOrRefseq(accession, accession);
     }
 
-    Optional<AssemblyEntity> findAssemblyEntityByGenbankOrRefseq(String genbank, String refseq);
+    Optional<AssemblyEntity> findAssemblyEntityByInsdcAccessionOrRefseq(String insdcAccession, String refseq);
 
     long count();
 
-    Optional<AssemblyEntity> findTopByIdNotNullOrderById();
-
-    Optional<AssemblyEntity> findAssemblyEntityByGenbank(String genbank);
+    Optional<AssemblyEntity> findAssemblyEntityByInsdcAccession(String insdcAccession);
 
     Optional<AssemblyEntity> findAssemblyEntityByRefseq(String refseq);
 
     Page<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
     @Transactional
-    void deleteAssemblyEntityByGenbank(String genbank);
+    void deleteAssemblyEntityByInsdcAccession(String insdcAccession);
 
     @Transactional
     void deleteAssemblyEntityByRefseq(String refseq);

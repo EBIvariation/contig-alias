@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -68,11 +66,11 @@ public class ContigAliasHandlerTest {
         void setUp() {
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
             Optional<AssemblyEntity> optionalOfEntity = Optional.of(this.entity);
-            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.entity.getGenbank()))
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.entity.getInsdcAccession()))
                    .thenReturn(optionalOfEntity);
             Mockito.when(mockAssemblyService.getAssemblyByAccession(this.entity.getRefseq()))
                    .thenReturn(optionalOfEntity);
-            Mockito.when(mockAssemblyService.getAssemblyByGenbank(this.entity.getGenbank()))
+            Mockito.when(mockAssemblyService.getAssemblyByInsdcAccession(this.entity.getInsdcAccession()))
                    .thenReturn(optionalOfEntity);
             Mockito.when(mockAssemblyService.getAssemblyByRefseq(this.entity.getRefseq()))
                    .thenReturn(optionalOfEntity);
@@ -90,15 +88,15 @@ public class ContigAliasHandlerTest {
         @Test
         public void getAssemblyByAccession() {
             testAssemblyEntityPagedResponse(
-                    handler.getAssemblyByAccession(entity.getGenbank()));
+                    handler.getAssemblyByAccession(entity.getInsdcAccession()));
             testAssemblyEntityPagedResponse(
                     handler.getAssemblyByAccession(entity.getRefseq()));
         }
 
         @Test
-        public void getAssemblyByGenbank() {
+        public void getAssemblyByInsdcAccession() {
             testAssemblyEntityPagedResponse(
-                    handler.getAssemblyByGenbank(entity.getGenbank()));
+                    handler.getAssemblyByInsdcAccession(entity.getInsdcAccession()));
         }
 
         @Test
@@ -117,7 +115,7 @@ public class ContigAliasHandlerTest {
             assertNotNull(assembly);
             assertEquals(entity.getName(), assembly.getName());
             assertEquals(entity.getOrganism(), assembly.getOrganism());
-            assertEquals(entity.getGenbank(), assembly.getGenbank());
+            assertEquals(entity.getInsdcAccession(), assembly.getInsdcAccession());
             assertEquals(entity.getRefseq(), assembly.getRefseq());
             assertEquals(entity.getTaxid(), assembly.getTaxid());
             assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
@@ -168,7 +166,7 @@ public class ContigAliasHandlerTest {
                 AssemblyEntity entity = entities.get(i);
                 assertEquals(entity.getName(), assembly.getName());
                 assertEquals(entity.getOrganism(), assembly.getOrganism());
-                assertEquals(entity.getGenbank(), assembly.getGenbank());
+                assertEquals(entity.getInsdcAccession(), assembly.getInsdcAccession());
                 assertEquals(entity.getRefseq(), assembly.getRefseq());
                 assertEquals(TAX_ID, assembly.getTaxid());
                 assertEquals(entity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
@@ -187,7 +185,7 @@ public class ContigAliasHandlerTest {
             ChromosomeService mockChromosomeService = mock(ChromosomeService.class);
 
             Page<ChromosomeEntity> pageOfEntity = new PageImpl<>(Collections.singletonList(entity));
-            Mockito.when(mockChromosomeService.getChromosomesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST))
+            Mockito.when(mockChromosomeService.getChromosomesByInsdcAccession(entity.getInsdcAccession(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
             Mockito.when(mockChromosomeService.getChromosomesByRefseq(entity.getRefseq(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfEntity);
@@ -203,7 +201,7 @@ public class ContigAliasHandlerTest {
 
         @Test
         public void getChromosomeByGenbank() {
-            testChromosomeEntityResponse(handler.getSequencesByGenbank(entity.getGenbank(), DEFAULT_PAGE_REQUEST));
+            testChromosomeEntityResponse(handler.getSequencesByInsdcAccession(entity.getInsdcAccession(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
@@ -221,7 +219,7 @@ public class ContigAliasHandlerTest {
         void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosome) {
             assertNotNull(chromosome);
             assertEquals(entity.getGenbankSequenceName(), chromosome.getGenbankSequenceName());
-            assertEquals(entity.getGenbank(), chromosome.getGenbank());
+            assertEquals(entity.getInsdcAccession(), chromosome.getInsdcAccession());
             assertEquals(entity.getRefseq(), chromosome.getRefseq());
             assertEquals(entity.getUcscName(), chromosome.getUcscName());
         }
@@ -244,14 +242,14 @@ public class ContigAliasHandlerTest {
                 ChromosomeEntity generate = ChromosomeGenerator.generate(i, assemblyEntity);
                 chromosomeEntities.add(generate);
                 List<AssemblyEntity> listOfEntity = Collections.singletonList(this.assemblyEntity);
-                Mockito.when(mockChromosomeService.getAssembliesByChromosomeGenbank(generate.getGenbank()))
+                Mockito.when(mockChromosomeService.getAssembliesByChromosomeInsdcAccession(generate.getInsdcAccession()))
                        .thenReturn(listOfEntity);
                 Mockito.when(mockChromosomeService.getAssembliesByChromosomeRefseq(generate.getRefseq()))
                        .thenReturn(listOfEntity);
             }
             PageImpl<ChromosomeEntity> pageOfChromosomeEntities = new PageImpl<>(chromosomeEntities);
             Mockito.when(mockChromosomeService
-                                 .getChromosomesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                                 .getChromosomesByAssemblyInsdcAccession(assemblyEntity.getInsdcAccession(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfChromosomeEntities);
             Mockito.when(mockChromosomeService
                                  .getChromosomesByAssemblyRefseq(assemblyEntity.getRefseq(), DEFAULT_PAGE_REQUEST))
@@ -259,7 +257,7 @@ public class ContigAliasHandlerTest {
 
             AssemblyService mockAssemblyService = mock(AssemblyService.class);
             Optional<AssemblyEntity> optionalOfAssemblyEntity = Optional.of(this.assemblyEntity);
-            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.assemblyEntity.getGenbank()))
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(this.assemblyEntity.getInsdcAccession()))
                    .thenReturn(optionalOfAssemblyEntity);
             Mockito.when(mockAssemblyService.getAssemblyByAccession(this.assemblyEntity.getRefseq()))
                    .thenReturn(optionalOfAssemblyEntity);
@@ -286,7 +284,7 @@ public class ContigAliasHandlerTest {
                    .thenReturn(new PageImpl<>(chromosomesByNameAndAssembly));
 
             Mockito.when(mockChromosomeService
-                                 .getChromosomesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST))
+                                 .getChromosomesByAssemblyAccession(assemblyEntity.getInsdcAccession(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfChromosomeEntities);
 
 
@@ -302,7 +300,7 @@ public class ContigAliasHandlerTest {
                     chromosomeEntities.get(0).getUcscName(), assemblyEntity.getTaxid(), DEFAULT_PAGE_REQUEST))
                    .thenReturn(pageOfChromosomeEntities);
 
-            Mockito.when(mockAssemblyService.getAssemblyByAccession(assemblyEntity.getGenbank()))
+            Mockito.when(mockAssemblyService.getAssemblyByAccession(assemblyEntity.getInsdcAccession()))
                    .thenReturn(Optional.of(assemblyEntity));
 
             PagedResourcesAssembler<AssemblyEntity> mockAssemblyAssembler = mock(PagedResourcesAssembler.class);
@@ -332,7 +330,7 @@ public class ContigAliasHandlerTest {
         @Test
         void getAssemblyByChromosomeGenbank() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                testAssemblyEntityResponse(handler.getAssembliesBySequenceGenbank(chromosomeEntity.getGenbank()));
+                testAssemblyEntityResponse(handler.getAssembliesBySequenceInsdcAccession(chromosomeEntity.getInsdcAccession()));
             }
         }
 
@@ -346,7 +344,7 @@ public class ContigAliasHandlerTest {
         @Test
         void getChromosomesByAssemblyGenbank() {
             testChromosomeEntityResponses(
-                    handler.getSequencesByAssemblyGenbank(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
+                    handler.getSequencesByAssemblyInsdcAccession(assemblyEntity.getInsdcAccession(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
@@ -358,7 +356,7 @@ public class ContigAliasHandlerTest {
         @Test
         void getChromosomesByAssemblyAccessionGenbank() {
             testChromosomeEntityResponses(
-                    handler.getSequencesByAssemblyAccession(assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST));
+                    handler.getSequencesByAssemblyAccession(assemblyEntity.getInsdcAccession(), DEFAULT_PAGE_REQUEST));
         }
 
         @Test
@@ -395,7 +393,7 @@ public class ContigAliasHandlerTest {
             String chrName = chromosomeEntities.get(0).getGenbankSequenceName();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getSequencesBySequenceNameAndAssemblyAccession(
-                            chrName, assemblyEntity.getGenbank(), NAME_GENBANK_TYPE, DEFAULT_PAGE_REQUEST);
+                            chrName, assemblyEntity.getInsdcAccession(), NAME_GENBANK_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 
@@ -414,7 +412,7 @@ public class ContigAliasHandlerTest {
             String chrName = chromosomeEntities.get(0).getUcscName();
             PagedModel<EntityModel<SequenceEntity>> pagedModel = handler
                     .getSequencesBySequenceNameAndAssemblyAccession(
-                            chrName, assemblyEntity.getGenbank(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
+                            chrName, assemblyEntity.getInsdcAccession(), NAME_UCSC_TYPE, DEFAULT_PAGE_REQUEST);
             assertPagedModelIdenticalToChromosomeEntities(pagedModel);
         }
 
@@ -442,7 +440,7 @@ public class ContigAliasHandlerTest {
             assertNotNull(assembly);
             assertEquals(this.assemblyEntity.getName(), assembly.getName());
             assertEquals(this.assemblyEntity.getOrganism(), assembly.getOrganism());
-            assertEquals(this.assemblyEntity.getGenbank(), assembly.getGenbank());
+            assertEquals(this.assemblyEntity.getInsdcAccession(), assembly.getInsdcAccession());
             assertEquals(this.assemblyEntity.getRefseq(), assembly.getRefseq());
             assertEquals(this.assemblyEntity.getTaxid(), assembly.getTaxid());
             assertEquals(this.assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
