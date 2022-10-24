@@ -79,7 +79,7 @@ public class PassiveAnonymousFTPClient extends FTPClient {
     private String getStatusString() {
         try {
             return String.format("FTP status was: %s. Reply code: %s. Reply string: %s", super.getStatus(),
-                                 super.getReply(), super.getReplyString());
+                    super.getReply(), super.getReplyString());
         } catch (Exception e) {
             return "Unable to get status information";
         }
@@ -93,7 +93,6 @@ public class PassiveAnonymousFTPClient extends FTPClient {
         }
     }
 
-    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 100, maxDelay = 500))
     public boolean downloadFTPFile(String ftpFilePath, Path downloadFilePath, long ftpFileSize) throws IOException {
         super.setFileType(FTP.BINARY_FILE_TYPE);
         super.setFileTransferMode(FTP.BINARY_FILE_TYPE);

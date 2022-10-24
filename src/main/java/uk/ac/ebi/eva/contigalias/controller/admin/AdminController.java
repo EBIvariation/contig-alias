@@ -78,7 +78,7 @@ public class AdminController {
                     "parallel manner.")
     @PutMapping(value = "assemblies")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
-            @RequestBody(required = false) @ApiParam(value = "A JSON array of INSDC assembly accessions. " +
+            @RequestBody(required = false) @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -99,7 +99,7 @@ public class ChromosomeService {
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request) {
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_InsdcAccessionOrAssemblyRefseq(
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseq(
                 accession, accession, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
@@ -199,16 +199,16 @@ public class ChromosomeService {
         repository.delete(entity);
     }
 
-    public long countChromosomeEntitiesByInsdcAccession(String genbank) {
-        return repository.countChromosomeEntitiesByInsdcAccession(genbank);
+    public long countChromosomeEntitiesByInsdcAccession(String insdcAccession) {
+        return repository.countChromosomeEntitiesByInsdcAccession(insdcAccession);
     }
 
     public long countChromosomeEntitiesByRefseq(String refseq) {
         return repository.countChromosomeEntitiesByRefseq(refseq);
     }
 
-    public long countChromosomeEntitiesByAssembly_Genbank(String asmGenbank) {
-        return repository.countChromosomeEntitiesByAssembly_InsdcAccession(asmGenbank);
+    public long countChromosomeEntitiesByAssemblyInsdcAccession(String asmInsdcAccession) {
+        return repository.countChromosomeEntitiesByAssemblyInsdcAccession(asmInsdcAccession);
     }
 
     public long countChromosomeEntitiesByAssembly_Refseq(String asmRefseq) {
@@ -243,8 +243,8 @@ public class ChromosomeService {
         return repository.countChromosomeEntitiesByGenbankSequenceName(name);
     }
 
-    public long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq) {
-        return repository.countChromosomeEntitiesByAssembly_InsdcAccessionOrAssemblyRefseq(genbank, refseq);
+    public long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String insdcAccession, String refseq) {
+        return repository.countChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseq(insdcAccession, refseq);
     }
 
     public long countChromosomeEntitiesByUcscName(String ucscName) {

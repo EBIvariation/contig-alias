@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReader;
 import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReaderFactory;
@@ -29,10 +31,13 @@ import uk.ac.ebi.eva.contigalias.dus.ENABrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
+import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -62,28 +67,25 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     }
 
     @Override
+//    @Retryable(value = UnknownHostException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         ENABrowser enaBrowser = factory.build();
         enaBrowser.connect();
         try {
-            String dirPath = enaBrowser.getAssemblyDirPath(accession);
-            FTPFile ftpFile = enaBrowser.getAssemblyReportFile(dirPath, accession);
-            String ftpFilePath = dirPath + ftpFile.getName();
-            Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
-            boolean success = enaBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
-            if (!success) {
-                logger.info("Could not fetch Assembly Report form ENA for accession " + accession);
+            Optional<Path> downloadFilePath = downloadAssemblyReport(enaBrowser, accession);
+            if (!downloadFilePath.isPresent()) {
                 return Optional.empty();
             }
 
             AssemblyEntity assemblyEntity;
-            try (InputStream stream = new FileInputStream(downloadFilePath.toFile())) {
+            try (InputStream stream = new FileInputStream(downloadFilePath.get().toFile())) {
                 ENAAssemblyReportReader reader = readerFactory.build(stream);
                 assemblyEntity = reader.getAssemblyEntity();
                 logger.info("ENA: Number of chromosomes in " + accession + " : " + assemblyEntity.getChromosomes().size());
             } finally {
                 try {
                     enaBrowser.disconnect();
+                    Files.deleteIfExists(downloadFilePath.get());
                 } catch (IOException e) {
                     logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
                 }
@@ -93,7 +95,27 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
             logger.info("Could not fetch Assembly Report form ENA for accession " + accession + "Exception: " + e);
             return Optional.empty();
         }
-        
+
+    }
+
+    public Optional<Path> downloadAssemblyReport(ENABrowser enaBrowser, String accession) throws IOException {
+        String dirPath = enaBrowser.getAssemblyDirPath(accession);
+        FTPFile ftpFile = enaBrowser.getAssemblyReportFile(dirPath, accession);
+        String ftpFilePath = dirPath + ftpFile.getName();
+        Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
+        try {
+            boolean success = enaBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
+            if (success) {
+                logger.info("ENA assembly report downloaded successfully");
+                return Optional.of(downloadFilePath);
+            } else {
+                logger.info("ENA assembly report could not be downloaded successfully");
+                return Optional.empty();
+            }
+        }catch (IOException | DownloadFailedException e){
+            logger.info("Error downloading ENA assembly report " + e);
+            return Optional.empty();
+        }
     }
 
     /**

@@ -17,11 +17,14 @@
 package uk.ac.ebi.eva.contigalias.dus;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -41,6 +44,7 @@ public class ENABrowser extends PassiveAnonymousFTPClient {
         this.ftpProxyPort = ftpProxyPort;
     }
 
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
     public void connect() throws IOException {
         if (ftpProxyHost != null && !ftpProxyHost.equals("null") &&
                 ftpProxyPort != null && ftpProxyPort != 0) {

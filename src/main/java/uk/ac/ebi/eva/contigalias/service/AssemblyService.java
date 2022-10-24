@@ -23,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-
 import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -34,17 +33,14 @@ import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 @Service
 public class AssemblyService {
@@ -161,35 +157,13 @@ public class AssemblyService {
         Map<String, List<String>> accessionResult = new HashMap<>();
         List<Future<Pair<String, String>>> executorResponseList = new ArrayList<>();
         for (String accession : accessions) {
-            executorResponseList.add(executor.submit(() -> {
-                try {
-                    this.fetchAndInsertAssembly(accession);
-                    return Pair.of("SUCCESS", accession);
-                } catch (DuplicateAssemblyException e) {
-                    logger.warn("The assembly with accession  " + accession + " is already present");
-                    return Pair.of("DUPLICATE", accession);
-                } catch (Exception e) {
-                    logger.error("Exception while fetching and inserting " + accession, e);
-                    return Pair.of("FAILURE", accession);
-                }
-            }));
-        }
-
-        for (Future<Pair<String, String>> result : executorResponseList) {
             try {
-                Pair<String, String> resPair = result.get();
-                accessionResult.putIfAbsent(resPair.getFirst(), new ArrayList<>());
-                accessionResult.get(resPair.getFirst()).add(resPair.getSecond());
-            } catch (ExecutionException | InterruptedException e) {
-                logger.error("Exception while fetching result for submitted jobs");
+                this.fetchAndInsertAssembly(accession);
+                accessionResult.getOrDefault("SUCCESS", new ArrayList<>()).add(accession);
+            } catch (Exception e) {
+                accessionResult.getOrDefault("FAILURE", new ArrayList<>()).add(accession);
             }
         }
-
-        List<String> accessionsWithResult = accessionResult.values().stream().flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        List<String> accessionWithoutResult = accessions.stream().filter(acc -> !accessionsWithResult.contains(acc))
-                .collect(Collectors.toList());
-        accessionResult.put("NO_RESULT", accessionWithoutResult);
 
         return accessionResult;
     }
