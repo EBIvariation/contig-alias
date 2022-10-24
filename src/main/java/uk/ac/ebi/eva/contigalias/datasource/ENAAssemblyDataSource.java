@@ -36,7 +36,6 @@ import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,7 +66,6 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     }
 
     @Override
-//    @Retryable(value = UnknownHostException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         ENABrowser enaBrowser = factory.build();
         enaBrowser.connect();
@@ -98,6 +96,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
     }
 
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
     public Optional<Path> downloadAssemblyReport(ENABrowser enaBrowser, String accession) throws IOException {
         String dirPath = enaBrowser.getAssemblyDirPath(accession);
         FTPFile ftpFile = enaBrowser.getAssemblyReportFile(dirPath, accession);
@@ -112,7 +111,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
                 logger.info("ENA assembly report could not be downloaded successfully");
                 return Optional.empty();
             }
-        }catch (IOException | DownloadFailedException e){
+        } catch (IOException | DownloadFailedException e) {
             logger.info("Error downloading ENA assembly report " + e);
             return Optional.empty();
         }
