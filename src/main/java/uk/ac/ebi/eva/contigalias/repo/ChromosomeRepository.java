@@ -27,13 +27,13 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 @Repository
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByGenbank(String genbank, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccession(String insdcAccession, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByRefseq(String refseq, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankOrRefseq(String genbank, String refseq, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccessionOrRefseq(String insdcAccession, String refseq, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Genbank(String asmGenbank, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_InsdcAccession(String asmInsdcAccession, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq, Pageable request);
 
@@ -58,16 +58,16 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceName(String enaSequenceName, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq,
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseq(String insdcAccession, String refseq,
                                                                                    Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscName(String ucscName, Pageable request);
 
-    long countChromosomeEntitiesByGenbank(String genbank);
+    long countChromosomeEntitiesByInsdcAccession(String insdcAccession);
 
     long countChromosomeEntitiesByRefseq(String refseq);
 
-    long countChromosomeEntitiesByAssembly_Genbank(String asmGenbank);
+    long countChromosomeEntitiesByAssemblyInsdcAccession(String asmInsdcAccession);
 
     long countChromosomeEntitiesByAssembly_Refseq(String asmRefseq);
 
@@ -85,7 +85,7 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     long countChromosomeEntitiesByGenbankSequenceName(String genbankName);
 
-    long countChromosomeEntitiesByAssemblyGenbankOrAssemblyRefseq(String genbank, String refseq);
+    long countChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseq(String insdcAccession, String refseq);
 
     long countChromosomeEntitiesByUcscName(String ucscName);
 

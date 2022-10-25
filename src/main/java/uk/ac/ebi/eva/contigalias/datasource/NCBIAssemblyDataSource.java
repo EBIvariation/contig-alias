@@ -16,19 +16,27 @@
 
 package uk.ac.ebi.eva.contigalias.datasource;
 
+import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
-
 import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReader;
 import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @Repository("NCBIDataSource")
@@ -39,6 +47,9 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
     private final NCBIBrowserFactory factory;
 
     private final NCBIAssemblyReportReaderFactory readerFactory;
+
+    @Value("${asm.file.download.dir}")
+    private String asmFileDownloadDir;
 
     @Autowired
     public NCBIAssemblyDataSource(NCBIBrowserFactory factory,
@@ -56,18 +67,41 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         if (!directory.isPresent()) {
             return Optional.empty();
         }
+
+        Optional<Path> downloadFilePath = downloadAssemblyReport(ncbiBrowser, directory.get());
+        if (!downloadFilePath.isPresent()) {
+            return Optional.empty();
+        }
+
         AssemblyEntity assemblyEntity;
-        try (InputStream stream = ncbiBrowser.getAssemblyReportInputStream(directory.get())) {
+        try (InputStream stream = new FileInputStream(downloadFilePath.get().toFile())) {
             NCBIAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
+            logger.info("NCBI: Number of chromosomes in " + accession + " : " + assemblyEntity.getChromosomes().size());
         } finally {
             try {
                 ncbiBrowser.disconnect();
+                Files.deleteIfExists(downloadFilePath.get());
             } catch (IOException e) {
                 logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
             }
         }
         return Optional.of(assemblyEntity);
+    }
+
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
+    public Optional<Path> downloadAssemblyReport(NCBIBrowser ncbiBrowser, String directory) throws IOException {
+        FTPFile ftpFile = ncbiBrowser.getNCBIAssemblyReportFile(directory);
+        String ftpFilePath = directory + ftpFile.getName();
+        Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
+        boolean success = ncbiBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
+        if (success) {
+            logger.info("NCBI assembly report downloaded successfully");
+            return Optional.of(downloadFilePath);
+        } else {
+            logger.info("NCBI assembly report could not be downloaded successfully");
+            return Optional.empty();
+        }
     }
 
 }

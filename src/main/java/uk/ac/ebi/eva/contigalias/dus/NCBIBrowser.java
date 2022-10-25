@@ -18,6 +18,9 @@ package uk.ac.ebi.eva.contigalias.dus;
 
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilters;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.IncorrectAccessionException;
 
 import java.io.IOException;
@@ -44,6 +47,7 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         this.ftpProxyPort = ftpProxyPort;
     }
 
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
     public void connect() throws IOException {
         if (ftpProxyHost != null && !ftpProxyHost.equals("null") &&
                 ftpProxyPort != null && ftpProxyPort != 0) {
@@ -134,6 +138,14 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
             throw new IllegalArgumentException("Assembly Report File not present in given directory: " + directoryPath);
         }
         return fileStream;
+    }
+
+    public FTPFile getNCBIAssemblyReportFile(String directoryPath) throws IOException {
+        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
+        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
+        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
+
+        return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Report File not present in given directory: " + directoryPath));
     }
 
 }

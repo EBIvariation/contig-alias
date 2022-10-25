@@ -16,12 +16,19 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class PassiveAnonymousFTPClient extends FTPClient {
 
@@ -72,7 +79,7 @@ public class PassiveAnonymousFTPClient extends FTPClient {
     private String getStatusString() {
         try {
             return String.format("FTP status was: %s. Reply code: %s. Reply string: %s", super.getStatus(),
-                                 super.getReply(), super.getReplyString());
+                    super.getReply(), super.getReplyString());
         } catch (Exception e) {
             return "Unable to get status information";
         }
@@ -83,6 +90,26 @@ public class PassiveAnonymousFTPClient extends FTPClient {
         if (super.isConnected()) {
             super.logout();
             super.disconnect();
+        }
+    }
+
+    public boolean downloadFTPFile(String ftpFilePath, Path downloadFilePath, long ftpFileSize) throws IOException {
+        super.setFileType(FTP.BINARY_FILE_TYPE);
+        super.setFileTransferMode(FTP.BINARY_FILE_TYPE);
+        Files.deleteIfExists(downloadFilePath);
+
+        boolean success = super.retrieveFile(ftpFilePath, new FileOutputStream(downloadFilePath.toFile()));
+
+        if (success && Files.exists(downloadFilePath) && Files.isReadable(downloadFilePath)) {
+            long downloadFileSize = Files.size(downloadFilePath);
+            if (ftpFileSize == downloadFileSize) {
+                logger.info(ftpFilePath + " downloaded successfully.");
+                return true;
+            } else {
+                throw new DownloadFailedException("FTP file and Downloaded file sizes does not match for " + ftpFilePath + ". Trying again.");
+            }
+        } else {
+            throw new DownloadFailedException("Could not download ftp file" + ftpFilePath + "successfully. Trying again");
         }
     }
 

@@ -79,7 +79,7 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
                 break;
             }
             case "GenBank assembly accession": {
-                assemblyEntity.setGenbank(tagData);
+                assemblyEntity.setInsdcAccession(tagData);
                 break;
             }
             case "RefSeq assembly accession": {
@@ -97,8 +97,17 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
         ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
 
         chromosomeEntity.setGenbankSequenceName(columns[0]);
-        chromosomeEntity.setGenbank(columns[4]);
+        chromosomeEntity.setInsdcAccession(columns[4]);
         chromosomeEntity.setRefseq(columns[6]);
+
+        if (columns.length > 8) {
+            try {
+                Long seqLength = Long.parseLong(columns[8]);
+                chromosomeEntity.setSeqLength(seqLength);
+            } catch (NumberFormatException nfe) {
+
+            }
+        }
 
         if (columns.length > 9 && !columns[9].equals("na")) {
             chromosomeEntity.setUcscName(columns[9]);
@@ -122,8 +131,18 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
         ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
 
         scaffoldEntity.setGenbankSequenceName(columns[0]);
-        scaffoldEntity.setGenbank(columns[4]);
+        scaffoldEntity.setInsdcAccession(columns[4]);
         scaffoldEntity.setRefseq(columns[6]);
+
+        if (columns.length > 8) {
+            try {
+                Long seqLength = Long.parseLong(columns[8]);
+                scaffoldEntity.setSeqLength(seqLength);
+            } catch (NumberFormatException nfe) {
+
+            }
+        }
+
 
         if (columns.length >= 10) {
             String ucscName = columns[9];

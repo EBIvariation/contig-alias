@@ -64,7 +64,7 @@ public class ENAAssemblyReportReader extends AssemblyReportReader {
     protected void parseChromosomeLine(String[] columns) {
         ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
 
-        chromosomeEntity.setGenbank(columns[0]);
+        chromosomeEntity.setInsdcAccession(columns[0]);
         chromosomeEntity.setEnaSequenceName(columns[1]);
 
         if (assemblyEntity == null) {
@@ -84,7 +84,7 @@ public class ENAAssemblyReportReader extends AssemblyReportReader {
     protected void parseScaffoldLine(String[] columns) {
         ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
 
-        scaffoldEntity.setGenbank(columns[0]);
+        scaffoldEntity.setInsdcAccession(columns[0]);
         scaffoldEntity.setEnaSequenceName(columns[1]);
 
         if (assemblyEntity == null) {

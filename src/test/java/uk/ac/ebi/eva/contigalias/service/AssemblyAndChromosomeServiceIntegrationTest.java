@@ -51,7 +51,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
 
     void assertChromosomeEntityIdentical(ChromosomeEntity expected, ChromosomeEntity actual) {
         assertEquals(expected.getGenbankSequenceName(), actual.getGenbankSequenceName());
-        assertEquals(expected.getGenbank(), actual.getGenbank());
+        assertEquals(expected.getInsdcAccession(), actual.getInsdcAccession());
         assertEquals(expected.getRefseq(), actual.getRefseq());
         assertEquals(expected.getUcscName(), actual.getUcscName());
         assertEquals(expected.getEnaSequenceName(), actual.getEnaSequenceName());
@@ -81,10 +81,10 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         }
 
         @Test
-        void getAssemblyByChromosomeGenbank() {
+        void getAssemblyByChromosomeInsdcAccession() {
             for (ChromosomeEntity chromosomeEntity : chromosomeEntities) {
-                List<AssemblyEntity> entity = service.getAssembliesByChromosomeGenbank(
-                        chromosomeEntity.getGenbank());
+                List<AssemblyEntity> entity = service.getAssembliesByChromosomeInsdcAccession(
+                        chromosomeEntity.getInsdcAccession());
                 testAssemblyIdenticalToEntity(entity);
             }
         }
@@ -99,9 +99,9 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         }
 
         @Test
-        void getChromosomesByAssemblyGenbank() {
-            Page<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyGenbank(
-                    assemblyEntity.getGenbank(), DEFAULT_PAGE_REQUEST);
+        void getChromosomesByAssemblyInsdcAccession() {
+            Page<ChromosomeEntity> chromosomes = service.getChromosomesByAssemblyInsdcAccession(
+                    assemblyEntity.getInsdcAccession(), DEFAULT_PAGE_REQUEST);
             assertPageEntitiesIdentical(chromosomes);
         }
 
@@ -131,7 +131,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
             assertNotNull(assembly);
             assertEquals(assemblyEntity.getName(), assembly.getName());
             assertEquals(assemblyEntity.getOrganism(), assembly.getOrganism());
-            assertEquals(assemblyEntity.getGenbank(), assembly.getGenbank());
+            assertEquals(assemblyEntity.getInsdcAccession(), assembly.getInsdcAccession());
             assertEquals(assemblyEntity.getRefseq(), assembly.getRefseq());
             assertEquals(assemblyEntity.getTaxid(), assembly.getTaxid());
             assertEquals(assemblyEntity.isGenbankRefseqIdentical(), assembly.isGenbankRefseqIdentical());
