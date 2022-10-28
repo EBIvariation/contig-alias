@@ -99,7 +99,11 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
         chromosomeEntity.setGenbankSequenceName(columns[0]);
         chromosomeEntity.setInsdcAccession(columns[4]);
-        chromosomeEntity.setRefseq(columns[6]);
+        if (columns[6] == null || columns[6].isEmpty() || columns[6].equals("na")) {
+            chromosomeEntity.setRefseq(null);
+        } else {
+            chromosomeEntity.setRefseq(columns[6]);
+        }
 
         if (columns.length > 8) {
             try {
@@ -133,7 +137,11 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
         scaffoldEntity.setGenbankSequenceName(columns[0]);
         scaffoldEntity.setInsdcAccession(columns[4]);
-        scaffoldEntity.setRefseq(columns[6]);
+        if (columns[6] == null || columns[6].isEmpty() || columns[6].equals("na")) {
+            scaffoldEntity.setRefseq(null);
+        } else {
+            scaffoldEntity.setRefseq(columns[6]);
+        }
 
         if (columns.length > 8) {
             try {
