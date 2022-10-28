@@ -45,7 +45,8 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
             } else if (!line.startsWith("#")) {
                 String[] columns = line.split("\t", -1);
                 if ((columns.length >= 6 && columns[5].equals("=")) ||
-                        (columns.length >= 6 && columns[5].equals("<>") && columns[4] != null && !columns[4].isEmpty())) {
+                        (columns.length >= 6 && columns[5].equals("<>") &&
+                                columns[4] != null && !columns[4].isEmpty() && !columns[4].equals("na"))) {
                     if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
                         parseChromosomeLine(columns);
                     } else if (isScaffoldsEnabled) {
