@@ -90,7 +90,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
             }
             return Optional.of(assemblyEntity);
         } catch (Exception e) {
-            logger.info("Could not fetch Assembly Report form ENA for accession " + accession + "Exception: " + e);
+            logger.warn("Could not fetch Assembly Report from ENA for accession " + accession + "Exception: " + e);
             return Optional.empty();
         }
 
@@ -105,14 +105,14 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         try {
             boolean success = enaBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
             if (success) {
-                logger.info("ENA assembly report downloaded successfully");
+                logger.info("ENA assembly report downloaded successfully for accession "+ accession);
                 return Optional.of(downloadFilePath);
             } else {
-                logger.info("ENA assembly report could not be downloaded successfully");
+                logger.warn("ENA assembly report could not be downloaded successfully for accession "+accession);
                 return Optional.empty();
             }
         } catch (IOException | DownloadFailedException e) {
-            logger.info("Error downloading ENA assembly report " + e);
+            logger.warn("Error downloading ENA assembly report for accession "+ accession + e);
             return Optional.empty();
         }
     }

@@ -41,37 +41,43 @@ public class RetryTest {
 
     @Test
     public void fileDownloadSuccessfulTest() throws IOException {
+        String mockAccession = "GCA_000012345.1";
         String mockDirectory = "/src/test/resources/";
         String mockFileName = "mock_file.txt";
         Long mockFileSize = 1000l;
+        when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenReturn(Optional.of(mockDirectory));
         when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(ftpFile);
         when(ftpFile.getName()).thenReturn(mockFileName);
         when(ftpFile.getSize()).thenReturn(mockFileSize);
         when(ncbiBrowser.downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
                 .thenReturn(true);
-        Optional<Path> result = dataSource.downloadAssemblyReport(ncbiBrowser, mockDirectory);
+        Optional<Path> result = dataSource.downloadAssemblyReport(mockAccession, ncbiBrowser);
         assertTrue(result.isPresent());
     }
 
     @Test
     public void fileDownloadFailedTest() throws IOException {
+        String mockAccession = "GCA_000012345.1";
         String mockDirectory = "/src/test/resources/";
         String mockFileName = "mock_file.txt";
         Long mockFileSize = 1000l;
+        when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenReturn(Optional.of(mockDirectory));
         when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(ftpFile);
         when(ftpFile.getName()).thenReturn(mockFileName);
         when(ftpFile.getSize()).thenReturn(mockFileSize);
         when(ncbiBrowser.downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
                 .thenReturn(false);
-        Optional<Path> result = dataSource.downloadAssemblyReport(ncbiBrowser, mockDirectory);
+        Optional<Path> result = dataSource.downloadAssemblyReport(mockAccession, ncbiBrowser);
         assertFalse(result.isPresent());
     }
 
     @Test
     public void fileDownloadFailedRetryTest() throws IOException {
+        String mockAccession = "GCA_000012345.1";
         String mockDirectory = "/src/test/resources/";
         String mockFileName = "mock_file.txt";
         Long mockFileSize = 1000l;
+        when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenReturn(Optional.of(mockDirectory));
         when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(ftpFile);
         when(ftpFile.getName()).thenReturn(mockFileName);
         when(ftpFile.getSize()).thenReturn(mockFileSize);
@@ -80,12 +86,26 @@ public class RetryTest {
 
         NCBIAssemblyDataSource anotherObjSpy = Mockito.spy(dataSource);
         DownloadFailedException thrown = Assertions.assertThrows(DownloadFailedException.class, () -> {
-            anotherObjSpy.downloadAssemblyReport(ncbiBrowser, mockDirectory);
+            anotherObjSpy.downloadAssemblyReport(mockAccession, ncbiBrowser);
         });
         assertEquals("Download Failed", thrown.getMessage());
 
         verify(ncbiBrowser, times(5))
                 .downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize);
+    }
+
+    @Test
+    public void fileDownloadFailedRetryTest2() throws IOException {
+        String mockAccession = "GCA_000012345.1";
+        when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenThrow(new IOException("Error listing files"));
+
+        NCBIAssemblyDataSource anotherObjSpy = Mockito.spy(dataSource);
+        IOException thrown = Assertions.assertThrows(IOException.class, () -> {
+            anotherObjSpy.downloadAssemblyReport(mockAccession, ncbiBrowser);
+        });
+
+        assertEquals("Error listing files", thrown.getMessage());
+        verify(ncbiBrowser, times(5)).getGenomeReportDirectory(mockAccession);
     }
 
 }

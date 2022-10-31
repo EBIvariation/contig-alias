@@ -41,7 +41,6 @@ public class SequenceEntity {
     @ApiModelProperty(value = "Sequence's INSDC accession.")
     private String insdcAccession;
 
-    @Column(nullable = false)
     @ApiModelProperty(value = "Sequence's RefSeq accession.")
     private String refseq;
 

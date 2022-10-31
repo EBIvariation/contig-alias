@@ -33,7 +33,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,12 +62,8 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
             String accession) throws IOException, IllegalArgumentException {
         NCBIBrowser ncbiBrowser = factory.build();
         ncbiBrowser.connect();
-        Optional<String> directory = ncbiBrowser.getGenomeReportDirectory(accession);
-        if (!directory.isPresent()) {
-            return Optional.empty();
-        }
 
-        Optional<Path> downloadFilePath = downloadAssemblyReport(ncbiBrowser, directory.get());
+        Optional<Path> downloadFilePath = downloadAssemblyReport(accession, ncbiBrowser);
         if (!downloadFilePath.isPresent()) {
             return Optional.empty();
         }
@@ -77,7 +72,8 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         try (InputStream stream = new FileInputStream(downloadFilePath.get().toFile())) {
             NCBIAssemblyReportReader reader = readerFactory.build(stream);
             assemblyEntity = reader.getAssemblyEntity();
-            logger.info("NCBI: Number of chromosomes in " + accession + " : " + assemblyEntity.getChromosomes().size());
+            logger.info("NCBI: Number of chromosomes in " + accession + " : " +
+                    (assemblyEntity.getChromosomes() != null ? assemblyEntity.getChromosomes().size() : 0));
         } finally {
             try {
                 ncbiBrowser.disconnect();
@@ -89,17 +85,23 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         return Optional.of(assemblyEntity);
     }
 
-    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
-    public Optional<Path> downloadAssemblyReport(NCBIBrowser ncbiBrowser, String directory) throws IOException {
-        FTPFile ftpFile = ncbiBrowser.getNCBIAssemblyReportFile(directory);
-        String ftpFilePath = directory + ftpFile.getName();
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
+    public Optional<Path> downloadAssemblyReport(String accession, NCBIBrowser ncbiBrowser) throws IOException {
+        Optional<String> directory = ncbiBrowser.getGenomeReportDirectory(accession);
+        if (!directory.isPresent()) {
+            return Optional.empty();
+        }
+        logger.info("NCBI directory for assembly report download: " + directory.get());
+
+        FTPFile ftpFile = ncbiBrowser.getNCBIAssemblyReportFile(directory.get());
+        String ftpFilePath = directory.get() + ftpFile.getName();
         Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
         boolean success = ncbiBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
         if (success) {
-            logger.info("NCBI assembly report downloaded successfully");
+            logger.info("NCBI assembly report downloaded successfully (" + ftpFile.getName() + ")");
             return Optional.of(downloadFilePath);
         } else {
-            logger.info("NCBI assembly report could not be downloaded successfully");
+            logger.error("NCBI assembly report could not be downloaded successfully(" + ftpFile.getName() + ")");
             return Optional.empty();
         }
     }

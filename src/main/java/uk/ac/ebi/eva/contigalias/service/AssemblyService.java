@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
@@ -31,6 +30,7 @@ import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+
 
 @Service
 public class AssemblyService {
@@ -50,8 +50,6 @@ public class AssemblyService {
     private final NCBIAssemblyDataSource ncbiDataSource;
 
     private final ENAAssemblyDataSource enaDataSource;
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
@@ -102,7 +100,12 @@ public class AssemblyService {
             throw new AssemblyNotFoundException(accession);
         }
         enaDataSource.addENASequenceNamesToAssembly(fetchAssembly);
-        fetchAssembly.ifPresent(this::insertAssembly);
+        if (fetchAssembly.get().getChromosomes() != null && fetchAssembly.get().getChromosomes().size() > 0) {
+            insertAssembly(fetchAssembly.get());
+            logger.info("Successfully inserted assembly for accession " + accession);
+        } else {
+            logger.error("Skipping inserting assembly : No chromosome in assembly " + accession);
+        }
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
@@ -131,6 +134,7 @@ public class AssemblyService {
         }
     }
 
+    @Transactional
     public void insertAssembly(AssemblyEntity entity) {
         if (isEntityPresent(entity)) {
             throw duplicateAssemblyInsertionException(null, entity);
@@ -155,15 +159,21 @@ public class AssemblyService {
 
     public Map<String, List<String>> fetchAndInsertAssembly(List<String> accessions) {
         Map<String, List<String>> accessionResult = new HashMap<>();
-        List<Future<Pair<String, String>>> executorResponseList = new ArrayList<>();
+        accessionResult.put("SUCCESS", new ArrayList<>());
+        accessionResult.put("FAILURE", new ArrayList<>());
+
         for (String accession : accessions) {
             try {
+                logger.info("Started processing assembly accession : " + accession);
                 this.fetchAndInsertAssembly(accession);
-                accessionResult.getOrDefault("SUCCESS", new ArrayList<>()).add(accession);
+                accessionResult.get("SUCCESS").add(accession);
             } catch (Exception e) {
-                accessionResult.getOrDefault("FAILURE", new ArrayList<>()).add(accession);
+                logger.error("Exception while loading assembly for accession " + accession + e);
+                accessionResult.get("FAILURE").add(accession);
             }
         }
+        logger.info("Success: " + accessionResult.getOrDefault("SUCCESS", Collections.emptyList()));
+        logger.info("Failure: " + accessionResult.getOrDefault("FAILURE", Collections.emptyList()));
 
         return accessionResult;
     }
