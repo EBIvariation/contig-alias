@@ -38,6 +38,7 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
+
     private String ftpProxyHost;
 
     private Integer ftpProxyPort;
@@ -146,6 +147,16 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
 
         return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Report File not present in given directory: " + directoryPath));
+    }
+
+    /**
+     * Return the fna/fasta file that will be downloaded (a pointer to that FtpFile)*/
+    public FTPFile getAssemblyGenomicFnaFile(String directoryPath) throws IOException {
+        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
+        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("genomic.fna.gz") && !f.getName().contains("from"));
+        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
+
+        return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Genomic Fna (Fasta) File not present in given directory: " + directoryPath));
     }
 
 }
