@@ -19,7 +19,7 @@ public class GzipCompress {
     /**
      * Decompress (Unzip) a .gz file and save the output file in the same
      * input file's location.
-     * The output file's name will be the same as the input's but without '.gz'
+     * The output file's name will be genome_sequence.fna
      * @return The output (decompressed) file path*/
     public Optional<Path> unzip(String compressedFilePath, String outputDirPath) {
         String outputFileName = "genome_sequence.fna";
