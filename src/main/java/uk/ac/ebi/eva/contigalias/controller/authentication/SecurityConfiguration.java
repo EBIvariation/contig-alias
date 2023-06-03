@@ -57,7 +57,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
             .antMatchers("/v1/assemblies/**").permitAll()
             .antMatchers("/v1/chromosomes/**").permitAll()
-            .antMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
+            //.antMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
             .and().httpBasic().realmName(REALM)
             .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
