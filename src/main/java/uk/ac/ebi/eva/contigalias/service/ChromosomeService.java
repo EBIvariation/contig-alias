@@ -199,6 +199,13 @@ public class ChromosomeService {
         repository.delete(entity);
     }
 
+    /**
+     * Update the chromosome table; set the md5Checksum for the entry that has the given
+     * chromosome refseq*/
+    public int updateChromosomeEntityByRefseqSetMD5Checksum(String refseq, String md5Checksum){
+        return repository.updateChromosomeEntityByRefseqSetMD5Checksum(refseq, md5Checksum);
+    }
+
     public long countChromosomeEntitiesByInsdcAccession(String insdcAccession) {
         return repository.countChromosomeEntitiesByInsdcAccession(insdcAccession);
     }

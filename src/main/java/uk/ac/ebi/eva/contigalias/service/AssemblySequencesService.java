@@ -8,15 +8,20 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblySequencesDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblySequencesEntity;
+import uk.ac.ebi.eva.contigalias.entities.Sequence;
 import uk.ac.ebi.eva.contigalias.exception.AssemblySequenceNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblySequenceException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblySequencesRepository;
 
 @Service
 public class AssemblySequencesService {
+
+    @Autowired
+    private ChromosomeService chromosomeService;
 
     private final AssemblySequencesRepository repository;
 
@@ -39,7 +44,7 @@ public class AssemblySequencesService {
         if(!fetchAssembly.isPresent()){
             throw new AssemblySequenceNotFoundException(accession);
         }
-        if (fetchAssembly.get().getInsdcAccession() != null){ // This condition is only for testing, it'll change as soon as we add more attributes to the entity
+        if (fetchAssembly.get().getInsdcAccession() != null){
             insertAssemblySequence(fetchAssembly.get());
             logger.info("Successfully inserted assembly for accession " + accession);
         }else {
@@ -52,6 +57,12 @@ public class AssemblySequencesService {
         if (isEntityPresent(entity)) {
             throw duplicateAssemblySequenceInsertionException(null, entity);
         } else {
+            // Inserting the sequences' md5Checksum in the correct place in the chromosome table
+            for (Sequence s: entity.getSequences()){
+                chromosomeService.updateChromosomeEntityByRefseqSetMD5Checksum(s.getRefseq(), s.getSequenceMD5());
+                logger.info("Successfully updated chromosome table with md5Checksum: "+ s.getSequenceMD5() + "" +
+                                    " Where refseq = "+s.getRefseq());
+            }
             repository.save(entity);
         }
     }

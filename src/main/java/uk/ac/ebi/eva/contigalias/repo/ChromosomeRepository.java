@@ -19,10 +19,16 @@ package uk.ac.ebi.eva.contigalias.repo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+
+import javax.transaction.Transactional;
+
 
 @Repository
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
@@ -62,6 +68,11 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
                                                                                    Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscName(String ucscName, Pageable request);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE ChromosomeEntity c SET c.md5checksum = :md5Checksum WHERE c.refseq = :refseq")
+    int updateChromosomeEntityByRefseqSetMD5Checksum(@Param(value = "refseq") String refseq, @Param(value = "md5Checksum") String md5Checksum);
 
     long countChromosomeEntitiesByInsdcAccession(String insdcAccession);
 

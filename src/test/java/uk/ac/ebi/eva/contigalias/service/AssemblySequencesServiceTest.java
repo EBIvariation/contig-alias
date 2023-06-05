@@ -35,7 +35,7 @@ class AssemblySequencesServiceTest {
         String accession = "GCF_000001765.3";
         assemblySequencesService.fetchAndInsertAssemblySequence(accession);
         assertNotNull(assemblySequencesRepository.findAssemblySequenceEntityByInsdcAccession(accession));
-        assertEquals(accession, assemblySequencesRepository.findAssemblySequenceEntityByInsdcAccession(accession).get());
+        assertEquals(accession, assemblySequencesRepository.findAssemblySequenceEntityByInsdcAccession(accession).get().getInsdcAccession());
     }
 
     @Test
