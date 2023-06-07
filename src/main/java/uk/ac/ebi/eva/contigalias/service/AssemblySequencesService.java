@@ -25,51 +25,50 @@ public class AssemblySequencesService {
 
     private final AssemblySequencesRepository repository;
 
-    private final NCBIAssemblySequencesDataSource ncbiSequenceDataSource;
+    private final NCBIAssemblySequencesDataSource ncbiSequencesDataSource;
 
-    private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
+    private final Logger logger = LoggerFactory.getLogger(AssemblySequencesService.class);
 
 
     public AssemblySequencesService(
-            AssemblySequencesRepository repository, NCBIAssemblySequencesDataSource ncbiSequenceDataSource){
+            AssemblySequencesRepository repository, NCBIAssemblySequencesDataSource ncbiSequencesDataSource){
         this.repository = repository;
-        this.ncbiSequenceDataSource = ncbiSequenceDataSource;
+        this.ncbiSequencesDataSource = ncbiSequencesDataSource;
     }
 
     public void fetchAndInsertAssemblySequence(String accession) throws IOException, NoSuchAlgorithmException {
-        Optional<AssemblySequencesEntity> entity = repository.findAssemblySequenceEntityByInsdcAccession(accession);
+        Optional<AssemblySequencesEntity> entity = repository.findAssemblySequenceEntityByAssemblyInsdcAccession(accession);
         if(entity.isPresent())
             throw duplicateAssemblySequenceInsertionException(accession, entity.get());
-        Optional<AssemblySequencesEntity> fetchAssembly = ncbiSequenceDataSource.getAssemblySequencesByAccession(accession);
-        if(!fetchAssembly.isPresent()){
+        Optional<AssemblySequencesEntity> fetchAssemblySequences = ncbiSequencesDataSource.getAssemblySequencesByAccession(accession);
+        if(!fetchAssemblySequences.isPresent()){
             throw new AssemblySequenceNotFoundException(accession);
         }
-        if (fetchAssembly.get().getInsdcAccession() != null){
-            insertAssemblySequence(fetchAssembly.get());
-            logger.info("Successfully inserted assembly for accession " + accession);
+        if (fetchAssemblySequences.get().getAssemblyInsdcAccession() != null){
+            insertAssemblySequences(fetchAssemblySequences.get());
+            logger.info("Successfully inserted assembly sequences for accession: " + accession);
         }else {
-            logger.error("Skipping inserting assembly sequence : No name in assembly : " + accession);
+            logger.error("Skipping inserting assembly sequences : No name in assembly: " + accession);
         }
     }
 
     @Transactional
-    public void insertAssemblySequence(AssemblySequencesEntity entity) {
+    public void insertAssemblySequences(AssemblySequencesEntity entity) {
         if (isEntityPresent(entity)) {
             throw duplicateAssemblySequenceInsertionException(null, entity);
         } else {
             // Inserting the sequences' md5Checksum in the correct place in the chromosome table
             for (Sequence s: entity.getSequences()){
-                chromosomeService.updateChromosomeEntityByRefseqSetMD5Checksum(s.getRefseq(), s.getSequenceMD5());
-                logger.info("Successfully updated chromosome table with md5Checksum: "+ s.getSequenceMD5() + "" +
-                                    " Where refseq = "+s.getRefseq());
+                chromosomeService.updateChromosomeEntityByRefseqSetMD5Checksum(s.getSequenceRefseq(), s.getSequenceMD5());
             }
+            System.out.println("Assembly_insdc_accession: " + entity.getAssemblyInsdcAccession());
             repository.save(entity);
         }
     }
 
     private boolean isEntityPresent(AssemblySequencesEntity entity) {
         // TODO: THE CONDITIONS IN THIS METHOD WILL BE CHANGED WHEN WE ADD MORE ATTRIBUTES TO THE ENTITY
-        Optional<AssemblySequencesEntity> existingAssembly = repository.findAssemblySequenceEntityByInsdcAccession(entity.getInsdcAccession());
+        Optional<AssemblySequencesEntity> existingAssembly = repository.findAssemblySequenceEntityByAssemblyInsdcAccession(entity.getAssemblyInsdcAccession());
         return existingAssembly.isPresent();
     }
 

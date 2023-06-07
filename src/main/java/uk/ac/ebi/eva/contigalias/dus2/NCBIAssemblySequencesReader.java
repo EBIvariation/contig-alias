@@ -8,7 +8,8 @@ import java.util.List;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblySequencesEntity;
 import uk.ac.ebi.eva.contigalias.entities.Sequence;
-import uk.ac.ebi.eva.contigalias.utils.MD5Digest;
+import uk.ac.ebi.eva.contigalias.utils.DigestGenerator;
+import uk.ac.ebi.eva.contigalias.utils.MD5Hash;
 
 public class NCBIAssemblySequencesReader extends AssemblySequencesReader {
 
@@ -21,19 +22,19 @@ public class NCBIAssemblySequencesReader extends AssemblySequencesReader {
         if (reader == null){
             throw new NullPointerException("Cannot use AssemblySequenceReader without having a valid InputStreamReader.");
         }
-        MD5Digest md5Digest = new MD5Digest();
+        DigestGenerator md5Digest = new MD5Hash();
         if (assemblySequencesEntity == null){
             assemblySequencesEntity = new AssemblySequencesEntity();
         }
         // Setting the accession of the whole assembly file
-        assemblySequencesEntity.setInsdcAccession(accession);
+        assemblySequencesEntity.setAssemblyInsdcAccession(accession);
         List<Sequence> sequences = new LinkedList<>();
         String line = reader.readLine();
         while (line != null){
             if (line.startsWith(">")){
                 Sequence sequence = new Sequence();
                 String refSeq = line.substring(1, line.indexOf(' '));
-                sequence.setRefseq(refSeq);
+                sequence.setSequenceRefseq(refSeq);
                 line = reader.readLine();
                 StringBuilder sequenceValue = new StringBuilder();
                 while (line != null && !line.startsWith(">")){
@@ -47,6 +48,7 @@ public class NCBIAssemblySequencesReader extends AssemblySequencesReader {
             }
         }
         assemblySequencesEntity.setSequences(sequences);
+        String digest0; // The level 0 digest of the object
         fileParsed = true;
         reader.close();
     }

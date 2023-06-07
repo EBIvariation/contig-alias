@@ -5,10 +5,11 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.xml.bind.DatatypeConverter;
 
-public class MD5Digest {
+public class MD5Hash extends DigestGenerator{
 
     /**
      * Return the digest of the text using the MD5 algorithm*/
+    @Override
     public String hash(String text) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(text.getBytes());

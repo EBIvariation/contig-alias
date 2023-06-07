@@ -8,7 +8,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblySequencesEntity;
 
 @Repository
 public interface AssemblySequencesRepository extends JpaRepository<AssemblySequencesEntity, String> {
-    Optional<AssemblySequencesEntity> findAssemblySequenceEntityByInsdcAccession(String accession);
+    Optional<AssemblySequencesEntity> findAssemblySequenceEntityByAssemblyInsdcAccession(String accession);
 
 
 }

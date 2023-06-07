@@ -44,6 +44,9 @@ public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSou
     }
 
     @Override
+    /**
+     * Return the assemblySequencesEntity which contains the list of sequences of the assembly
+     * with the given accession. The sequences are hashed using md5 algorithm*/
     public Optional<AssemblySequencesEntity> getAssemblySequencesByAccession(String accession) throws IOException, IllegalArgumentException, NoSuchAlgorithmException {
             NCBIBrowser ncbiBrowser = factory.build();
             ncbiBrowser.connect();
@@ -59,7 +62,6 @@ public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSou
             if (!compressedFilePath.isPresent()){
                 return Optional.empty();
             }
-
             AssemblySequencesEntity assemblySequencesEntity;
             try (InputStream stream = new FileInputStream(compressedFilePath.get().toFile())){
                 NCBIAssemblySequencesReader reader = readerFactory.build(stream, accession);
@@ -69,7 +71,7 @@ public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSou
                 try {
                     ncbiBrowser.disconnect();
                     Files.deleteIfExists(downloadFilePath.get());
-                    Files.deleteIfExists(compressedFilePath.get()); // Deleting the fasta file
+                    Files.deleteIfExists(compressedFilePath.get()); // Deleting the fna.gz file
                 } catch (IOException e) {
                     logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ")");
                 }
