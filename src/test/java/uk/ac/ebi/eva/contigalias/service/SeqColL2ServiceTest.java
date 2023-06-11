@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.ac.ebi.eva.contigalias.entities.JSONObjectL2;
+import uk.ac.ebi.eva.contigalias.entities.NamingConvention;
 import uk.ac.ebi.eva.contigalias.entities.SeqColL2;
 
 import java.util.Arrays;
@@ -26,6 +27,8 @@ class SeqColL2ServiceTest {
 
     private static final String DIGEST0 = "a6748aa0f6a1e165f871dbed5e54ba62"; // Level 0 digest
 
+    private final NamingConvention.Convention namingConvention = NamingConvention.Convention.ENA;
+
     @BeforeEach
     void setUp() {
         JSONObjectL2 jsonObjectL2 = new JSONObjectL2();
@@ -38,7 +41,7 @@ class SeqColL2ServiceTest {
         jsonObjectL2.setLengths(lengths);
         jsonObjectL2.setNames(names);
         jsonObjectL2.setSequences(sequences);
-        seqColL2 = new SeqColL2(DIGEST0, jsonObjectL2);
+        seqColL2 = new SeqColL2(DIGEST0, jsonObjectL2, namingConvention);
     }
 
     @AfterEach

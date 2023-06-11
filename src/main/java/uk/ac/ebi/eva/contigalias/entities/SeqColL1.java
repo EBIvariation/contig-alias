@@ -19,8 +19,12 @@ public class SeqColL1 extends SeqCol{
     @Basic(fetch = FetchType.LAZY)
     private JSONObjectL1 object;
 
-    public SeqColL1(String digest, JSONObjectL1 jsonObject){
+    @OneToOne(mappedBy = "seqColL1")
+    private NamingConvention namingConvention;
+
+    public SeqColL1(String digest, JSONObjectL1 jsonObject, NamingConvention namingConvention){
         super(digest);
+        this.namingConvention = namingConvention;
         this.object = jsonObject;
     }
 

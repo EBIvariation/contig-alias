@@ -20,4 +20,9 @@ public class SeqColL1Service {
         SeqColL1 seqCol = repository.save(seqColL1);
         return Optional.of(seqCol);
     }
+
+    public Optional<SeqColL1> getSeqColL1ByDigest(String digest){
+        Optional<SeqColL1> seqColL11 = repository.findById(digest);
+        return seqColL11;
+    }
 }

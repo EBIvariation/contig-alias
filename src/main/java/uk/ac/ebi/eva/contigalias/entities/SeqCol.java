@@ -7,8 +7,8 @@ import lombok.ToString;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
+import java.util.List;
 
 @MappedSuperclass
 @TypeDefs({
@@ -20,6 +20,9 @@ import javax.persistence.MappedSuperclass;
 public abstract class SeqCol {
 
     @Id
+    @Column (name = "digest")
     protected String digest; // The level 0 digest
 
+    /*@Transient
+    protected NamingConvention.Convention namingConvention;*/
 }
