@@ -34,8 +34,8 @@ class AssemblySequencesServiceTest {
     void fetchAndInsertAssemblySequence() throws IOException, NoSuchAlgorithmException {
         String accession = "GCF_000001765.3";
         assemblySequencesService.fetchAndInsertAssemblySequence(accession);
-        assertNotNull(assemblySequencesRepository.findAssemblySequenceEntityByInsdcAccession(accession));
-        assertEquals(accession, assemblySequencesRepository.findAssemblySequenceEntityByInsdcAccession(accession).get().getInsdcAccession());
+        assertNotNull(assemblySequencesRepository.findAssemblySequenceEntityByAssemblyInsdcAccession(accession));
+        assertEquals(accession, assemblySequencesRepository.findAssemblySequenceEntityByAssemblyInsdcAccession(accession).get().getAssemblyInsdcAccession());
     }
 
     @Test

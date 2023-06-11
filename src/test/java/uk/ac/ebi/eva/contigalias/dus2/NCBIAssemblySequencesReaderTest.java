@@ -54,13 +54,13 @@ class NCBIAssemblySequencesReaderTest {
     void assertParsedFastaFileValid() throws IOException, NoSuchAlgorithmException {
         reader.parseFile();
         displayAssemblySequencesEntityContent(reader.assemblySequencesEntity);
-        assertEquals(ACCESSION, reader.assemblySequencesEntity.getInsdcAccession());
+        assertEquals(ACCESSION, reader.assemblySequencesEntity.getAssemblyInsdcAccession());
     }
 
     void displayAssemblySequencesEntityContent(AssemblySequencesEntity entity){
-        System.out.println("ACCESSION: " + entity.getInsdcAccession());
+        System.out.println("ACCESSION: " + entity.getAssemblyInsdcAccession());
         for (Sequence s: entity.getSequences()){
-            System.out.print("REFSEQ: " + s.getRefseq() + " | ");
+            System.out.print("REFSEQ: " + s.getSequenceRefseq() + " | ");
             System.out.println("SEQUENCE_MD5: " + s.getSequenceMD5());
         }
     }

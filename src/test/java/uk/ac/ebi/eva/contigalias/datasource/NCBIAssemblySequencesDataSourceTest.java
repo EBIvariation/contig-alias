@@ -12,7 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import uk.ac.ebi.eva.contigalias.entities.AssemblySequencesEntity;
 import uk.ac.ebi.eva.contigalias.entities.Sequence;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @SpringBootTest
 class NCBIAssemblySequencesDataSourceTest {
 
@@ -36,14 +37,14 @@ class NCBIAssemblySequencesDataSourceTest {
         //String accession2 = "GCF_000001405.31";
         Optional<AssemblySequencesEntity> entity = dataSource.getAssemblySequencesByAccession(accession);
         //displayAssemblySequencesEntityContent(entity.get());
-        assertEquals(accession, entity.get().getInsdcAccession());
+        assertEquals(accession, entity.get().getAssemblyInsdcAccession());
     }
 
     void displayAssemblySequencesEntityContent(AssemblySequencesEntity entity) throws InterruptedException {
-        System.out.println("ACCESSION: " + entity.getInsdcAccession());
+        System.out.println("ACCESSION: " + entity.getAssemblyInsdcAccession());
         System.out.println("TOTAL NUMBER OF SEQUENCES: " + entity.getSequences().size());
         for (Sequence s: entity.getSequences()){
-            System.out.print("REFSEQ: " + s.getRefseq() + " | ");
+            System.out.print("REFSEQ: " + s.getSequenceRefseq() + " | ");
             System.out.println("SEQUENCE_MD5: " + s.getSequenceMD5());
             Thread.sleep(1000); // Just for lazy and fun display :)
         }
