@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.entities.SeqColL1;
 import uk.ac.ebi.eva.contigalias.repo.SeqColL1Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,5 +25,9 @@ public class SeqColL1Service {
     public Optional<SeqColL1> getSeqColL1ByDigest(String digest){
         Optional<SeqColL1> seqColL11 = repository.findById(digest);
         return seqColL11;
+    }
+
+    public List<SeqColL1> getAllSeqCollections(){
+        return repository.findAll();
     }
 }

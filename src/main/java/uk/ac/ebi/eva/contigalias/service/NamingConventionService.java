@@ -15,7 +15,14 @@ public class NamingConventionService {
 
 
     public Optional<NamingConvention> addNamingConvention(NamingConvention namingConvention){
-        NamingConvention convention = repository.save(namingConvention);
-        return Optional.of(convention);
+        NamingConvention convention = null;
+        try {
+            convention = repository.save(namingConvention);
+            return Optional.of(convention);
+        } catch (Exception e){
+            // TODO: THROW AN EXCEPTIONS CLASS
+            System.out.println("Seqcol with digest "+ namingConvention.getSeqColL1().getDigest() +" already exist");
+        }
+        return Optional.empty();
     }
 }

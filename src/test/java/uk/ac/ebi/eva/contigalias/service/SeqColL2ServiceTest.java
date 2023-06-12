@@ -32,17 +32,14 @@ class SeqColL2ServiceTest {
     @BeforeEach
     void setUp() {
         JSONObjectL2 jsonObjectL2 = new JSONObjectL2();
-        List<Integer> lengths = Arrays.asList(1216, 970, 1788);
-        List<String> names = Arrays.asList("A", "B", "C");
         List<String> sequences = Arrays.asList(
                 "76f9f3315fa4b831e93c36cd88196480",
                 "d5171e863a3d8f832f0559235987b1e5",
                 "b9b1baaa7abf206f6b70cf31654172db");
-        jsonObjectL2.setLengths(lengths);
-        jsonObjectL2.setNames(names);
-        jsonObjectL2.setSequences(sequences);
-        seqColL2 = new SeqColL2(DIGEST0, jsonObjectL2, namingConvention);
+        jsonObjectL2.setObject(sequences);
+        seqColL2 = new SeqColL2(DIGEST0, jsonObjectL2);
     }
+
 
     @AfterEach
     void tearDown() {

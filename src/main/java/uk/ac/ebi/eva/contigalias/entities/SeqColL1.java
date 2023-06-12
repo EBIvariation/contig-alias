@@ -22,9 +22,8 @@ public class SeqColL1 extends SeqCol{
     @OneToOne(mappedBy = "seqColL1")
     private NamingConvention namingConvention;
 
-    public SeqColL1(String digest, JSONObjectL1 jsonObject, NamingConvention namingConvention){
+    public SeqColL1(String digest, JSONObjectL1 jsonObject){
         super(digest);
-        this.namingConvention = namingConvention;
         this.object = jsonObject;
     }
 

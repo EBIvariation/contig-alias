@@ -32,7 +32,7 @@ public class NamingConvention {
     private SeqColL1 seqCols;*/
 
     public enum Convention {
-        ENA, GENBANK
+        ENA, GENBANK, USCS
     }
 
     public NamingConvention(Convention convention, SeqColL1 seqColL1){

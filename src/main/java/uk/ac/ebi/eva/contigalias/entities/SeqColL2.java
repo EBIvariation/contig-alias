@@ -19,7 +19,7 @@ public class SeqColL2 extends SeqCol{
     @Basic(fetch = FetchType.LAZY)
     private JSONObjectL2 object;
 
-    public SeqColL2(String digest, JSONObjectL2 jsonObject, NamingConvention.Convention namingConvention){
+    public SeqColL2(String digest, JSONObjectL2 jsonObject){
         super(digest);
         this.object = jsonObject;
     }
