@@ -27,7 +27,7 @@ class SeqColL2ServiceTest {
 
     private static final String DIGEST0 = "a6748aa0f6a1e165f871dbed5e54ba62"; // Level 0 digest
 
-    private final NamingConvention.Convention namingConvention = NamingConvention.Convention.ENA;
+
 
     @BeforeEach
     void setUp() {

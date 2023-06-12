@@ -25,6 +25,4 @@ public abstract class SeqCol {
     @Column (name = "digest")
     protected String digest; // The level 0 digest
 
-    /*@Transient
-    protected NamingConvention.Convention namingConvention;*/
 }

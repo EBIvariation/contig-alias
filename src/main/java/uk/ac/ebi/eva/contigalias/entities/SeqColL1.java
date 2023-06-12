@@ -9,7 +9,6 @@ import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Table(name = "sequence_collections_L1")
 public class SeqColL1 extends SeqCol{
@@ -19,12 +18,14 @@ public class SeqColL1 extends SeqCol{
     @Basic(fetch = FetchType.LAZY)
     private JSONObjectL1 object;
 
-    @OneToOne(mappedBy = "seqColL1")
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private NamingConvention namingConvention;
 
-    public SeqColL1(String digest, JSONObjectL1 jsonObject){
-        super(digest);
-        this.object = jsonObject;
-    }
+   public SeqColL1(String digest, JSONObjectL1 jsonObjectL1, NamingConvention namingConvention){
+       super(digest);
+       this.object = jsonObjectL1;
+       this.namingConvention = namingConvention;
+   }
 
 }
