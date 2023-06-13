@@ -1,13 +1,22 @@
 package uk.ac.ebi.eva.contigalias.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
 
 @Entity
 @Data
-public class SeqColL1 extends SeqCol{
+@NoArgsConstructor
+@AllArgsConstructor
+public class SeqColL1 {
+    @Id
+    private String digest;
 
     @Column(nullable = false)
     private String sequences;
@@ -19,5 +28,10 @@ public class SeqColL1 extends SeqCol{
     private String names;
 
     @Column(nullable = false)
-    private String naming_convention;
+    @Enumerated(EnumType.STRING)
+    private NamingConvention naming_convention;
+
+    public enum NamingConvention {
+        ENA, GENBANK, USCS
+    }
 }
