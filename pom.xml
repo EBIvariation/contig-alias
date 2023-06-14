@@ -147,6 +147,13 @@
             <version>1.2.5.RELEASE</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-52</artifactId>
+            <version>2.3.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
