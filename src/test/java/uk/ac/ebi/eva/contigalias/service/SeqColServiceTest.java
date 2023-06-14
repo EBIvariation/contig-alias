@@ -8,14 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import uk.ac.ebi.eva.contigalias.entities.SeqCol2;
+import uk.ac.ebi.eva.contigalias.entities.SeqCol;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
-class SeqCol2ServiceTest {
+class SeqColServiceTest {
 
     @Autowired
     private SeqCol2Service service;
@@ -28,10 +28,10 @@ class SeqCol2ServiceTest {
 
     private final String BASE_SEQUENCES = "3b379221__";
 
-    private final SeqCol2.Attribute names = SeqCol2.Attribute.names;
-    private final SeqCol2.Attribute sequences = SeqCol2.Attribute.sequences;
-    private final SeqCol2.Attribute lengths = SeqCol2.Attribute.lengths;
-    private final SeqCol2.Attribute convention = SeqCol2.Attribute.convention;
+    private final SeqCol.Attribute names = SeqCol.Attribute.names;
+    private final SeqCol.Attribute sequences = SeqCol.Attribute.sequences;
+    private final SeqCol.Attribute lengths = SeqCol.Attribute.lengths;
+    private final SeqCol.Attribute convention = SeqCol.Attribute.convention;
     private final List<String> NAMES_ARRAY = Arrays.asList("AB__", "CD__", "EF__", "GH__");
     private final List<String> LENGTHS_ARRAY = Arrays.asList("12", "34", "56", "78");
     private final List<String> SEQUENCES_ARRAY = Arrays.asList("AA__", "TT__", "GG__", "CC__");
@@ -39,34 +39,34 @@ class SeqCol2ServiceTest {
     /**
      * The JSON object will contain a map with three
      * keys and values*/
-    SeqCol2 generateSeqColLevel1(String id, SeqCol2.NamingConvention namingConvention){
-        SeqCol2 seqCol2 = new SeqCol2();
-        seqCol2.setDigest(BASE_DIGEST + id);
+    SeqCol generateSeqColLevel1(String id, SeqCol.NamingConvention namingConvention){
+        SeqCol seqCol = new SeqCol();
+        seqCol.setDigest(BASE_DIGEST + id);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(names.toString(), BASE_NAMES + id);
         jsonObject.put(lengths.toString(), BASE_LENGTHS + id);
         jsonObject.put(sequences.toString(), BASE_SEQUENCES + id);
         jsonObject.put(convention.toString(), namingConvention);
-        seqCol2.setObject(jsonObject);
-        return seqCol2;
+        seqCol.setObject(jsonObject);
+        return seqCol;
     }
 
     /**
      * The JSON object will contain the digests
      * as keys and their corresponding values in
      * a JSONArray*/
-    SeqCol2 generateSeqColLevel2(String id, String digest, SeqCol2.Attribute attribute){
-        SeqCol2 seqCol2 = new SeqCol2();
-        seqCol2.setDigest(digest);
+    SeqCol generateSeqColLevel2(String id, String digest, SeqCol.Attribute attribute){
+        SeqCol seqCol = new SeqCol();
+        seqCol.setDigest(digest);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(attribute.toString(), generateSampleArray(id, attribute));
-        seqCol2.setObject(jsonObject);
-        return seqCol2;
+        seqCol.setObject(jsonObject);
+        return seqCol;
     }
 
     /**
      * Generate a sample array*/
-    JSONArray generateSampleArray(String id, SeqCol2.Attribute attribute){
+    JSONArray generateSampleArray(String id, SeqCol.Attribute attribute){
         JSONArray array = new JSONArray();
         switch (attribute){
             case names:
@@ -100,28 +100,28 @@ class SeqCol2ServiceTest {
     @Test
     void addSeqCol() {
         for (int i=1000; i<1003; i++) {
-            SeqCol2 level1 = generateSeqColLevel1(Integer.toString(i), SeqCol2.NamingConvention.ENA);
-            SeqCol2 namesArr = generateSeqColLevel2(Integer.toString(i),
-                                                    level1.getObject().get(names.toString()).toString(),
-                                                    SeqCol2.Attribute.names);
-            SeqCol2 sequencesArr = generateSeqColLevel2(Integer.toString(i),
-                                                        level1.getObject().get(sequences.toString()).toString(),
-                                                        SeqCol2.Attribute.sequences);
-            SeqCol2 lengthsArr = generateSeqColLevel2(Integer.toString(i),
-                                                      level1.getObject().get(lengths.toString()).toString(),
-                                                      lengths);
+            SeqCol level1 = generateSeqColLevel1(Integer.toString(i), SeqCol.NamingConvention.ENA);
+            SeqCol namesArr = generateSeqColLevel2(Integer.toString(i),
+                                                   level1.getObject().get(names.toString()).toString(),
+                                                   SeqCol.Attribute.names);
+            SeqCol sequencesArr = generateSeqColLevel2(Integer.toString(i),
+                                                       level1.getObject().get(sequences.toString()).toString(),
+                                                       SeqCol.Attribute.sequences);
+            SeqCol lengthsArr = generateSeqColLevel2(Integer.toString(i),
+                                                     level1.getObject().get(lengths.toString()).toString(),
+                                                     lengths);
             service.addSeqCol(level1);
             service.addSeqCol(namesArr);
             service.addSeqCol(sequencesArr);
             service.addSeqCol(lengthsArr);
         }
-        List<SeqCol2> seqCol2List = service.getAll();
+        List<SeqCol> seqColList = service.getAll();
 
-        for (SeqCol2 seqCol: seqCol2List){
+        for (SeqCol seqCol: seqColList){
             System.out.println(seqCol);
         }
 
-        assertNotNull(seqCol2List);
+        assertNotNull(seqColList);
     }
 
     @Test

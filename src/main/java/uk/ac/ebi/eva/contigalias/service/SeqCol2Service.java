@@ -3,7 +3,7 @@ package uk.ac.ebi.eva.contigalias.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uk.ac.ebi.eva.contigalias.entities.SeqCol2;
+import uk.ac.ebi.eva.contigalias.entities.SeqCol;
 import uk.ac.ebi.eva.contigalias.repo.SeqCol2Repository;
 
 import java.util.List;
@@ -16,9 +16,9 @@ public class SeqCol2Service {
     private SeqCol2Repository seqCol2Repository;
 
 
-    public Optional<SeqCol2> addSeqCol(SeqCol2 seqCol2){
+    public Optional<SeqCol> addSeqCol(SeqCol seqCol2){
         try {
-            SeqCol2 seqCol = seqCol2Repository.save(seqCol2);
+            SeqCol seqCol = seqCol2Repository.save(seqCol2);
             return Optional.of(seqCol);
         } catch (Exception e){
             System.out.println("Sequence collection object with digest: " + seqCol2.getDigest()
@@ -27,7 +27,7 @@ public class SeqCol2Service {
         return Optional.empty();
     }
 
-    public List<SeqCol2> getAll(){
+    public List<SeqCol> getAll(){
         return seqCol2Repository.findAll();
     }
 }

@@ -2,7 +2,6 @@ package uk.ac.ebi.eva.contigalias.entities;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
-import lombok.ToString;
 import net.minidev.json.JSONObject;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -19,7 +18,7 @@ import javax.persistence.Id;
 })
 @Entity
 @Data
-public class SeqCol2 {
+public class SeqCol {
     @Id
     private String digest; // Can be of any level
 
