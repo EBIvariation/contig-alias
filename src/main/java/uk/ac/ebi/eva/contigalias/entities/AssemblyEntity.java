@@ -61,6 +61,9 @@ public class AssemblyEntity {
     @ApiModelProperty(value = "Assembly's TRUNC512 checksum value.")
     private String trunc512checksum;
 
+
+    private String seqColDigest;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
     @LazyCollection(LazyCollectionOption.FALSE)
