@@ -74,6 +74,11 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     @Query("UPDATE ChromosomeEntity c SET c.md5checksum = :md5Checksum WHERE c.refseq = :refseq")
     int updateChromosomeEntityByRefseqSetMD5Checksum(@Param(value = "refseq") String refseq, @Param(value = "md5Checksum") String md5Checksum);
 
+    @Transactional
+    @Modifying
+    @Query("UPDATE ChromosomeEntity c SET c.md5checksum = :md5Checksum")
+    int updateChromosomeEntityByAccessionSetMD5Checksum(@Param(value = "md5Checksum") String md5Checksum);
+
     long countChromosomeEntitiesByInsdcAccession(String insdcAccession);
 
     long countChromosomeEntitiesByRefseq(String refseq);

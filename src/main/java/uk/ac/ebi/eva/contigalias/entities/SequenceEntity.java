@@ -65,6 +65,8 @@ public class SequenceEntity {
     @Enumerated(EnumType.STRING)
     private ContigType contigType;
 
+    private String seqColDigest;
+
     @Id
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this sequence belongs to.")
