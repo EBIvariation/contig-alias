@@ -36,9 +36,7 @@ public class ChecksumSetter {
         this.md5ChecksumRetriever = md5ChecksumRetriever;
     }
 
-    // @Scheduled(cron = "30 15 10 1 * ? 2023")   -- the task to run at 10:15:30 AM on the 1st day of every month in the year 2023.
-    //Seconds: 30 Minutes: 15 Hours: 10 Day of the month: 1 Month: Every month Day of the week: Every day of the week Year: 2023
-    @Scheduled(initialDelay = 24 * 60 * 60 * 1000, fixedDelay = 24 * 60 * 60 * 1000)
+    @Scheduled(cron = "0 0 0 ? * FRI")
     public void updateMd5CheckSumForAllAssemblies() {
         scheduledToRunMD5ChecksumUpdateTasks = new HashSet<>();
         List<String> assemblyList = chromosomeService.getAssembliesWhereChromosomeMd5ChecksumIsNull();
@@ -90,10 +88,14 @@ public class ChecksumSetter {
         logger.info("Trying to update md5checksum for assembly: " + assembly);
         Slice<ChromosomeEntity> chrSlice;
         Pageable pageable = PageRequest.of(0, DEFAULT_PAGE_SIZE);
+        long chromosomeUpdated = 0;
         do {
             chrSlice = chromosomeService.getChromosomesByAssemblyInsdcAccessionWhereMd5ChecksumIsNull(assembly, pageable);
             List<ChromosomeEntity> chromosomeEntityList = chrSlice.getContent();
             updateMd5ChecksumForChromosome(chromosomeEntityList);
+
+            chromosomeUpdated += chromosomeEntityList.size();
+            logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
         } while (chrSlice.hasNext());
 
         logger.info("Updating md5checksum for assembly " + assembly + " completed");
