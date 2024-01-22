@@ -123,20 +123,17 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
      * @param optional {@link AssemblyEntity} to add ENA sequence names to
      * @throws IOException Passes IOException thrown by {@link #getAssemblyByAccession(String)}
      */
-    public void addENASequenceNamesToAssembly(Optional<AssemblyEntity> optional) throws IOException {
-        if (optional.isPresent()) {
-            AssemblyEntity targetAssembly = optional.get();
-            if (!hasAllEnaSequenceNames(targetAssembly)) {
-                String insdcAccession = targetAssembly.getInsdcAccession();
-                Optional<AssemblyEntity> enaAssembly = getAssemblyByAccession(insdcAccession);
+    public void addENASequenceNamesToAssembly(AssemblyEntity targetAssembly) throws IOException {
+        if (!hasAllEnaSequenceNames(targetAssembly)) {
+            String insdcAccession = targetAssembly.getInsdcAccession();
+            Optional<AssemblyEntity> enaAssembly = getAssemblyByAccession(insdcAccession);
 
-                if (enaAssembly.isPresent()) {
-                    AssemblyEntity sourceAssembly = enaAssembly.get();
-                    addENASequenceNames(Objects.nonNull(sourceAssembly.getChromosomes()) ?
-                                    sourceAssembly.getChromosomes() : Collections.emptyList(),
-                            Objects.nonNull(targetAssembly.getChromosomes()) ?
-                                    targetAssembly.getChromosomes() : Collections.emptyList());
-                }
+            if (enaAssembly.isPresent()) {
+                AssemblyEntity sourceAssembly = enaAssembly.get();
+                addENASequenceNames(Objects.nonNull(sourceAssembly.getChromosomes()) ?
+                                sourceAssembly.getChromosomes() : Collections.emptyList(),
+                        Objects.nonNull(targetAssembly.getChromosomes()) ?
+                                targetAssembly.getChromosomes() : Collections.emptyList());
             }
         }
     }

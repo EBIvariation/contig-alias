@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
+import uk.ac.ebi.eva.contigalias.scheduler.ChecksumSetter;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -38,8 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Set;
 
 
 @Service
@@ -51,14 +51,17 @@ public class AssemblyService {
 
     private final ENAAssemblyDataSource enaDataSource;
 
+    private final ChecksumSetter checksumSetter;
+
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
-    public AssemblyService(
-            AssemblyRepository repository, NCBIAssemblyDataSource ncbiDataSource, ENAAssemblyDataSource enaDataSource) {
+    public AssemblyService(AssemblyRepository repository, NCBIAssemblyDataSource ncbiDataSource,
+                           ENAAssemblyDataSource enaDataSource, ChecksumSetter checksumSetter) {
         this.repository = repository;
         this.ncbiDataSource = ncbiDataSource;
         this.enaDataSource = enaDataSource;
+        this.checksumSetter = checksumSetter;
     }
 
     public Optional<AssemblyEntity> getAssemblyByInsdcAccession(String insdcAccession) {
@@ -99,13 +102,28 @@ public class AssemblyService {
         if (!fetchAssembly.isPresent()) {
             throw new AssemblyNotFoundException(accession);
         }
-        enaDataSource.addENASequenceNamesToAssembly(fetchAssembly);
-        if (fetchAssembly.get().getChromosomes() != null && fetchAssembly.get().getChromosomes().size() > 0) {
-            insertAssembly(fetchAssembly.get());
-            logger.info("Successfully inserted assembly for accession " + accession);
+        if (fetchAssembly.isPresent()) {
+            AssemblyEntity assemblyEntity = fetchAssembly.get();
+            enaDataSource.addENASequenceNamesToAssembly(assemblyEntity);
+            if (assemblyEntity.getChromosomes() != null && assemblyEntity.getChromosomes().size() > 0) {
+                insertAssembly(assemblyEntity);
+                logger.info("Successfully inserted assembly for accession " + accession);
+                // submit job for retrieving and updating MD5 Checksum for assembly (asynchronously)
+                checksumSetter.updateMd5CheckSumForAssemblyAsync(accession);
+            } else {
+                logger.error("Skipping inserting assembly : No chromosome in assembly " + accession);
+            }
         } else {
-            logger.error("Skipping inserting assembly : No chromosome in assembly " + accession);
+            logger.error("Could not get assembly from NCBI");
         }
+    }
+
+    public void retrieveAndInsertMd5ChecksumForAssembly(String assembly) {
+        checksumSetter.updateMd5CheckSumForAssemblyAsync(assembly);
+    }
+
+    public Map<String, Set<String>> getMD5ChecksumUpdateTaskStatus() {
+        return checksumSetter.getMD5ChecksumUpdateTaskStatus();
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {

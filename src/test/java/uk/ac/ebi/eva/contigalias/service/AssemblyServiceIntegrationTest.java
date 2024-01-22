@@ -31,10 +31,12 @@ import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
+import uk.ac.ebi.eva.contigalias.scheduler.ChecksumSetter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +64,7 @@ public class AssemblyServiceIntegrationTest {
     void setup() throws IOException {
         NCBIAssemblyDataSource mockNcbiDataSource = mock(NCBIAssemblyDataSource.class);
         ENAAssemblyDataSource mockEnaDataSource = mock(ENAAssemblyDataSource.class);
+        ChecksumSetter mockChecksumSetter = mock(ChecksumSetter.class);
         for (int i = 0; i < entities.length; i++) {
             AssemblyEntity generate = AssemblyGenerator.generate(i);
             entities[i] = generate;
@@ -69,8 +72,10 @@ public class AssemblyServiceIntegrationTest {
                     .thenReturn(Optional.of(generate));
             Mockito.when(mockNcbiDataSource.getAssemblyByAccession(generate.getRefseq()))
                     .thenReturn(Optional.of(generate));
+            Mockito.when(mockChecksumSetter.updateMd5CheckSumForAssemblyAsync(generate.getInsdcAccession()))
+                    .thenReturn(new CompletableFuture<>());
         }
-        service = new AssemblyService(repository, mockNcbiDataSource, mockEnaDataSource);
+        service = new AssemblyService(repository, mockNcbiDataSource, mockEnaDataSource, mockChecksumSetter);
     }
 
     @AfterEach

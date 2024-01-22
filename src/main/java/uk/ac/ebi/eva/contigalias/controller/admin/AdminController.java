@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequestMapping("/v1/admin")
 @RestController
@@ -85,6 +88,30 @@ public class AdminController {
         }
         Map<String, List<String>> accessionResult = handler.fetchAndInsertAssemblyByAccession(accessions);
         return new ResponseEntity<>("Accession Processing Result : " + accessionResult, HttpStatus.MULTI_STATUS);
+    }
+
+    @ApiOperation(value = "Given an assembly accession, retrieve MD5 checksum for all chromosomes belonging to assembly and update")
+    @PutMapping(value = "assemblies/{accession}/md5checksum")
+    public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(@PathVariable(name = "accession")
+                                                                          @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
+                                                                                  "GCA_000001405.10") String asmAccession) {
+        handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
+        return ResponseEntity.ok("A task has been submitted for updating md5checksum for all chromosomes " +
+                "in assembly " + asmAccession + ". Depending upon the number of chromosomes present in assembly, " +
+                "this might take some time to complete");
+    }
+
+    @ApiOperation(value = "Retrieve list of assemblies for which MD5 Checksum updates are running/going-to-run ")
+    @GetMapping(value = "assemblies/md5checksum/status")
+    public ResponseEntity<String> getMD5ChecksumUpdateTaskStatus() {
+        Map<String, Set<String>> md5ChecksumUpdateTasks = handler.getMD5ChecksumUpdateTaskStatus();
+        Set<String> runningTasks = md5ChecksumUpdateTasks.get("running");
+        Set<String> scheduledTasks = md5ChecksumUpdateTasks.get("scheduled");
+        String runningTaskRes = runningTasks == null || runningTasks.isEmpty() ? "No running MD5 checksum update tasks" :
+                runningTasks.stream().collect(Collectors.joining(","));
+        String scheduledTaskRes = scheduledTasks == null || scheduledTasks.isEmpty() ? "No scheduled MD5 checksum update tasks" :
+                scheduledTasks.stream().collect(Collectors.joining(","));
+        return ResponseEntity.ok("running: " + runningTaskRes + "\nscheduled: " + scheduledTaskRes);
     }
 
 //    This endpoint can be enabled in the future when checksums for assemblies are added to the project.
