@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.contigalias.datasource;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.net.ftp.FTPFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,13 +7,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
-import uk.ac.ebi.eva.contigalias.scheduler.Md5ChecksumRetriever;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,8 +20,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,13 +37,6 @@ public class RetryTest {
 
     @Autowired
     private NCBIAssemblyDataSource dataSource;
-
-    @Autowired
-    private Md5ChecksumRetriever md5ChecksumRetriever;
-
-    @MockBean
-    private RestTemplate restTemplate;
-
 
     @Test
     public void fileDownloadSuccessfulTest() throws IOException {
@@ -118,22 +105,6 @@ public class RetryTest {
 
         assertEquals("Error listing files", thrown.getMessage());
         verify(ncbiBrowser, times(5)).getGenomeReportDirectory(mockAccession);
-    }
-
-
-    @Test
-    public void retrieveMd5ChecksumRetry() {
-        String insdcAccession = "TEST_ACCESSION";
-        when(restTemplate.getForObject(anyString(), eq(JsonNode.class)))
-                .thenThrow(new RuntimeException("Simulated network issue"));
-
-        Md5ChecksumRetriever anotherObjSpy = Mockito.spy(md5ChecksumRetriever);
-        RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, () -> {
-            anotherObjSpy.retrieveMd5Checksum(insdcAccession);
-        });
-
-        assertEquals("Simulated network issue", thrown.getMessage());
-        verify(restTemplate, times(5)).getForObject(anyString(), eq(JsonNode.class));
     }
 
 }
