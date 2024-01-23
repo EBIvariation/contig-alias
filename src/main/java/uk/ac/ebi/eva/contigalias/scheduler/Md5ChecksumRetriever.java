@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,7 +20,6 @@ public class Md5ChecksumRetriever {
         this.restTemplate = restTemplate;
     }
 
-    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
     public String retrieveMd5Checksum(String insdcAccession) {
         String apiURL = INSDC_CHECKSUM_URL.replace(INSDC_ACCESSION_PLACE_HOLDER, insdcAccession);
         JsonNode jsonResponse = restTemplate.getForObject(apiURL, JsonNode.class);
