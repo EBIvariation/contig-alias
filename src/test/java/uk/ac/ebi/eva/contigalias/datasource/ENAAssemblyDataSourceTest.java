@@ -56,7 +56,7 @@ public class ENAAssemblyDataSourceTest {
     @Test
     public void getENASequenceNamesForAssembly() throws IOException {
         Optional<AssemblyEntity> assembly = ncbiDataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        enaDataSource.addENASequenceNamesToAssembly(assembly);
+        enaDataSource.addENASequenceNamesToAssembly(assembly.get());
         assertTrue(assembly.isPresent());
         assertTrue(enaDataSource.hasAllEnaSequenceNames(assembly.get()));
     }

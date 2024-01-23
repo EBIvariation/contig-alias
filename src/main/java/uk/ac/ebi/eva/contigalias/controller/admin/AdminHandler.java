@@ -27,6 +27,8 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AdminHandler {
@@ -46,12 +48,24 @@ public class AdminHandler {
         this.assemblyAssembler = assemblyAssembler;
     }
 
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
+        return assemblyService.getAssemblyByAccession(accession);
+    }
+
     public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {
         assemblyService.fetchAndInsertAssembly(accession);
     }
 
     public Map<String, List<String>> fetchAndInsertAssemblyByAccession(List<String> accessions) {
         return assemblyService.fetchAndInsertAssembly(accessions);
+    }
+
+    public void retrieveAndInsertMd5ChecksumForAssembly(String accession) {
+        assemblyService.retrieveAndInsertMd5ChecksumForAssembly(accession);
+    }
+
+    public Map<String, Set<String>> getMD5ChecksumUpdateTaskStatus() {
+        return assemblyService.getMD5ChecksumUpdateTaskStatus();
     }
 
     public void deleteAssemblyByAccession(String accession) {

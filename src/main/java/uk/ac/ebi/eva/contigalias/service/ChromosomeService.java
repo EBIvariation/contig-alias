@@ -25,6 +25,7 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
+import javax.transaction.Transactional;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,6 +53,22 @@ public class ChromosomeService {
     public Page<ChromosomeEntity> getChromosomesByAssemblyInsdcAccession(String asmInsdcAccession, Pageable request) {
         Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_InsdcAccession(asmInsdcAccession, request);
         return stripAssembliesFromChromosomes(chromosomes);
+    }
+
+    public List<String> getAssembliesWhereChromosomeMd5ChecksumIsNull() {
+        return repository.findAssembliesWhereChromosomeMd5checksumIsNullOrEmpty();
+    }
+
+    public Page<ChromosomeEntity> getChromosomesByAssemblyInsdcAccessionWhereMd5ChecksumIsNull(String asmInsdcAccession, Pageable request) {
+        Page<ChromosomeEntity> chrPage = repository.findChromosomeEntitiesByAssembly_InsdcAccessionAndMd5checksumIsNullOrEmpty(asmInsdcAccession, request);
+        return chrPage;
+    }
+
+    @Transactional
+    public void updateMd5ChecksumForAll(List<ChromosomeEntity> chromosomeEntityList) {
+        for (ChromosomeEntity chromosome : chromosomeEntityList) {
+            repository.updateMd5ChecksumByInsdcAccession(chromosome.getAssembly().getInsdcAccession(), chromosome.getInsdcAccession(), chromosome.getMd5checksum());
+        }
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq, Pageable request) {

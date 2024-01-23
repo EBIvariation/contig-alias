@@ -19,10 +19,15 @@ package uk.ac.ebi.eva.contigalias.repo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+
+import java.util.List;
 
 @Repository
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
@@ -34,6 +39,16 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccessionOrRefseq(String insdcAccession, String refseq, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_InsdcAccession(String asmInsdcAccession, Pageable request);
+
+    @Query("SELECT c FROM ChromosomeEntity c WHERE c.assembly.insdcAccession = :asmInsdcAccession AND (c.md5checksum IS NULL OR c.md5checksum = '')")
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_InsdcAccessionAndMd5checksumIsNullOrEmpty(@Param("asmInsdcAccession") String asmInsdcAccession, Pageable pageable);
+
+    @Query("SELECT distinct c.assembly.insdcAccession FROM ChromosomeEntity c WHERE c.md5checksum IS NULL OR c.md5checksum = ''")
+    List<String> findAssembliesWhereChromosomeMd5checksumIsNullOrEmpty();
+
+    @Modifying
+    @Query("UPDATE ChromosomeEntity c SET c.md5checksum = :md5Checksum WHERE c.assembly.insdcAccession= :asmInsdcAccession AND c.insdcAccession = :insdcAccession")
+    void updateMd5ChecksumByInsdcAccession(@Param("asmInsdcAccession") String asmInsdcAccession, @Param("insdcAccession") String insdcAccession, @Param("md5Checksum") String md5Checksum);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq, Pageable request);
 
