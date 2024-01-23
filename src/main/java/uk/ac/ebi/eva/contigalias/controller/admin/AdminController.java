@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 
 import java.io.IOException;
 import java.util.List;
@@ -95,10 +96,16 @@ public class AdminController {
     public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(@PathVariable(name = "accession")
                                                                           @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
                                                                                   "GCA_000001405.10") String asmAccession) {
-        handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
-        return ResponseEntity.ok("A task has been submitted for updating md5checksum for all chromosomes " +
-                "in assembly " + asmAccession + ". Depending upon the number of chromosomes present in assembly, " +
-                "this might take some time to complete");
+        try {
+            handler.getAssemblyByAccession(asmAccession);
+            handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
+            return ResponseEntity.ok("A task has been submitted for updating md5checksum for all chromosomes " +
+                    "in assembly " + asmAccession + ". Depending upon the number of chromosomes present in assembly, " +
+                    "this might take some time to complete");
+        } catch (AssemblyNotFoundException e) {
+            return ResponseEntity.ok("Could not find assembly " + asmAccession +
+                    ". Please insert the assembly first (md5checksum will be updated as part of the insertion process");
+        }
     }
 
     @ApiOperation(value = "Retrieve list of assemblies for which MD5 Checksum updates are running/going-to-run ")

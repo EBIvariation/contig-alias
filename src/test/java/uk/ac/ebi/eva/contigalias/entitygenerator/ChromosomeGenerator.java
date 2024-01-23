@@ -40,7 +40,7 @@ public class ChromosomeGenerator {
                 .setRefseq("refseq" + id)
                 .setUcscName("ucsc" + id)
                 .setEnaSequenceName("ena" + id)
-                .setMd5checksum("md5" + id)
+                .setMd5checksum(null)
                 .setTrunc512checksum("trunc512" + id)
                 .setAssembly(null);
     }
@@ -80,7 +80,7 @@ public class ChromosomeGenerator {
         assertTrue(entity.getInsdcAccession().endsWith(sId));
         assertTrue(entity.getRefseq().endsWith(sId));
         assertTrue(entity.getUcscName().endsWith(sId));
-        assertTrue(entity.getMd5checksum().endsWith(sId));
+        assertEquals(null, entity.getMd5checksum());
         assertTrue(entity.getTrunc512checksum().endsWith(sId));
         assertNull(entity.getAssembly());
     }

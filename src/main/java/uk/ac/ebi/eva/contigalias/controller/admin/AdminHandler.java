@@ -27,6 +27,7 @@ import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -45,6 +46,10 @@ public class AdminHandler {
         this.assemblyService = assemblyService;
         this.chromosomeService = chromosomeService;
         this.assemblyAssembler = assemblyAssembler;
+    }
+
+    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
+        return assemblyService.getAssemblyByAccession(accession);
     }
 
     public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {

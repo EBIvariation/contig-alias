@@ -22,12 +22,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -78,6 +82,31 @@ public class ChromosomeServiceIntegrationTest {
             assertEquals(md5, chromosomeEntity.getMd5checksum());
             assertEquals(trunc512, chromosomeEntity.getTrunc512checksum());
         });
+    }
+
+    @Test
+    void testGetAssemblyWhereChromosomeMd5ChecksumIsNullOrEmpty() {
+        List<String> asmList = service.getAssembliesWhereChromosomeMd5ChecksumIsNull();
+        assertEquals(entity.getAssembly().getInsdcAccession(), asmList.get(0));
+    }
+
+    @Test
+    void testGetChromosomesByAssemblyInsdcAccessionWhereMd5ChecksumIsNull() {
+        Page<ChromosomeEntity> chrPage = service.getChromosomesByAssemblyInsdcAccessionWhereMd5ChecksumIsNull(entity.getAssembly().getInsdcAccession(), PageRequest.of(0, 100));
+        assertChromosomePageIdenticalToEntity(chrPage);
+        assertEquals(null, chrPage.getContent().get(0).getMd5checksum());
+    }
+
+    @Test
+    void testUpdateMD5ChecksumForAllChromosomesInAssembly() {
+        String testMD5Checksum = "testmd5checksum";
+        entity.setMd5checksum(testMD5Checksum);
+        service.updateMd5ChecksumForAll(Collections.singletonList(entity));
+
+        Page<ChromosomeEntity> chrPage = service.getChromosomesByInsdcAccession(entity.getInsdcAccession(), Pageable.unpaged());
+        assertChromosomePageIdenticalToEntity(chrPage);
+        assertEquals(testMD5Checksum, chrPage.getContent().get(0).getMd5checksum());
+
     }
 
     void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
