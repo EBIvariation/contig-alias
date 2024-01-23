@@ -36,7 +36,7 @@ public class ChecksumSetter {
         this.md5ChecksumRetriever = md5ChecksumRetriever;
     }
 
-    @Scheduled(cron = "0 0 0 ? * FRI")
+    @Scheduled(cron = "0 0 0 ? * TUE")
     public void updateMd5CheckSumForAllAssemblies() {
         scheduledToRunMD5ChecksumUpdateTasks = new HashSet<>();
         List<String> assemblyList = chromosomeService.getAssembliesWhereChromosomeMd5ChecksumIsNull();
