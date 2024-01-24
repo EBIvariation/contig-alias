@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
+import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,14 +48,18 @@ public class ChromosomeServiceIntegrationTest {
     @Autowired
     private ChromosomeService service;
 
+    @Autowired
+    private ChromosomeRepository chromosomeRepository;
+
     @BeforeEach
     void setup() {
+        chromosomeRepository.deleteAll();
         service.insertChromosome(entity);
     }
 
     @AfterEach
     void tearDown() {
-        service.deleteChromosome(entity);
+        chromosomeRepository.deleteAll();
     }
 
     @Test
