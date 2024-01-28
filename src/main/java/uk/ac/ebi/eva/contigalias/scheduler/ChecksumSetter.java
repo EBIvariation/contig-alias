@@ -3,14 +3,14 @@ package uk.ac.ebi.eva.contigalias.scheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Component
 public class ChecksumSetter {
@@ -27,23 +26,26 @@ public class ChecksumSetter {
     private final Map<String, CompletableFuture<Void>> runningMD5ChecksumUpdateTasks = new ConcurrentHashMap<>();
     private Set<String> scheduledToRunMD5ChecksumUpdateTasks = new HashSet<>();
     private int DEFAULT_PAGE_SIZE = 10000;
+    private JdbcTemplate jdbcTemplate;
     private ChromosomeService chromosomeService;
     private Md5ChecksumRetriever md5ChecksumRetriever;
 
     @Autowired
-    public ChecksumSetter(ChromosomeService chromosomeService, Md5ChecksumRetriever md5ChecksumRetriever) {
+    public ChecksumSetter(ChromosomeService chromosomeService, Md5ChecksumRetriever md5ChecksumRetriever,
+                          JdbcTemplate jdbcTemplate) {
         this.chromosomeService = chromosomeService;
         this.md5ChecksumRetriever = md5ChecksumRetriever;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Scheduled(cron = "0 0 1 ? * THU")
+    @Scheduled(cron = "0 0 1 ? * TUE")
     public void updateMd5CheckSumForAllAssemblies() {
-        scheduledToRunMD5ChecksumUpdateTasks = new HashSet<>();
         List<String> assemblyList = chromosomeService.getAssembliesWhereChromosomeMd5ChecksumIsNull();
         logger.info("List of assemblies to be updated for MD5 Checksum: " + assemblyList);
-        scheduledToRunMD5ChecksumUpdateTasks.addAll(assemblyList.stream().collect(Collectors.toSet()));
+        scheduledToRunMD5ChecksumUpdateTasks = new HashSet<>(assemblyList);
 
         for (String assembly : assemblyList) {
+            scheduledToRunMD5ChecksumUpdateTasks.remove(assembly);
             CompletableFuture<Void> future = updateMd5CheckSumForAssemblyAsync(assembly);
             try {
                 future.get();
@@ -86,22 +88,34 @@ public class ChecksumSetter {
 
     public void updateMD5ChecksumForAllChromosomesInAssembly(String assembly) {
         logger.info("Trying to update md5checksum for assembly: " + assembly);
-        Slice<ChromosomeEntity> chrSlice;
-        Pageable pageable = PageRequest.of(0, DEFAULT_PAGE_SIZE);
-        long chromosomeUpdated = 0;
-        do {
-            chrSlice = chromosomeService.getChromosomesByAssemblyInsdcAccessionWhereMd5ChecksumIsNull(assembly, pageable);
-            List<ChromosomeEntity> chromosomeEntityList = chrSlice.getContent();
-            updateMd5ChecksumForChromosome(chromosomeEntityList);
+        String sql = "select * from chromosome c where c.assembly_insdc_accession = '" + assembly
+                + "' AND (c.md5checksum IS NULL OR c.md5checksum = '')";
+        jdbcTemplate.query(sql, (ResultSetExtractor<Void>) rs -> {
+            long chromosomeUpdated = 0;
+            List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
+            while (rs.next()) {
+                ChromosomeEntity chromosome = new ChromosomeEntity();
+                chromosome.setInsdcAccession(rs.getString(1));
+                chromosomeEntityList.add(chromosome);
 
-            chromosomeUpdated += chromosomeEntityList.size();
-            logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
-        } while (chrSlice.hasNext());
+                if (chromosomeEntityList.size() == DEFAULT_PAGE_SIZE) {
+                    updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
+                    chromosomeUpdated += chromosomeEntityList.size();
+                    logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
+                    chromosomeEntityList = new ArrayList<>();
+                }
+            }
+            if (chromosomeEntityList.size() > 0) {
+                updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
+                chromosomeUpdated += chromosomeEntityList.size();
+                logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
+            }
 
-        logger.info("Updating md5checksum for assembly " + assembly + " completed");
+            return null;
+        });
     }
 
-    public void updateMd5ChecksumForChromosome(List<ChromosomeEntity> chromosomesList) {
+    public void updateMd5ChecksumForChromosome(String assembly, List<ChromosomeEntity> chromosomesList) {
         chromosomesList.parallelStream().forEach(chromosome -> {
             try {
                 String md5Checksum = md5ChecksumRetriever.retrieveMd5Checksum(chromosome.getInsdcAccession());
@@ -111,7 +125,7 @@ public class ChecksumSetter {
             }
         });
 
-        chromosomeService.updateMd5ChecksumForAll(chromosomesList);
+        chromosomeService.updateMd5ChecksumForAllChromosomeInAssembly(assembly, chromosomesList);
     }
 
     public Map<String, Set<String>> getMD5ChecksumUpdateTaskStatus() {

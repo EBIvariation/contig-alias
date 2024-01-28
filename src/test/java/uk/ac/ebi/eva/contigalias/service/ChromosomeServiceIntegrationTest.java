@@ -106,7 +106,8 @@ public class ChromosomeServiceIntegrationTest {
     void testUpdateMD5ChecksumForAllChromosomesInAssembly() {
         String testMD5Checksum = "testmd5checksum";
         entity.setMd5checksum(testMD5Checksum);
-        service.updateMd5ChecksumForAll(Collections.singletonList(entity));
+        service.updateMd5ChecksumForAllChromosomeInAssembly(entity.getAssembly().getInsdcAccession(),
+                Collections.singletonList(entity));
 
         Page<ChromosomeEntity> chrPage = service.getChromosomesByInsdcAccession(entity.getInsdcAccession(), Pageable.unpaged());
         assertChromosomePageIdenticalToEntity(chrPage);
