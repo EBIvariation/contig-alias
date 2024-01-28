@@ -65,9 +65,9 @@ public class ChromosomeService {
     }
 
     @Transactional
-    public void updateMd5ChecksumForAll(List<ChromosomeEntity> chromosomeEntityList) {
+    public void updateMd5ChecksumForAllChromosomeInAssembly(String assembly, List<ChromosomeEntity> chromosomeEntityList) {
         for (ChromosomeEntity chromosome : chromosomeEntityList) {
-            repository.updateMd5ChecksumByInsdcAccession(chromosome.getAssembly().getInsdcAccession(), chromosome.getInsdcAccession(), chromosome.getMd5checksum());
+            repository.updateMd5ChecksumByInsdcAccession(assembly, chromosome.getInsdcAccession(), chromosome.getMd5checksum());
         }
     }
 
