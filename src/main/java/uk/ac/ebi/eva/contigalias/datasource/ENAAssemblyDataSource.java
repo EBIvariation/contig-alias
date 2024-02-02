@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +97,24 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
     }
 
+    public Optional<Path> downloadAssemblyReport(String accession) throws IOException {
+        ENABrowser enaBrowser = factory.build();
+        enaBrowser.connect();
+        Optional<Path> downloadPath;
+        try {
+            enaBrowser.connect();
+            downloadPath = downloadAssemblyReport(enaBrowser, accession);
+        } finally {
+            try {
+                enaBrowser.disconnect();
+            } catch (IOException e) {
+                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
+            }
+        }
+
+        return downloadPath;
+    }
+
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
     public Optional<Path> downloadAssemblyReport(ENABrowser enaBrowser, String accession) throws IOException {
         String dirPath = enaBrowser.getAssemblyDirPath(accession);
@@ -105,16 +124,35 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         try {
             boolean success = enaBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
             if (success) {
-                logger.info("ENA assembly report downloaded successfully for accession "+ accession);
+                logger.info("ENA assembly report downloaded successfully for accession " + accession);
                 return Optional.of(downloadFilePath);
             } else {
-                logger.warn("ENA assembly report could not be downloaded successfully for accession "+accession);
+                logger.warn("ENA assembly report could not be downloaded successfully for accession " + accession);
                 return Optional.empty();
             }
         } catch (IOException | DownloadFailedException e) {
-            logger.warn("Error downloading ENA assembly report for accession "+ accession + e);
+            logger.warn("Error downloading ENA assembly report for accession " + accession + e);
             return Optional.empty();
         }
+    }
+
+    public List<ChromosomeEntity> getChromosomeEntityList(AssemblyEntity assemblyEntity, List<String> chrDataList) {
+        List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
+        for (String chrData : chrDataList) {
+            ChromosomeEntity chromosomeEntity = getChromosomeEntity(assemblyEntity, chrData);
+            if (chromosomeEntity != null) {
+                chromosomeEntityList.add(chromosomeEntity);
+            }
+        }
+        return chromosomeEntityList;
+    }
+
+    public ChromosomeEntity getChromosomeEntity(AssemblyEntity assemblyEntity, String chrLine) {
+        ChromosomeEntity chromosomeEntity = ENAAssemblyReportReader.getChromosomeEntity(chrLine);
+        if (chromosomeEntity != null) {
+            chromosomeEntity.setAssembly(assemblyEntity);
+        }
+        return chromosomeEntity;
     }
 
     /**
@@ -144,7 +182,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         return chromosomes.stream().allMatch(sequence -> sequence.getEnaSequenceName() != null);
     }
 
-    private void addENASequenceNames(
+    public void addENASequenceNames(
             List<? extends SequenceEntity> sourceSequences, List<? extends SequenceEntity> targetSequences) {
         Map<String, SequenceEntity> insdcToSequenceEntity = new HashMap<>();
         for (SequenceEntity targetSeq : targetSequences) {

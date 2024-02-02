@@ -59,13 +59,11 @@ public class ENAAssemblyReportReader extends AssemblyReportReader {
     }
 
     // Not present in ENA assembly reports
-    protected void parseAssemblyData(String line) {}
+    protected void parseAssemblyData(String line) {
+    }
 
     protected void parseChromosomeLine(String[] columns) {
-        ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
-
-        chromosomeEntity.setInsdcAccession(columns[0]);
-        chromosomeEntity.setEnaSequenceName(columns[1]);
+        ChromosomeEntity chromosomeEntity = getChromosome(columns);
 
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();
@@ -82,10 +80,7 @@ public class ENAAssemblyReportReader extends AssemblyReportReader {
     }
 
     protected void parseScaffoldLine(String[] columns) {
-        ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
-
-        scaffoldEntity.setInsdcAccession(columns[0]);
-        scaffoldEntity.setEnaSequenceName(columns[1]);
+        ChromosomeEntity scaffoldEntity = getScaffold(columns);
 
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();
@@ -99,6 +94,39 @@ public class ENAAssemblyReportReader extends AssemblyReportReader {
             assemblyEntity.setChromosomes(scaffolds);
         }
         scaffolds.add(scaffoldEntity);
+    }
+
+    public static ChromosomeEntity getChromosomeEntity(String line) {
+        if (!line.startsWith("accession")) {
+            String[] columns = line.split("\t", -1);
+            if (columns.length >= 6) {
+                if (columns[5].equals("Chromosome") && columns[3].equals("assembled-molecule")) {
+                    return getChromosome(columns);
+                } else {
+                    return getScaffold(columns);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static ChromosomeEntity getChromosome(String[] columns) {
+        ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
+        chromosomeEntity.setInsdcAccession(columns[0]);
+        chromosomeEntity.setEnaSequenceName(columns[1]);
+        chromosomeEntity.setContigType(SequenceEntity.ContigType.CHROMOSOME);
+
+        return chromosomeEntity;
+    }
+
+    public static ChromosomeEntity getScaffold(String[] columns) {
+        ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
+        scaffoldEntity.setInsdcAccession(columns[0]);
+        scaffoldEntity.setEnaSequenceName(columns[1]);
+        scaffoldEntity.setContigType(SequenceEntity.ContigType.SCAFFOLD);
+
+        return scaffoldEntity;
     }
 
 }

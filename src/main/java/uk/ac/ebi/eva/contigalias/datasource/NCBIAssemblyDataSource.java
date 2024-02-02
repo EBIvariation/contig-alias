@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +37,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository("NCBIDataSource")
 public class NCBIAssemblyDataSource implements AssemblyDataSource {
@@ -83,6 +87,53 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
             }
         }
         return Optional.of(assemblyEntity);
+    }
+
+    public AssemblyEntity getAssemblyEntity(Path downloadFilePath) throws IOException {
+        List<String> asmDataLines = Files.lines(downloadFilePath)
+                .filter(line -> line.startsWith("#"))
+                .collect(Collectors.toList());
+        return getAssemblyEntity(asmDataLines);
+    }
+
+    public AssemblyEntity getAssemblyEntity(List<String> asmDataLines) {
+        return NCBIAssemblyReportReader.getAssemblyEntity(asmDataLines);
+    }
+
+    public List<ChromosomeEntity> getChromosomeEntityList(AssemblyEntity assemblyEntity, List<String> chrDataList) {
+        List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
+        for (String chrData : chrDataList) {
+            ChromosomeEntity chromosomeEntity = getChromosomeEntity(assemblyEntity, chrData);
+            if (chromosomeEntity != null) {
+                chromosomeEntityList.add(chromosomeEntity);
+            }
+        }
+        return chromosomeEntityList;
+    }
+
+    public ChromosomeEntity getChromosomeEntity(AssemblyEntity assemblyEntity, String chrLine) {
+        ChromosomeEntity chromosomeEntity = NCBIAssemblyReportReader.getChromosomeEntity(chrLine);
+        if (chromosomeEntity != null) {
+            chromosomeEntity.setAssembly(assemblyEntity);
+        }
+        return chromosomeEntity;
+    }
+
+    public Optional<Path> downloadAssemblyReport(String accession) throws IOException {
+        NCBIBrowser ncbiBrowser = factory.build();
+        Optional<Path> downloadPath;
+        try {
+            ncbiBrowser.connect();
+            downloadPath = downloadAssemblyReport(accession, ncbiBrowser);
+        } finally {
+            try {
+                ncbiBrowser.disconnect();
+            } catch (IOException e) {
+                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
+            }
+        }
+
+        return downloadPath;
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))

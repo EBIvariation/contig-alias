@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
@@ -38,7 +37,7 @@ public class ChecksumSetter {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Scheduled(cron = "0 0 1 ? * TUE")
+    //@Scheduled(cron = "0 0 1 ? * TUE")
     public void updateMd5CheckSumForAllAssemblies() {
         List<String> assemblyList = chromosomeService.getAssembliesWhereChromosomeMd5ChecksumIsNull();
         logger.info("List of assemblies to be updated for MD5 Checksum: " + assemblyList);
@@ -110,6 +109,8 @@ public class ChecksumSetter {
                 chromosomeUpdated += chromosomeEntityList.size();
                 logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
             }
+
+            logger.info("Finished updating md5checksum for assembly: " + assembly);
 
             return null;
         });

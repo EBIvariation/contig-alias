@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
@@ -95,34 +97,12 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
     }
 
     protected void parseChromosomeLine(String[] columns) {
-        ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
-
-        chromosomeEntity.setGenbankSequenceName(columns[0]);
-        chromosomeEntity.setInsdcAccession(columns[4]);
-        if (columns[6] == null || columns[6].isEmpty() || columns[6].equals("na")) {
-            chromosomeEntity.setRefseq(null);
-        } else {
-            chromosomeEntity.setRefseq(columns[6]);
-        }
-
-        if (columns.length > 8) {
-            try {
-                Long seqLength = Long.parseLong(columns[8]);
-                chromosomeEntity.setSeqLength(seqLength);
-            } catch (NumberFormatException nfe) {
-
-            }
-        }
-
-        if (columns.length > 9 && !columns[9].equals("na")) {
-            chromosomeEntity.setUcscName(columns[9]);
-        }
+        ChromosomeEntity chromosomeEntity = getChromosome(columns);
 
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();
         }
         chromosomeEntity.setAssembly(this.assemblyEntity);
-        chromosomeEntity.setContigType(SequenceEntity.ContigType.CHROMOSOME);
 
         List<ChromosomeEntity> chromosomes = this.assemblyEntity.getChromosomes();
         if (chromosomes == null) {
@@ -133,6 +113,103 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
     }
 
     protected void parseScaffoldLine(String[] columns) {
+        ChromosomeEntity scaffoldEntity = getScaffold(columns);
+
+        if (assemblyEntity == null) {
+            assemblyEntity = new AssemblyEntity();
+        }
+        scaffoldEntity.setAssembly(this.assemblyEntity);
+
+        List<ChromosomeEntity> scaffolds = this.assemblyEntity.getChromosomes();
+        if (scaffolds == null) {
+            scaffolds = new LinkedList<>();
+            assemblyEntity.setChromosomes(scaffolds);
+        }
+        scaffolds.add(scaffoldEntity);
+    }
+
+    public static AssemblyEntity getAssemblyEntity(List<String> lines) {
+        Map<String, String> tagAndValuesMap = lines.stream()
+                .filter(line -> line.startsWith("#"))
+                .filter(line -> line.indexOf(':') != -1)
+                .collect(Collectors.toMap(l -> l.substring(2, l.indexOf(':')), l -> l.substring(l.indexOf(':') + 1).trim()));
+
+        AssemblyEntity asmEntity = new AssemblyEntity();
+        for (Map.Entry<String, String> entry : tagAndValuesMap.entrySet()) {
+            String tag = entry.getKey();
+            String tagData = entry.getValue();
+            switch (tag) {
+                case "Assembly name": {
+                    asmEntity.setName(tagData);
+                    break;
+                }
+                case "Organism name": {
+                    asmEntity.setOrganism(tagData);
+                    break;
+                }
+                case "Taxid": {
+                    asmEntity.setTaxid(Long.parseLong(tagData));
+                    break;
+                }
+                case "GenBank assembly accession": {
+                    asmEntity.setInsdcAccession(tagData);
+                    break;
+                }
+                case "RefSeq assembly accession": {
+                    asmEntity.setRefseq(tagData);
+                    break;
+                }
+                case "RefSeq assembly and GenBank assemblies identical": {
+                    asmEntity.setGenbankRefseqIdentical(tagData.equals("yes"));
+                    break;
+                }
+            }
+        }
+
+        return asmEntity;
+    }
+
+    public static ChromosomeEntity getChromosomeEntity(String line) {
+        String[] columns = line.split("\t", -1);
+        if (columns.length >= 6 && (columns[5].equals("=") || columns[5].equals("<>")) &&
+                (columns[4] != null && !columns[4].isEmpty() && !columns[4].equals("na"))) {
+            if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
+                return getChromosome(columns);
+            } else {
+                return getScaffold(columns);
+            }
+        }
+
+        return null;
+    }
+
+    public static ChromosomeEntity getChromosome(String[] columns) {
+        ChromosomeEntity chromosomeEntity = new ChromosomeEntity();
+
+        chromosomeEntity.setGenbankSequenceName(columns[0]);
+        chromosomeEntity.setInsdcAccession(columns[4]);
+        if (columns[6] == null || columns[6].isEmpty() || columns[6].equals("na")) {
+            chromosomeEntity.setRefseq(null);
+        } else {
+            chromosomeEntity.setRefseq(columns[6]);
+        }
+        if (columns.length > 8) {
+            try {
+                Long seqLength = Long.parseLong(columns[8]);
+                chromosomeEntity.setSeqLength(seqLength);
+            } catch (NumberFormatException nfe) {
+
+            }
+        }
+        if (columns.length > 9 && !columns[9].equals("na")) {
+            chromosomeEntity.setUcscName(columns[9]);
+        }
+        chromosomeEntity.setContigType(SequenceEntity.ContigType.CHROMOSOME);
+
+        return chromosomeEntity;
+    }
+
+    public static ChromosomeEntity getScaffold(String[] columns) {
         ChromosomeEntity scaffoldEntity = new ChromosomeEntity();
 
         scaffoldEntity.setGenbankSequenceName(columns[0]);
@@ -142,7 +219,6 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
         } else {
             scaffoldEntity.setRefseq(columns[6]);
         }
-
         if (columns.length > 8) {
             try {
                 Long seqLength = Long.parseLong(columns[8]);
@@ -151,27 +227,15 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
             }
         }
-
-
         if (columns.length >= 10) {
             String ucscName = columns[9];
             if (!ucscName.equals("na")) {
                 scaffoldEntity.setUcscName(ucscName);
             }
         }
-
-        if (assemblyEntity == null) {
-            assemblyEntity = new AssemblyEntity();
-        }
-        scaffoldEntity.setAssembly(this.assemblyEntity);
         scaffoldEntity.setContigType(SequenceEntity.ContigType.SCAFFOLD);
 
-        List<ChromosomeEntity> scaffolds = this.assemblyEntity.getChromosomes();
-        if (scaffolds == null) {
-            scaffolds = new LinkedList<>();
-            assemblyEntity.setChromosomes(scaffolds);
-        }
-        scaffolds.add(scaffoldEntity);
+        return scaffoldEntity;
     }
 
 }

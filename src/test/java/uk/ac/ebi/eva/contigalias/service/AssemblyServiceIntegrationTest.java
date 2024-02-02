@@ -31,6 +31,7 @@ import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
+import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 import uk.ac.ebi.eva.contigalias.scheduler.ChecksumSetter;
 
 import java.io.IOException;
@@ -58,6 +59,9 @@ public class AssemblyServiceIntegrationTest {
     AssemblyRepository repository;
 
     @Autowired
+    ChromosomeRepository chromosomeRepository;
+
+    @Autowired
     private AssemblyService service;
 
     @BeforeEach
@@ -75,7 +79,7 @@ public class AssemblyServiceIntegrationTest {
             Mockito.when(mockChecksumSetter.updateMd5CheckSumForAssemblyAsync(generate.getInsdcAccession()))
                     .thenReturn(new CompletableFuture<>());
         }
-        service = new AssemblyService(repository, mockNcbiDataSource, mockEnaDataSource, mockChecksumSetter);
+        service = new AssemblyService(repository, chromosomeRepository, mockNcbiDataSource, mockEnaDataSource, mockChecksumSetter);
     }
 
     @AfterEach
