@@ -98,6 +98,9 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
     protected void parseChromosomeLine(String[] columns) {
         ChromosomeEntity chromosomeEntity = getChromosome(columns);
+        if (chromosomeEntity == null) {
+            return;
+        }
 
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();
@@ -114,6 +117,9 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
 
     protected void parseScaffoldLine(String[] columns) {
         ChromosomeEntity scaffoldEntity = getScaffold(columns);
+        if (scaffoldEntity == null) {
+            return;
+        }
 
         if (assemblyEntity == null) {
             assemblyEntity = new AssemblyEntity();

@@ -33,11 +33,7 @@ import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 import uk.ac.ebi.eva.contigalias.scheduler.ChecksumSetter;
 
 import javax.transaction.Transactional;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,8 +55,6 @@ public class AssemblyService {
     private final ENAAssemblyDataSource enaDataSource;
 
     private final ChecksumSetter checksumSetter;
-
-    private final int BATCH_SIZE = 100000;
 
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
@@ -111,119 +105,12 @@ public class AssemblyService {
             throw duplicateAssemblyInsertionException(accession, entity.get());
         }
 
-        Optional<Path> downloadNCBIFilePathOpt = ncbiDataSource.downloadAssemblyReport(accession);
-        Path downloadedNCBIFilePath = downloadNCBIFilePathOpt.orElseThrow(() -> new AssemblyNotFoundException(accession));
-        Optional<Path> downloadENAFilePathOpt = enaDataSource.downloadAssemblyReport(accession);
-        Path downloadedENAFilePath = downloadENAFilePathOpt.orElse(null);
-
-        long numberOfChromosomesInFile = Files.lines(downloadedNCBIFilePath).filter(line -> !line.startsWith("#")).count();
-        logger.info("Number of chromosomes in assembly (" + accession + "): " + numberOfChromosomesInFile);
-
-        // parse file and save data
-        parseFileAndInsertAssembly(downloadedNCBIFilePath, downloadedENAFilePath);
+        // download file and save assembly and chromosome data
+        ncbiDataSource.parseFileAndInsertAssembly(accession, enaDataSource, assemblyRepository, chromosomeRepository);
         logger.info("Successfully inserted assembly for accession " + accession);
 
         // submit job for retrieving and updating MD5 Checksum for assembly (asynchronously)
         checksumSetter.updateMd5CheckSumForAssemblyAsync(accession);
-
-        Files.deleteIfExists(downloadedNCBIFilePath);
-        if (downloadedENAFilePath != null) {
-            Files.deleteIfExists(downloadedENAFilePath);
-        }
-    }
-
-    @Transactional
-    public void parseFileAndInsertAssembly(Path downloadedNCBIFilePath, Path downloadedENAFilePath) throws IOException {
-        AssemblyEntity assemblyEntity = ncbiDataSource.getAssemblyEntity(downloadedNCBIFilePath);
-        assemblyRepository.save(assemblyEntity);
-
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedNCBIFilePath.toFile()))) {
-            List<String> chrLines = new ArrayList<>();
-            String line;
-            long chromosomesSavedTillNow = 0;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.startsWith("#")) {
-                    continue;
-                }
-                chrLines.add(line);
-                if (chrLines.size() == BATCH_SIZE) {
-                    List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
-                    if (downloadedENAFilePath != null) {
-                        addENASequenceNameToChromosomes(assemblyEntity, chromosomeEntityList, downloadedENAFilePath);
-                    }
-                    chromosomeRepository.saveAll(chromosomeEntityList);
-                    chromosomesSavedTillNow += chromosomeEntityList.size();
-                    logger.info("Number of total chromosomes saved till now : " + chromosomesSavedTillNow);
-
-                    chrLines = new ArrayList<>();
-                }
-            }
-
-            if (!chrLines.isEmpty()) {
-                List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
-                if (downloadedENAFilePath != null) {
-                    addENASequenceNameToChromosomes(assemblyEntity, chromosomeEntityList, downloadedENAFilePath);
-                }
-                chromosomeRepository.saveAll(chromosomeEntityList);
-                chromosomesSavedTillNow += chromosomeEntityList.size();
-                logger.info("Number of total chromosomes saved till now : " + chromosomesSavedTillNow);
-            }
-        }
-    }
-
-    public void addENASequenceNameToChromosomes(AssemblyEntity assemblyEntity, List<ChromosomeEntity> ncbiChromosomeList,
-                                                Path downloadedENAFilePath) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedENAFilePath.toFile()))) {
-            List<String> chrLines = new ArrayList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.startsWith("accession")) {
-                    continue;
-                }
-                chrLines.add(line);
-                if (chrLines.size() == BATCH_SIZE) {
-                    List<ChromosomeEntity> enaChromosomeList = enaDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
-                    enaDataSource.addENASequenceNames(
-                            !enaChromosomeList.isEmpty() ? enaChromosomeList : Collections.emptyList(),
-                            !ncbiChromosomeList.isEmpty() ? ncbiChromosomeList : Collections.emptyList()
-                    );
-
-                    chrLines = new ArrayList<>();
-                }
-            }
-            if (!chrLines.isEmpty()) {
-                List<ChromosomeEntity> enaChromosomeList = enaDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
-                enaDataSource.addENASequenceNames(
-                        !enaChromosomeList.isEmpty() ? enaChromosomeList : Collections.emptyList(),
-                        !ncbiChromosomeList.isEmpty() ? ncbiChromosomeList : Collections.emptyList()
-                );
-            }
-        }
-    }
-
-    public void fetchAndInsertAssemblyOld(String accession) throws IOException {
-        Optional<AssemblyEntity> entity = assemblyRepository.findAssemblyEntityByAccession(accession);
-        if (entity.isPresent()) {
-            throw duplicateAssemblyInsertionException(accession, entity.get());
-        }
-        Optional<AssemblyEntity> fetchAssembly = ncbiDataSource.getAssemblyByAccession(accession);
-        if (!fetchAssembly.isPresent()) {
-            throw new AssemblyNotFoundException(accession);
-        }
-        if (fetchAssembly.isPresent()) {
-            AssemblyEntity assemblyEntity = fetchAssembly.get();
-            enaDataSource.addENASequenceNamesToAssembly(assemblyEntity);
-            if (assemblyEntity.getChromosomes() != null && assemblyEntity.getChromosomes().size() > 0) {
-                insertAssembly(assemblyEntity);
-                logger.info("Successfully inserted assembly for accession " + accession);
-                // submit job for retrieving and updating MD5 Checksum for assembly (asynchronously)
-                checksumSetter.updateMd5CheckSumForAssemblyAsync(accession);
-            } else {
-                logger.error("Skipping inserting assembly : No chromosome in assembly " + accession);
-            }
-        } else {
-            logger.error("Could not get assembly from NCBI");
-        }
     }
 
     public void retrieveAndInsertMd5ChecksumForAssembly(String assembly) {

@@ -33,7 +33,9 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -41,11 +43,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository("ENADataSource")
 public class ENAAssemblyDataSource implements AssemblyDataSource {
@@ -136,10 +138,10 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         }
     }
 
-    public List<ChromosomeEntity> getChromosomeEntityList(AssemblyEntity assemblyEntity, List<String> chrDataList) {
+    public List<ChromosomeEntity> getChromosomeEntityList(List<String> chrDataList) {
         List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
         for (String chrData : chrDataList) {
-            ChromosomeEntity chromosomeEntity = getChromosomeEntity(assemblyEntity, chrData);
+            ChromosomeEntity chromosomeEntity = getChromosomeEntity(chrData);
             if (chromosomeEntity != null) {
                 chromosomeEntityList.add(chromosomeEntity);
             }
@@ -147,12 +149,8 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         return chromosomeEntityList;
     }
 
-    public ChromosomeEntity getChromosomeEntity(AssemblyEntity assemblyEntity, String chrLine) {
-        ChromosomeEntity chromosomeEntity = ENAAssemblyReportReader.getChromosomeEntity(chrLine);
-        if (chromosomeEntity != null) {
-            chromosomeEntity.setAssembly(assemblyEntity);
-        }
-        return chromosomeEntity;
+    public ChromosomeEntity getChromosomeEntity(String chrLine) {
+        return ENAAssemblyReportReader.getChromosomeEntity(chrLine);
     }
 
     /**
@@ -184,16 +182,41 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
 
     public void addENASequenceNames(
             List<? extends SequenceEntity> sourceSequences, List<? extends SequenceEntity> targetSequences) {
-        Map<String, SequenceEntity> insdcToSequenceEntity = new HashMap<>();
-        for (SequenceEntity targetSeq : targetSequences) {
-            insdcToSequenceEntity.put(targetSeq.getInsdcAccession(), targetSeq);
+        if (targetSequences == null || sourceSequences == null || targetSequences.isEmpty() || sourceSequences.isEmpty()) {
+            return;
         }
+        Map<String, SequenceEntity> insdcToSequenceEntityMap = targetSequences.stream()
+                .collect(Collectors.toMap(s->s.getInsdcAccession(), s->s));
+
         for (SequenceEntity sourceSeq : sourceSequences) {
             String sourceInsdcAccession = sourceSeq.getInsdcAccession();
-            if (insdcToSequenceEntity.containsKey(sourceInsdcAccession)) {
-                insdcToSequenceEntity.get(sourceInsdcAccession).setEnaSequenceName(sourceSeq.getEnaSequenceName());
-            } else {
-                insdcToSequenceEntity.put(sourceInsdcAccession, sourceSeq);
+            if (insdcToSequenceEntityMap.containsKey(sourceInsdcAccession)) {
+                insdcToSequenceEntityMap.get(sourceInsdcAccession).setEnaSequenceName(sourceSeq.getEnaSequenceName());
+            }
+        }
+    }
+
+    public void addENASequenceNameToChromosomes(List<ChromosomeEntity> ncbiChromosomeList,
+                                                Path downloadedENAFilePath, final int BATCH_SIZE) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedENAFilePath.toFile()))) {
+            List<String> chrLines = new ArrayList<>();
+            List<ChromosomeEntity> enaChromosomeList;
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.startsWith("accession")) {
+                    continue;
+                }
+                chrLines.add(line);
+                if (chrLines.size() == BATCH_SIZE) {
+                    enaChromosomeList = getChromosomeEntityList(chrLines);
+                    addENASequenceNames(enaChromosomeList, ncbiChromosomeList);
+
+                    chrLines = new ArrayList<>();
+                }
+            }
+            if (!chrLines.isEmpty()) {
+                enaChromosomeList = getChromosomeEntityList(chrLines);
+                addENASequenceNames(enaChromosomeList, ncbiChromosomeList);
             }
         }
     }
