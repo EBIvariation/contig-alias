@@ -60,7 +60,7 @@ public class AssemblyService {
 
     private final ChecksumSetter checksumSetter;
 
-    private final int BATCH_SIZE = 100;
+    private final int BATCH_SIZE = 100000;
 
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
@@ -132,7 +132,6 @@ public class AssemblyService {
         }
     }
 
-    //TODO: put it somewhere else where transaction works
     @Transactional
     public void parseFileAndInsertAssembly(Path downloadedNCBIFilePath, Path downloadedENAFilePath) throws IOException {
         AssemblyEntity assemblyEntity = ncbiDataSource.getAssemblyEntity(downloadedNCBIFilePath);
