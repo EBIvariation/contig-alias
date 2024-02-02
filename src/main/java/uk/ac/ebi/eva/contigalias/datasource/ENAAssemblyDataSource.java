@@ -102,19 +102,19 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
     public Optional<Path> downloadAssemblyReport(String accession) throws IOException {
         ENABrowser enaBrowser = factory.build();
         enaBrowser.connect();
-        Optional<Path> downloadPath;
         try {
             enaBrowser.connect();
-            downloadPath = downloadAssemblyReport(enaBrowser, accession);
-        } finally {
+            return downloadAssemblyReport(enaBrowser, accession);
+        } catch (Exception e){
+            logger.warn("Could not fetch Assembly Report from ENA for accession " + accession + "Exception: " + e);
+            return Optional.empty();
+        }finally {
             try {
                 enaBrowser.disconnect();
             } catch (IOException e) {
                 logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
             }
         }
-
-        return downloadPath;
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
