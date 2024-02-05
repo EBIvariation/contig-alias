@@ -34,7 +34,6 @@ import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
-import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -165,7 +164,6 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         }
     }
 
-    @Transactional
     public void parseFileAndInsertAssembly(String accession, ENAAssemblyDataSource enaDataSource,
                                            AssemblyRepository assemblyRepository, ChromosomeRepository chromosomeRepository) throws IOException {
         Optional<Path> downloadNCBIFilePathOpt = downloadAssemblyReport(accession);

@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 @Component
 public class ChecksumSetter {
@@ -48,7 +47,7 @@ public class ChecksumSetter {
             CompletableFuture<Void> future = updateMd5CheckSumForAssemblyAsync(assembly);
             try {
                 future.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 logger.error("Encountered an error when running MD5Checksum update for assembly: " + assembly);
             } finally {
                 scheduledToRunMD5ChecksumUpdateTasks.remove(assembly);

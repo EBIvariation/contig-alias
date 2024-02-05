@@ -30,4 +30,9 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(AssemblyIngestionException.class)
+    public ResponseEntity<String> handleExceptions(AssemblyIngestionException exception, WebRequest webRequest){
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

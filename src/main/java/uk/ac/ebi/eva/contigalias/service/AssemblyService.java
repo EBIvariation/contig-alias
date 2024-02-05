@@ -26,6 +26,7 @@ import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyIngestionException;
 import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
@@ -105,12 +106,24 @@ public class AssemblyService {
             throw duplicateAssemblyInsertionException(accession, entity.get());
         }
 
-        // download file and save assembly and chromosome data
-        ncbiDataSource.parseFileAndInsertAssembly(accession, enaDataSource, assemblyRepository, chromosomeRepository);
-        logger.info("Successfully inserted assembly for accession " + accession);
+        try {
+            // download file and save assembly and chromosome data
+            ncbiDataSource.parseFileAndInsertAssembly(accession, enaDataSource, assemblyRepository, chromosomeRepository);
+            logger.info("Successfully inserted assembly for accession " + accession);
 
-        // submit job for retrieving and updating MD5 Checksum for assembly (asynchronously)
-        checksumSetter.updateMd5CheckSumForAssemblyAsync(accession);
+            // submit job for retrieving and updating MD5 Checksum for assembly (asynchronously)
+            checksumSetter.updateMd5CheckSumForAssemblyAsync(accession);
+        } catch (Exception e) {
+            // roll back inserted entries in case of any exception or error
+            logger.error("Exception while inserting assembly " + accession + " Rolling back changes");
+            deleteEntriesForAssembly(accession);
+            throw new AssemblyIngestionException(accession);
+        }
+    }
+
+    public void deleteEntriesForAssembly(String accession) {
+        chromosomeRepository.deleteChromosomeEntitiesByAssembly_InsdcAccession(accession);
+        assemblyRepository.deleteAssemblyEntityByInsdcAccessionOrRefseq(accession);
     }
 
     public void retrieveAndInsertMd5ChecksumForAssembly(String assembly) {
