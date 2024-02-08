@@ -19,13 +19,16 @@ package uk.ac.ebi.eva.contigalias.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
 import javax.transaction.Transactional;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,10 +36,12 @@ import java.util.List;
 public class ChromosomeService {
 
     private final ChromosomeRepository repository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ChromosomeService(ChromosomeRepository repository) {
+    public ChromosomeService(ChromosomeRepository repository, JdbcTemplate jdbcTemplate) {
         this.repository = repository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
 
@@ -68,6 +73,13 @@ public class ChromosomeService {
     public void updateMd5ChecksumForAllChromosomeInAssembly(String assembly, List<ChromosomeEntity> chromosomeEntityList) {
         for (ChromosomeEntity chromosome : chromosomeEntityList) {
             repository.updateMd5ChecksumByInsdcAccession(assembly, chromosome.getInsdcAccession(), chromosome.getMd5checksum());
+        }
+    }
+
+    @Transactional
+    public void updateENASequenceNameForAllChromosomeInAssembly(String assembly, List<ChromosomeEntity> chromosomeEntityList) {
+        for (ChromosomeEntity chromosome : chromosomeEntityList) {
+            repository.updateENASequenceNameByInsdcAccession(assembly, chromosome.getInsdcAccession(), chromosome.getEnaSequenceName());
         }
     }
 
@@ -270,6 +282,32 @@ public class ChromosomeService {
 
     public long countChromosomeEntitiesByEnaName(String enaName) {
         return repository.countChromosomeEntitiesByEnaSequenceName(enaName);
+    }
+
+    void saveAllChromosomes(List<ChromosomeEntity> chromosomeEntityList) {
+        String sql = "INSERT INTO chromosome (assembly_insdc_accession,contig_type,ena_sequence_name," +
+                "genbank_sequence_name,insdc_accession,md5checksum,refseq,seq_length,trunc512checksum,ucsc_name) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ChromosomeEntity chromosome = chromosomeEntityList.get(i);
+                ps.setString(1, chromosome.getAssembly().getInsdcAccession());
+                ps.setString(2, chromosome.getContigType().toString());
+                ps.setString(3, chromosome.getEnaSequenceName());
+                ps.setString(4, chromosome.getGenbankSequenceName());
+                ps.setString(5, chromosome.getInsdcAccession());
+                ps.setString(6, chromosome.getMd5checksum());
+                ps.setString(7, chromosome.getRefseq());
+                ps.setLong(8, chromosome.getSeqLength());
+                ps.setString(9, chromosome.getTrunc512checksum());
+                ps.setString(10, chromosome.getUcscName());
+            }
+            @Override
+            public int getBatchSize() {
+                return chromosomeEntityList.size();
+            }
+        });
     }
 
 }

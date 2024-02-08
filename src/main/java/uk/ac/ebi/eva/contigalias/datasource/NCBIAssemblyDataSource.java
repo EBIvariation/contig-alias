@@ -30,13 +30,8 @@ import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
-import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
-import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -51,8 +46,6 @@ import java.util.stream.Collectors;
 public class NCBIAssemblyDataSource implements AssemblyDataSource {
 
     private final Logger logger = LoggerFactory.getLogger(NCBIAssemblyDataSource.class);
-
-    private final int BATCH_SIZE = 100000;
 
     private final NCBIBrowserFactory factory;
 
@@ -162,61 +155,5 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
             logger.error("NCBI assembly report could not be downloaded successfully(" + ftpFile.getName() + ")");
             return Optional.empty();
         }
-    }
-
-    public void parseFileAndInsertAssembly(String accession, ENAAssemblyDataSource enaDataSource,
-                                           AssemblyRepository assemblyRepository, ChromosomeRepository chromosomeRepository) throws IOException {
-        Optional<Path> downloadNCBIFilePathOpt = downloadAssemblyReport(accession);
-        Path downloadedNCBIFilePath = downloadNCBIFilePathOpt.orElseThrow(() -> new AssemblyNotFoundException(accession));
-        Optional<Path> downloadENAFilePathOpt = enaDataSource.downloadAssemblyReport(accession);
-        Path downloadedENAFilePath = downloadENAFilePathOpt.orElse(null);
-
-        long numberOfChromosomesInFile = Files.lines(downloadedNCBIFilePath).filter(line -> !line.startsWith("#")).count();
-        logger.info("Number of chromosomes in assembly (" + accession + "): " + numberOfChromosomesInFile);
-
-        AssemblyEntity assemblyEntity = getAssemblyEntity(downloadedNCBIFilePath);
-        assemblyRepository.save(assemblyEntity);
-
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedNCBIFilePath.toFile()))) {
-            long chromosomesSavedTillNow = 0l;
-            List<String> chrLines = new ArrayList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.startsWith("#")) {
-                    continue;
-                }
-                chrLines.add(line);
-                if (chrLines.size() == BATCH_SIZE) {
-                    // add ena sequence name and save
-                    addENASequenceNameAndSave(assemblyEntity, chrLines, enaDataSource, downloadedENAFilePath, chromosomeRepository);
-                    chromosomesSavedTillNow += chrLines.size();
-                    logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
-
-                    chrLines = new ArrayList<>();
-                }
-            }
-            if (!chrLines.isEmpty()) {
-                // add ena sequence name and save
-                addENASequenceNameAndSave(assemblyEntity, chrLines, enaDataSource, downloadedENAFilePath, chromosomeRepository);
-                chromosomesSavedTillNow += chrLines.size();
-                logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
-            }
-        }
-
-        // delete the files after assembly insertion
-        Files.deleteIfExists(downloadedNCBIFilePath);
-        if (downloadedENAFilePath != null) {
-            Files.deleteIfExists(downloadedENAFilePath);
-        }
-    }
-
-    public void addENASequenceNameAndSave(AssemblyEntity assemblyEntity, List<String> chrLines,
-                                          ENAAssemblyDataSource enaDataSource, Path downloadedENAFilePath,
-                                          ChromosomeRepository chromosomeRepository) throws IOException {
-        List<ChromosomeEntity> chromosomeEntityList = getChromosomeEntityList(assemblyEntity, chrLines);
-        if (downloadedENAFilePath != null) {
-            enaDataSource.addENASequenceNameToChromosomes(chromosomeEntityList, downloadedENAFilePath, BATCH_SIZE);
-        }
-        chromosomeRepository.saveAll(chromosomeEntityList);
     }
 }

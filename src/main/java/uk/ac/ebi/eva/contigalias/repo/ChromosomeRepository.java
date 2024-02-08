@@ -51,6 +51,10 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     @Query("UPDATE ChromosomeEntity c SET c.md5checksum = :md5Checksum WHERE c.assembly.insdcAccession= :asmInsdcAccession AND c.insdcAccession = :insdcAccession")
     void updateMd5ChecksumByInsdcAccession(@Param("asmInsdcAccession") String asmInsdcAccession, @Param("insdcAccession") String insdcAccession, @Param("md5Checksum") String md5Checksum);
 
+    @Modifying
+    @Query("UPDATE ChromosomeEntity c SET c.enaSequenceName = :enaSequenceName WHERE c.assembly.insdcAccession= :asmInsdcAccession AND c.insdcAccession = :insdcAccession")
+    void updateENASequenceNameByInsdcAccession(@Param("asmInsdcAccession") String asmInsdcAccession, @Param("insdcAccession") String insdcAccession, @Param("enaSequenceName") String enaSequenceName);
+
     @Transactional
     @Modifying
     @Query("DELETE FROM ChromosomeEntity c WHERE c.assembly.insdcAccession=:asmInsdcAccession")

@@ -19,16 +19,13 @@ package uk.ac.ebi.eva.contigalias.controller.admin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.stereotype.Service;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.service.AssemblyService;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class AdminHandler {
@@ -52,7 +49,7 @@ public class AdminHandler {
         return assemblyService.getAssemblyByAccession(accession);
     }
 
-    public void fetchAndInsertAssemblyByAccession(String accession) throws IOException {
+    public void fetchAndInsertAssemblyByAccession(String accession) {
         assemblyService.fetchAndInsertAssembly(accession);
     }
 
@@ -64,8 +61,12 @@ public class AdminHandler {
         assemblyService.retrieveAndInsertMd5ChecksumForAssembly(accession);
     }
 
-    public Map<String, Set<String>> getMD5ChecksumUpdateTaskStatus() {
-        return assemblyService.getMD5ChecksumUpdateTaskStatus();
+    public void retrieveAndInsertENASequenceNameForAssembly(String accession) {
+        assemblyService.retrieveAndInsertENASequenceNameForAssembly(accession);
+    }
+
+    public List<String> getScheduledJobStatus() {
+        return assemblyService.getScheduledJobStatus();
     }
 
     public void deleteAssemblyByAccession(String accession) {

@@ -19,7 +19,6 @@ package uk.ac.ebi.eva.contigalias.controller.contigalias;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -83,6 +82,7 @@ public class ContigAliasHandler {
 
     public PagedModel<EntityModel<AssemblyEntity>> getAssembliesByTaxid(long taxid, Pageable request) {
         Page<AssemblyEntity> page = assemblyService.getAssembliesByTaxid(taxid, request);
+        page.forEach(it->it.setChromosomes(null));
         return generatePagedModelFromPage(page, assemblyAssembler);
     }
 

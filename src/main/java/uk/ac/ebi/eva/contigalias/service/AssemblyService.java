@@ -31,21 +31,29 @@ import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
-import uk.ac.ebi.eva.contigalias.scheduler.ChecksumSetter;
+import uk.ac.ebi.eva.contigalias.scheduler.ChromosomeUpdater;
+import uk.ac.ebi.eva.contigalias.scheduler.Job;
+import uk.ac.ebi.eva.contigalias.scheduler.JobType;
 
 import javax.transaction.Transactional;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 
 @Service
 public class AssemblyService {
+    private final int BATCH_SIZE = 100000;
+
+    private final ChromosomeService chromosomeService;
 
     private final AssemblyRepository assemblyRepository;
 
@@ -55,36 +63,34 @@ public class AssemblyService {
 
     private final ENAAssemblyDataSource enaDataSource;
 
-    private final ChecksumSetter checksumSetter;
+    private final ChromosomeUpdater chromosomeUpdater;
 
     private final Logger logger = LoggerFactory.getLogger(AssemblyService.class);
 
     @Autowired
-    public AssemblyService(AssemblyRepository repository, ChromosomeRepository chromosomeRepository,
+    public AssemblyService(ChromosomeService chromosomeService, AssemblyRepository repository, ChromosomeRepository chromosomeRepository,
                            NCBIAssemblyDataSource ncbiDataSource, ENAAssemblyDataSource enaDataSource,
-                           ChecksumSetter checksumSetter) {
+                           ChromosomeUpdater chromosomeUpdater) {
+        this.chromosomeService = chromosomeService;
         this.assemblyRepository = repository;
         this.chromosomeRepository = chromosomeRepository;
         this.ncbiDataSource = ncbiDataSource;
         this.enaDataSource = enaDataSource;
-        this.checksumSetter = checksumSetter;
+        this.chromosomeUpdater = chromosomeUpdater;
     }
 
     public Optional<AssemblyEntity> getAssemblyByInsdcAccession(String insdcAccession) {
         Optional<AssemblyEntity> entity = assemblyRepository.findAssemblyEntityByInsdcAccession(insdcAccession);
-        stripAssemblyFromChromosomes(entity);
         return entity;
     }
 
     public Optional<AssemblyEntity> getAssemblyByRefseq(String refseq) {
         Optional<AssemblyEntity> entity = assemblyRepository.findAssemblyEntityByRefseq(refseq);
-        stripAssemblyFromChromosomes(entity);
         return entity;
     }
 
     public Page<AssemblyEntity> getAssembliesByTaxid(long taxid, Pageable request) {
         Page<AssemblyEntity> page = assemblyRepository.findAssemblyEntitiesByTaxid(taxid, request);
-        page.forEach(this::stripAssemblyFromChromosomes);
         return page;
     }
 
@@ -99,7 +105,7 @@ public class AssemblyService {
         assemblyRepository.save(assemblyEntity);
     }
 
-    public void fetchAndInsertAssembly(String accession) throws IOException {
+    public void fetchAndInsertAssembly(String accession) {
         // check if assembly already exists in db
         Optional<AssemblyEntity> entity = assemblyRepository.findAssemblyEntityByAccession(accession);
         if (entity.isPresent()) {
@@ -108,17 +114,64 @@ public class AssemblyService {
 
         try {
             // download file and save assembly and chromosome data
-            ncbiDataSource.parseFileAndInsertAssembly(accession, enaDataSource, assemblyRepository, chromosomeRepository);
+            logger.info("Start inserting assembly for accession " + accession);
+            parseFileAndInsertAssembly(accession);
             logger.info("Successfully inserted assembly for accession " + accession);
 
-            // submit job for retrieving and updating MD5 Checksum for assembly (asynchronously)
-            checksumSetter.updateMd5CheckSumForAssemblyAsync(accession);
+            // submit job for updating ENA Sequence name for assembly (asynchronously)
+            Job enaSequenceNameupdateJob = new Job(JobType.ENA_SEQUENCE_NAME_UPDATE, accession);
+            chromosomeUpdater.submitJob(enaSequenceNameupdateJob);
+
+            // submit job for updating MD5 Checksum for assembly (asynchronously)
+            Job md5ChecksumupdateJob = new Job(JobType.MD5_CHECKSUM_UPDATE, accession);
+            chromosomeUpdater.submitJob(md5ChecksumupdateJob);
         } catch (Exception e) {
             // roll back inserted entries in case of any exception or error
-            logger.error("Exception while inserting assembly " + accession + " Rolling back changes");
+            logger.error("Exception while inserting assembly " + accession + " Rolling back changes. \n" + e);
             deleteEntriesForAssembly(accession);
             throw new AssemblyIngestionException(accession);
         }
+    }
+
+    public void parseFileAndInsertAssembly(String accession) throws IOException {
+        Optional<Path> downloadNCBIFilePathOpt = ncbiDataSource.downloadAssemblyReport(accession);
+        Path downloadedNCBIFilePath = downloadNCBIFilePathOpt.orElseThrow(() -> new AssemblyNotFoundException(accession));
+
+        long numberOfChromosomesInFile = Files.lines(downloadedNCBIFilePath).filter(line -> !line.startsWith("#")).count();
+        logger.info("Number of chromosomes in assembly (" + accession + "): " + numberOfChromosomesInFile);
+
+        AssemblyEntity assemblyEntity = ncbiDataSource.getAssemblyEntity(downloadedNCBIFilePath);
+        assemblyRepository.save(assemblyEntity);
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedNCBIFilePath.toFile()))) {
+            long chromosomesSavedTillNow = 0l;
+            List<String> chrLines = new ArrayList<>();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                chrLines.add(line);
+                if (chrLines.size() == BATCH_SIZE) {
+                    List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
+                    chromosomeService.saveAllChromosomes(chromosomeEntityList);
+                    chromosomesSavedTillNow += chrLines.size();
+                    logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
+
+                    chrLines = new ArrayList<>();
+                }
+            }
+            if (!chrLines.isEmpty()) {
+                // add ena sequence name and save
+                List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
+                chromosomeService.saveAllChromosomes(chromosomeEntityList);
+                chromosomesSavedTillNow += chrLines.size();
+                logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
+            }
+        }
+
+        // delete the files after assembly insertion
+        Files.deleteIfExists(downloadedNCBIFilePath);
     }
 
     public void deleteEntriesForAssembly(String accession) {
@@ -127,36 +180,25 @@ public class AssemblyService {
     }
 
     public void retrieveAndInsertMd5ChecksumForAssembly(String assembly) {
-        checksumSetter.updateMd5CheckSumForAssemblyAsync(assembly);
+        Job md5ChecksumupdateJob = new Job(JobType.MD5_CHECKSUM_UPDATE, assembly);
+        chromosomeUpdater.submitJob(md5ChecksumupdateJob);
     }
 
-    public Map<String, Set<String>> getMD5ChecksumUpdateTaskStatus() {
-        return checksumSetter.getMD5ChecksumUpdateTaskStatus();
+    public void retrieveAndInsertENASequenceNameForAssembly(String assembly) {
+        Job enaSequenceNameupdateJob = new Job(JobType.ENA_SEQUENCE_NAME_UPDATE, assembly);
+        chromosomeUpdater.submitJob(enaSequenceNameupdateJob);
+    }
+
+    public List<String> getScheduledJobStatus() {
+        return chromosomeUpdater.getScheduledJobStatus();
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
         Optional<AssemblyEntity> entity = assemblyRepository.findAssemblyEntityByAccession(accession);
         if (entity.isPresent()) {
-            stripAssemblyFromChromosomes(entity);
             return entity;
         } else {
             throw new AssemblyNotFoundException(accession);
-        }
-    }
-
-    public void stripAssemblyFromChromosomes(Optional<AssemblyEntity> optional) {
-        if (optional.isPresent()) {
-            AssemblyEntity entity = optional.get();
-            stripAssemblyFromChromosomes(entity);
-        }
-    }
-
-    private void stripAssemblyFromChromosomes(AssemblyEntity assembly) {
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
-        if (chromosomes != null && chromosomes.size() > 0) {
-            chromosomes.forEach(it -> it.setAssembly(null));
-        } else {
-            assembly.setChromosomes(Collections.emptyList());
         }
     }
 

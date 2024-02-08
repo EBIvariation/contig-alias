@@ -33,9 +33,7 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -112,7 +110,7 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
             try {
                 enaBrowser.disconnect();
             } catch (IOException e) {
-                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
+                logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
             }
         }
     }
@@ -192,31 +190,6 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
             String sourceInsdcAccession = sourceSeq.getInsdcAccession();
             if (insdcToSequenceEntityMap.containsKey(sourceInsdcAccession)) {
                 insdcToSequenceEntityMap.get(sourceInsdcAccession).setEnaSequenceName(sourceSeq.getEnaSequenceName());
-            }
-        }
-    }
-
-    public void addENASequenceNameToChromosomes(List<ChromosomeEntity> ncbiChromosomeList,
-                                                Path downloadedENAFilePath, final int BATCH_SIZE) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedENAFilePath.toFile()))) {
-            List<String> chrLines = new ArrayList<>();
-            List<ChromosomeEntity> enaChromosomeList;
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.startsWith("accession")) {
-                    continue;
-                }
-                chrLines.add(line);
-                if (chrLines.size() == BATCH_SIZE) {
-                    enaChromosomeList = getChromosomeEntityList(chrLines);
-                    addENASequenceNames(enaChromosomeList, ncbiChromosomeList);
-
-                    chrLines = new ArrayList<>();
-                }
-            }
-            if (!chrLines.isEmpty()) {
-                enaChromosomeList = getChromosomeEntityList(chrLines);
-                addENASequenceNames(enaChromosomeList, ncbiChromosomeList);
             }
         }
     }
