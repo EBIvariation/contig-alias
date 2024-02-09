@@ -61,8 +61,16 @@ public class AdminHandler {
         assemblyService.retrieveAndInsertMd5ChecksumForAssembly(accession);
     }
 
+    public void retrieveAndInsertMd5ChecksumForAssembly(List<String> accessions) {
+        assemblyService.retrieveAndInsertMd5ChecksumForAssembly(accessions);
+    }
+
     public void retrieveAndInsertENASequenceNameForAssembly(String accession) {
         assemblyService.retrieveAndInsertENASequenceNameForAssembly(accession);
+    }
+
+    public void retrieveAndInsertENASequenceNameForAssembly(List<String> accessions) {
+        assemblyService.retrieveAndInsertENASequenceNameForAssembly(accessions);
     }
 
     public List<String> getScheduledJobStatus() {

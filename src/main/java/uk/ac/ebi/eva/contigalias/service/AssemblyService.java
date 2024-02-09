@@ -184,9 +184,25 @@ public class AssemblyService {
         chromosomeUpdater.submitJob(md5ChecksumupdateJob);
     }
 
+    public void retrieveAndInsertMd5ChecksumForAssembly(List<String> assemblies) {
+        List<Job> jobsList = new ArrayList();
+        for (String assembly : assemblies) {
+            jobsList.add(new Job(JobType.MD5_CHECKSUM_UPDATE, assembly));
+        }
+        chromosomeUpdater.submitJob(jobsList);
+    }
+
     public void retrieveAndInsertENASequenceNameForAssembly(String assembly) {
         Job enaSequenceNameupdateJob = new Job(JobType.ENA_SEQUENCE_NAME_UPDATE, assembly);
         chromosomeUpdater.submitJob(enaSequenceNameupdateJob);
+    }
+
+    public void retrieveAndInsertENASequenceNameForAssembly(List<String> assemblies) {
+        List<Job> jobsList = new ArrayList();
+        for (String assembly : assemblies) {
+            jobsList.add(new Job(JobType.ENA_SEQUENCE_NAME_UPDATE, assembly));
+        }
+        chromosomeUpdater.submitJob(jobsList);
     }
 
     public List<String> getScheduledJobStatus() {

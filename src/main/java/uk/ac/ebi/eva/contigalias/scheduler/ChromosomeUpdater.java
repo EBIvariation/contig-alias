@@ -33,6 +33,13 @@ public class ChromosomeUpdater implements ApplicationListener<JobSubmittedEvent>
         ApplicationContextHolder.getApplicationContext().publishEvent(event);
     }
 
+    public void submitJob(List<Job> jobList) {
+        jobQueue.addAll(jobList);
+        jobList.stream().forEach(job -> logger.info("Submitted Job : " + job.getType() + " for assembly " + job.getParameter()));
+        JobSubmittedEvent event = new JobSubmittedEvent(this);
+        ApplicationContextHolder.getApplicationContext().publishEvent(event);
+    }
+
     @Override
     public void onApplicationEvent(JobSubmittedEvent event) {
         processJobs();
