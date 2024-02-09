@@ -66,7 +66,7 @@ public class MD5ChecksumUpdater {
         }
     }
 
-    public void updateMd5ChecksumForChromosome(String assembly, List<ChromosomeEntity> chromosomesList) {
+    private void updateMd5ChecksumForChromosome(String assembly, List<ChromosomeEntity> chromosomesList) {
         chromosomesList.parallelStream().forEach(chromosome -> {
             try {
                 String md5Checksum = retrieveMd5Checksum(chromosome.getInsdcAccession());

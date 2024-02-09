@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.contigalias.scheduler;
+package uk.ac.ebi.eva.contigalias.conf;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

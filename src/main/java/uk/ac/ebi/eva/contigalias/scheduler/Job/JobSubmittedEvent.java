@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.contigalias.scheduler;
+package uk.ac.ebi.eva.contigalias.scheduler.Job;
 
 
 import org.springframework.context.ApplicationEvent;

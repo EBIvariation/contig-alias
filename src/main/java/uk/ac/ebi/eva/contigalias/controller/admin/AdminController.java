@@ -61,6 +61,9 @@ public class AdminController {
                     "GCA_000001405.10") String asmAccession) throws IOException {
         try {
             handler.fetchAndInsertAssemblyByAccession(asmAccession);
+            // submit jobs for updating ena sequence name and md5 checksum for assembly
+            handler.retrieveAndInsertENASequenceNameForAssembly(asmAccession);
+            handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -86,6 +89,11 @@ public class AdminController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Map<String, List<String>> accessionResult = handler.fetchAndInsertAssemblyByAccession(accessions);
+        // submit jobs for updating ena sequence names and md5 checksum for all successfully inserted assemblies
+        if (accessionResult.get("SUCCESS").size() > 0) {
+            handler.retrieveAndInsertENASequenceNameForAssembly(accessionResult.get("SUCCESS"));
+            handler.retrieveAndInsertMd5ChecksumForAssembly(accessionResult.get("SUCCESS"));
+        }
         return new ResponseEntity<>("Accession Processing Result : " + accessionResult, HttpStatus.MULTI_STATUS);
     }
 

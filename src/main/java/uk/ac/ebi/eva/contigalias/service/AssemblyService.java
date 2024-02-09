@@ -32,8 +32,8 @@ import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 import uk.ac.ebi.eva.contigalias.scheduler.ChromosomeUpdater;
-import uk.ac.ebi.eva.contigalias.scheduler.Job;
-import uk.ac.ebi.eva.contigalias.scheduler.JobType;
+import uk.ac.ebi.eva.contigalias.scheduler.Job.Job;
+import uk.ac.ebi.eva.contigalias.scheduler.Job.JobType;
 
 import javax.transaction.Transactional;
 import java.io.BufferedReader;
@@ -117,14 +117,6 @@ public class AssemblyService {
             logger.info("Start inserting assembly for accession " + accession);
             parseFileAndInsertAssembly(accession);
             logger.info("Successfully inserted assembly for accession " + accession);
-
-            // submit job for updating ENA Sequence name for assembly (asynchronously)
-            Job enaSequenceNameupdateJob = new Job(JobType.ENA_SEQUENCE_NAME_UPDATE, accession);
-            chromosomeUpdater.submitJob(enaSequenceNameupdateJob);
-
-            // submit job for updating MD5 Checksum for assembly (asynchronously)
-            Job md5ChecksumupdateJob = new Job(JobType.MD5_CHECKSUM_UPDATE, accession);
-            chromosomeUpdater.submitJob(md5ChecksumupdateJob);
         } catch (Exception e) {
             // roll back inserted entries in case of any exception or error
             logger.error("Exception while inserting assembly " + accession + " Rolling back changes. \n" + e);

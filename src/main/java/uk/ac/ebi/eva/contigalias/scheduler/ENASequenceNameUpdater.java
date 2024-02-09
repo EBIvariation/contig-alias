@@ -59,7 +59,7 @@ public class ENASequenceNameUpdater {
         }
     }
 
-    public void retrieveAndUpdateENASequenceNames(String assembly, Path downloadedENAFilePath) throws IOException {
+    private void retrieveAndUpdateENASequenceNames(String assembly, Path downloadedENAFilePath) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedENAFilePath.toFile()))) {
             long chromosomesSavedTillNow = 0l;
             List<String> chrLines = new ArrayList<>();
@@ -73,7 +73,7 @@ public class ENASequenceNameUpdater {
                     List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
                     chromosomeService.updateENASequenceNameForAllChromosomeInAssembly(assembly, chromosomeEntityList);
                     chromosomesSavedTillNow += chrLines.size();
-                    logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
+                    logger.info("Number of chromosomes updated till now  : " + chromosomesSavedTillNow);
 
                     chrLines = new ArrayList<>();
                 }
@@ -83,7 +83,7 @@ public class ENASequenceNameUpdater {
                 List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
                 chromosomeService.updateENASequenceNameForAllChromosomeInAssembly(assembly, chromosomeEntityList);
                 chromosomesSavedTillNow += chrLines.size();
-                logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
+                logger.info("Number of chromosomes updated till now  : " + chromosomesSavedTillNow);
             }
         }
     }

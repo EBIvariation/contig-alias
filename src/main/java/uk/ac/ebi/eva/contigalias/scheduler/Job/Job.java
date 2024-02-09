@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.contigalias.scheduler;
+package uk.ac.ebi.eva.contigalias.scheduler.Job;
 
 public class Job {
     private final JobType type;
@@ -15,5 +15,10 @@ public class Job {
 
     public String getParameter() {
         return parameter;
+    }
+
+    @Override
+    public String toString() {
+        return type + " : " + parameter;
     }
 }
