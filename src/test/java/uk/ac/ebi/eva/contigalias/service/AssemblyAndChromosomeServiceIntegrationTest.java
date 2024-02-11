@@ -184,6 +184,9 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
 
         @AfterEach
         void tearDown() {
+            for(ChromosomeEntity chromosomeEntity: chromosomeEntities){
+                service.deleteChromosome(chromosomeEntity);
+            }
             for (AssemblyEntity assemblyEntity : assemblyEntities) {
                 assemblyService.deleteAssembly(assemblyEntity);
             }

@@ -31,9 +31,7 @@ import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,7 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository("NCBIDataSource")
-public class NCBIAssemblyDataSource implements AssemblyDataSource {
+public class NCBIAssemblyDataSource {
 
     private final Logger logger = LoggerFactory.getLogger(NCBIAssemblyDataSource.class);
 
@@ -59,34 +57,6 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
                                   NCBIAssemblyReportReaderFactory readerFactory) {
         this.factory = factory;
         this.readerFactory = readerFactory;
-    }
-
-    @Override
-    public Optional<AssemblyEntity> getAssemblyByAccession(
-            String accession) throws IOException, IllegalArgumentException {
-        NCBIBrowser ncbiBrowser = factory.build();
-        ncbiBrowser.connect();
-
-        Optional<Path> downloadFilePath = downloadAssemblyReport(accession, ncbiBrowser);
-        if (!downloadFilePath.isPresent()) {
-            return Optional.empty();
-        }
-
-        AssemblyEntity assemblyEntity;
-        try (InputStream stream = new FileInputStream(downloadFilePath.get().toFile())) {
-            NCBIAssemblyReportReader reader = readerFactory.build(stream);
-            assemblyEntity = reader.getAssemblyEntity();
-            logger.info("NCBI: Number of chromosomes in " + accession + " : " +
-                    (assemblyEntity.getChromosomes() != null ? assemblyEntity.getChromosomes().size() : 0));
-        } finally {
-            try {
-                ncbiBrowser.disconnect();
-                Files.deleteIfExists(downloadFilePath.get());
-            } catch (IOException e) {
-                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
-            }
-        }
-        return Optional.of(assemblyEntity);
     }
 
     public AssemblyEntity getAssemblyEntity(Path downloadFilePath) throws IOException {

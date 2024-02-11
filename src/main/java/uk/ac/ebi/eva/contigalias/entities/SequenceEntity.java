@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.contigalias.entities;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -67,7 +68,7 @@ public class SequenceEntity {
     @Id
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "Assembly that this sequence belongs to.")
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private AssemblyEntity assembly;
 
     public String getGenbankSequenceName() {

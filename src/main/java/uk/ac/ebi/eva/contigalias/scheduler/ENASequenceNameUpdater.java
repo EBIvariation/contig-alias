@@ -79,12 +79,13 @@ public class ENASequenceNameUpdater {
                 }
             }
             if (!chrLines.isEmpty()) {
-                // add ena sequence name and save
                 List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
                 chromosomeService.updateENASequenceNameForAllChromosomeInAssembly(assembly, chromosomeEntityList);
                 chromosomesSavedTillNow += chrLines.size();
                 logger.info("Number of chromosomes updated till now  : " + chromosomesSavedTillNow);
             }
         }
+
+        logger.info("Finished updating ENA Sequence Name for assembly: " + assembly);
     }
 }

@@ -23,8 +23,7 @@ public class ChromosomeUpdater {
     private final BlockingQueue<Job> jobQueue = new LinkedBlockingQueue<>();
     private final ENASequenceNameUpdater enaSequenceNameUpdater;
     private final MD5ChecksumUpdater md5ChecksumUpdater;
-    private AtomicBoolean running = new AtomicBoolean(false);
-
+    private final AtomicBoolean running = new AtomicBoolean(false);
     private Job currentJob;
 
     @Autowired
@@ -53,7 +52,7 @@ public class ChromosomeUpdater {
         currentJob = null;
         while (!jobQueue.isEmpty()) {
             try {
-                Job currentJob = jobQueue.take();
+                currentJob = jobQueue.take();
                 if (currentJob.getType() == JobType.ENA_SEQUENCE_NAME_UPDATE) {
                     enaSequenceNameUpdater.updateENASequenceNameForAssembly(currentJob.getParameter());
                 } else if (currentJob.getType() == JobType.MD5_CHECKSUM_UPDATE) {

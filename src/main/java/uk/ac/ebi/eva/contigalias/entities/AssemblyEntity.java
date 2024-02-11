@@ -65,7 +65,7 @@ public class AssemblyEntity {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
     @LazyCollection(LazyCollectionOption.TRUE)
-    @OneToMany(mappedBy = "assembly", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChromosomeEntity> chromosomes;
 
     public AssemblyEntity() {

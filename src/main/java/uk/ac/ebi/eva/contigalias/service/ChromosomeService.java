@@ -284,7 +284,7 @@ public class ChromosomeService {
         return repository.countChromosomeEntitiesByEnaSequenceName(enaName);
     }
 
-    void saveAllChromosomes(List<ChromosomeEntity> chromosomeEntityList) {
+    public void saveAllChromosomes(List<ChromosomeEntity> chromosomeEntityList) {
         String sql = "INSERT INTO chromosome (assembly_insdc_accession,contig_type,ena_sequence_name," +
                 "genbank_sequence_name,insdc_accession,md5checksum,refseq,seq_length,trunc512checksum,ucsc_name) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
