@@ -32,8 +32,8 @@ import uk.ac.ebi.eva.contigalias.exception.DuplicateAssemblyException;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 import uk.ac.ebi.eva.contigalias.scheduler.ChromosomeUpdater;
-import uk.ac.ebi.eva.contigalias.scheduler.Job.Job;
-import uk.ac.ebi.eva.contigalias.scheduler.Job.JobType;
+import uk.ac.ebi.eva.contigalias.scheduler.job.Job;
+import uk.ac.ebi.eva.contigalias.scheduler.job.JobType;
 
 import javax.transaction.Transactional;
 import java.io.BufferedReader;
@@ -146,7 +146,7 @@ public class AssemblyService {
                 chrLines.add(line);
                 if (chrLines.size() == BATCH_SIZE) {
                     List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
-                    chromosomeService.saveAllChromosomes(chromosomeEntityList);
+                    chromosomeService.insertAllChromosomes(chromosomeEntityList);
                     chromosomesSavedTillNow += chrLines.size();
                     logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
 
@@ -154,9 +154,8 @@ public class AssemblyService {
                 }
             }
             if (!chrLines.isEmpty()) {
-                // add ena sequence name and save
                 List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
-                chromosomeService.saveAllChromosomes(chromosomeEntityList);
+                chromosomeService.insertAllChromosomes(chromosomeEntityList);
                 chromosomesSavedTillNow += chrLines.size();
                 logger.info("Number of chromosomes saved till now  : " + chromosomesSavedTillNow);
             }

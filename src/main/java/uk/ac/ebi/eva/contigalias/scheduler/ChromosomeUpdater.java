@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.conf.ApplicationContextHolder;
-import uk.ac.ebi.eva.contigalias.scheduler.Job.Job;
-import uk.ac.ebi.eva.contigalias.scheduler.Job.JobSubmittedEvent;
-import uk.ac.ebi.eva.contigalias.scheduler.Job.JobType;
+import uk.ac.ebi.eva.contigalias.scheduler.job.Job;
+import uk.ac.ebi.eva.contigalias.scheduler.job.JobSubmittedEvent;
+import uk.ac.ebi.eva.contigalias.scheduler.job.JobType;
 
 import java.util.ArrayList;
 import java.util.List;

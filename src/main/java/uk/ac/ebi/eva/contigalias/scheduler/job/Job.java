@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.contigalias.scheduler.Job;
+package uk.ac.ebi.eva.contigalias.scheduler.job;
 
 public class Job {
     private final JobType type;

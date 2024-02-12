@@ -208,7 +208,7 @@ public class ChromosomeService {
     public void putChromosomeChecksumsByAccession(String accession, String md5, String trunc512) {
         Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByInsdcAccessionOrRefseq(
                 accession, accession, Pageable.unpaged());
-        if (page.isEmpty()){
+        if (page.isEmpty()) {
             throw new IllegalArgumentException(
                     "No chromosomes corresponding to accession " + accession + " found in the database");
         }
@@ -284,7 +284,7 @@ public class ChromosomeService {
         return repository.countChromosomeEntitiesByEnaSequenceName(enaName);
     }
 
-    public void saveAllChromosomes(List<ChromosomeEntity> chromosomeEntityList) {
+    public void insertAllChromosomes(List<ChromosomeEntity> chromosomeEntityList) {
         String sql = "INSERT INTO chromosome (assembly_insdc_accession,contig_type,ena_sequence_name," +
                 "genbank_sequence_name,insdc_accession,md5checksum,refseq,seq_length,trunc512checksum,ucsc_name) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -303,6 +303,7 @@ public class ChromosomeService {
                 ps.setString(9, chromosome.getTrunc512checksum());
                 ps.setString(10, chromosome.getUcscName());
             }
+
             @Override
             public int getBatchSize() {
                 return chromosomeEntityList.size();

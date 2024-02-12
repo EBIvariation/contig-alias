@@ -198,7 +198,7 @@ public class AdminController {
     }
 
 
-    @ApiOperation(value = "Retrieve list of assemblies for which MD5 Checksum updates are running/going-to-run ")
+    @ApiOperation(value = "Retrieve list of Jobs that are running or scheduled to run")
     @GetMapping(value = "assemblies/scheduled-jobs")
     public ResponseEntity<List<String>> getMD5ChecksumUpdateTaskStatus() {
         List<String> scheduledJobStatus = handler.getScheduledJobStatus();
