@@ -37,7 +37,7 @@ public class MD5ChecksumUpdater {
             String sql = "select * from chromosome c where c.assembly_insdc_accession = '" + assembly
                     + "' AND (c.md5checksum IS NULL OR c.md5checksum = '')";
             jdbcTemplate.query(sql, (ResultSetExtractor<Void>) rs -> {
-                long chromosomeUpdated = 0;
+                long chromosomeProcessed = 0;
                 List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
                 while (rs.next()) {
                     ChromosomeEntity chromosome = new ChromosomeEntity();
@@ -46,15 +46,15 @@ public class MD5ChecksumUpdater {
 
                     if (chromosomeEntityList.size() == DEFAULT_BATCH_SIZE) {
                         updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
-                        chromosomeUpdated += chromosomeEntityList.size();
-                        logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
+                        chromosomeProcessed += chromosomeEntityList.size();
+                        logger.info("Chromosomes Processed till now: " + chromosomeProcessed);
                         chromosomeEntityList = new ArrayList<>();
                     }
                 }
                 if (chromosomeEntityList.size() > 0) {
                     updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
-                    chromosomeUpdated += chromosomeEntityList.size();
-                    logger.info("Chromosomes Updated till now: " + chromosomeUpdated);
+                    chromosomeProcessed += chromosomeEntityList.size();
+                    logger.info("Chromosomes Processed till now: " + chromosomeProcessed);
                 }
 
                 logger.info("Finished updating MD5 Checksum for assembly: " + assembly);

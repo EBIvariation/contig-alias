@@ -28,11 +28,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequestMapping("/v1/admin")
 @RestController
@@ -102,15 +104,14 @@ public class AdminController {
     public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(@PathVariable(name = "accession")
                                                                           @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
                                                                                   "GCA_000001405.10") String asmAccession) {
-        try {
-            handler.getAssemblyByAccession(asmAccession);
-            handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
-            return ResponseEntity.ok("A task has been submitted for updating md5checksum for all chromosomes " +
-                    "in assembly " + asmAccession + ". Depending upon the number of chromosomes present in assembly, " +
-                    "and other scheduled jobs, this might take some time to complete");
-        } catch (AssemblyNotFoundException e) {
+        Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
+        if (assemblyOpt.isPresent()) {
+            handler.retrieveAndInsertMd5ChecksumForAssembly(assemblyOpt.get().getInsdcAccession());
+            return ResponseEntity.ok("A task has been submitted for updating md5checksum for assembly " + asmAccession
+                    + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
+        } else {
             return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first (md5checksum will be updated as part of the insertion process");
+                    ". Please insert the assembly first. MD5 checksum will be updated as part of the insertion process");
         }
     }
 
@@ -119,11 +120,32 @@ public class AdminController {
     public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(
             @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
-        handler.retrieveAndInsertMd5ChecksumForAssembly(accessions);
-        return ResponseEntity.ok("A task has been submitted for updating md5checksum for all chromosomes " +
-                "in assemblies " + accessions + ". Depending upon the number of chromosomes present in assembly, " +
-                "and other scheduled jobs, this might take some time to complete");
+        if (accessions == null || accessions.size() <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
+        List<String> asmInsdcAccessionsList = new ArrayList<>();
+        List<String> asmNotPresent = new ArrayList<>();
+        for (String accession : accessions) {
+            Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(accession);
+            if (assemblyOpt.isPresent()) {
+                asmInsdcAccessionsList.add(assemblyOpt.get().getInsdcAccession());
+            } else {
+                asmNotPresent.add(accession);
+            }
+        }
+
+        handler.retrieveAndInsertMd5ChecksumForAssembly(asmInsdcAccessionsList);
+
+        accessions.removeAll(asmNotPresent);
+        String responseText = "A task has been submitted for updating MD5 checksum for assemblies: " + accessions + "."
+                + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
+        if (!asmNotPresent.isEmpty()) {
+            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
+                    + "\nPlease insert the assembly first, MD5 Checksum will be updated as part of the insertion process";
+        }
+
+        return ResponseEntity.ok(responseText);
     }
 
     @ApiOperation(value = "Given an assembly accession, retrieve ENA sequence name for all chromosomes belonging to assembly and update")
@@ -131,15 +153,14 @@ public class AdminController {
     public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(@PathVariable(name = "accession")
                                                                               @ApiParam(value = "INSDC or RefSeq assembly accession. " +
                                                                                       "Eg: GCA_000001405.10") String asmAccession) {
-        try {
-            handler.getAssemblyByAccession(asmAccession);
-            handler.retrieveAndInsertENASequenceNameForAssembly(asmAccession);
-            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for all chromosomes " +
-                    "in assembly " + asmAccession + ". Depending upon the number of chromosomes present in assembly, " +
-                    "and other scheduled jobs, this might take some time to complete");
-        } catch (AssemblyNotFoundException e) {
+        Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
+        if (assemblyOpt.isPresent()) {
+            handler.retrieveAndInsertENASequenceNameForAssembly(assemblyOpt.get().getInsdcAccession());
+            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for assembly " + asmAccession
+                    + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
+        } else {
             return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first (ENA sequence name will be updated as part of the insertion process");
+                    ". Please insert the assembly first. ENA sequence name will be updated as part of the insertion process");
         }
     }
 
@@ -148,11 +169,32 @@ public class AdminController {
     public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(
             @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
+        if (accessions == null || accessions.size() <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
-        handler.retrieveAndInsertENASequenceNameForAssembly(accessions);
-        return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for all chromosomes " +
-                "in assembly " + accessions + ". Depending upon the number of chromosomes present in assembly, " +
-                "and other scheduled jobs, this might take some time to complete");
+        List<String> asmInsdcAccessionsList = new ArrayList<>();
+        List<String> asmNotPresent = new ArrayList<>();
+        for (String accession : accessions) {
+            Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(accession);
+            if (assemblyOpt.isPresent()) {
+                asmInsdcAccessionsList.add(assemblyOpt.get().getInsdcAccession());
+            } else {
+                asmNotPresent.add(accession);
+            }
+        }
+
+        handler.retrieveAndInsertENASequenceNameForAssembly(asmInsdcAccessionsList);
+
+        accessions.removeAll(asmNotPresent);
+        String responseText = "A task has been submitted for updating ENA Sequence Name for assemblies: " + accessions
+                + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
+        if (!asmNotPresent.isEmpty()) {
+            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
+                    + "\nPlease insert the assembly first, ENA Sequence Name will be updated as part of the insertion process";
+        }
+
+        return ResponseEntity.ok(responseText);
     }
 
 

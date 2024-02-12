@@ -202,12 +202,8 @@ public class AssemblyService {
     }
 
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) {
-        Optional<AssemblyEntity> entity = assemblyRepository.findAssemblyEntityByAccession(accession);
-        if (entity.isPresent()) {
-            return entity;
-        } else {
-            throw new AssemblyNotFoundException(accession);
-        }
+        Optional<AssemblyEntity> assemblyEntity = assemblyRepository.findAssemblyEntityByAccession(accession);
+        return assemblyEntity;
     }
 
     @Transactional

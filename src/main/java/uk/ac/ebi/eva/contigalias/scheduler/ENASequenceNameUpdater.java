@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +30,7 @@ public class ENASequenceNameUpdater {
     }
 
     public void updateENASequenceNameForAssembly(String assembly) {
-        Path downloadedENAFilePath = Paths.get("");
+        Path downloadedENAFilePath = null;
         try {
             logger.info("Trying to update ENA Sequence Name for assembly: " + assembly);
             Optional<Path> downloadENAFilePathOpt = enaDataSource.downloadAssemblyReport(assembly);
@@ -51,7 +50,9 @@ public class ENASequenceNameUpdater {
             logger.error("Error while updating ENA Sequence Name for assembly : " + assembly + "\n" + e);
         } finally {
             try {
-                Files.deleteIfExists(downloadedENAFilePath);
+                if (downloadedENAFilePath != null) {
+                    Files.deleteIfExists(downloadedENAFilePath);
+                }
             } catch (IOException e) {
                 logger.error("Error while deleting downloaded ENA assembly report file with path " + downloadedENAFilePath
                         + " for assembly : " + assembly);
@@ -61,7 +62,7 @@ public class ENASequenceNameUpdater {
 
     private void retrieveAndUpdateENASequenceNames(String assembly, Path downloadedENAFilePath) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedENAFilePath.toFile()))) {
-            long chromosomesSavedTillNow = 0l;
+            long chromosomesProcessedTillNow = 0l;
             List<String> chrLines = new ArrayList<>();
             String line;
             while ((line = bufferedReader.readLine()) != null) {
@@ -72,8 +73,8 @@ public class ENASequenceNameUpdater {
                 if (chrLines.size() == DEFAULT_BATCH_SIZE) {
                     List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
                     chromosomeService.updateENASequenceNameForAllChromosomeInAssembly(assembly, chromosomeEntityList);
-                    chromosomesSavedTillNow += chrLines.size();
-                    logger.info("Number of chromosomes updated till now  : " + chromosomesSavedTillNow);
+                    chromosomesProcessedTillNow += chrLines.size();
+                    logger.info("Number of chromosomes updated till now  : " + chromosomesProcessedTillNow);
 
                     chrLines = new ArrayList<>();
                 }
@@ -81,8 +82,8 @@ public class ENASequenceNameUpdater {
             if (!chrLines.isEmpty()) {
                 List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
                 chromosomeService.updateENASequenceNameForAllChromosomeInAssembly(assembly, chromosomeEntityList);
-                chromosomesSavedTillNow += chrLines.size();
-                logger.info("Number of chromosomes updated till now  : " + chromosomesSavedTillNow);
+                chromosomesProcessedTillNow += chrLines.size();
+                logger.info("Number of chromosomes updated till now  : " + chromosomesProcessedTillNow);
             }
         }
 
