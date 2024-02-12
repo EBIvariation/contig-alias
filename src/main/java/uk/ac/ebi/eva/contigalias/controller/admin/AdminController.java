@@ -127,7 +127,7 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Given an assembly accession, retrieve ENA sequence name for all chromosomes belonging to assembly and update")
-    @PutMapping(value = "assemblies/enaSequenceName/{accession}")
+    @PutMapping(value = "assemblies/ena-sequence-name/{accession}")
     public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(@PathVariable(name = "accession")
                                                                               @ApiParam(value = "INSDC or RefSeq assembly accession. " +
                                                                                       "Eg: GCA_000001405.10") String asmAccession) {
@@ -144,7 +144,7 @@ public class AdminController {
     }
 
     @ApiOperation(value = "Given a list of assembly accessions, retrieve ENA sequence name for all chromosomes belonging to all the assemblies and update")
-    @PutMapping(value = "assemblies/enaSequenceName")
+    @PutMapping(value = "assemblies/ena-sequence-name")
     public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(
             @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
@@ -157,7 +157,7 @@ public class AdminController {
 
 
     @ApiOperation(value = "Retrieve list of assemblies for which MD5 Checksum updates are running/going-to-run ")
-    @GetMapping(value = "assemblies/scheduledJobs")
+    @GetMapping(value = "assemblies/scheduled-jobs")
     public ResponseEntity<List<String>> getMD5ChecksumUpdateTaskStatus() {
         List<String> scheduledJobStatus = handler.getScheduledJobStatus();
         return ResponseEntity.ok(scheduledJobStatus);
