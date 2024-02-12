@@ -25,7 +25,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReader;
-import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -35,7 +34,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,16 +45,12 @@ public class NCBIAssemblyDataSource {
 
     private final NCBIBrowserFactory factory;
 
-    private final NCBIAssemblyReportReaderFactory readerFactory;
-
     @Value("${asm.file.download.dir}")
     private String asmFileDownloadDir;
 
     @Autowired
-    public NCBIAssemblyDataSource(NCBIBrowserFactory factory,
-                                  NCBIAssemblyReportReaderFactory readerFactory) {
+    public NCBIAssemblyDataSource(NCBIBrowserFactory factory) {
         this.factory = factory;
-        this.readerFactory = readerFactory;
     }
 
     public AssemblyEntity getAssemblyEntity(Path downloadFilePath) throws IOException {
@@ -71,13 +65,8 @@ public class NCBIAssemblyDataSource {
     }
 
     public List<ChromosomeEntity> getChromosomeEntityList(AssemblyEntity assemblyEntity, List<String> chrDataList) {
-        List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
-        for (String chrData : chrDataList) {
-            ChromosomeEntity chromosomeEntity = getChromosomeEntity(assemblyEntity, chrData);
-            if (chromosomeEntity != null) {
-                chromosomeEntityList.add(chromosomeEntity);
-            }
-        }
+        List<ChromosomeEntity> chromosomeEntityList = NCBIAssemblyReportReader.getChromosomeEntity(chrDataList);
+        chromosomeEntityList.stream().forEach(c -> c.setAssembly(assemblyEntity));
         return chromosomeEntityList;
     }
 

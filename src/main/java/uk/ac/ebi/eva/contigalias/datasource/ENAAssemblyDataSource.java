@@ -25,7 +25,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReader;
-import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowser;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
@@ -34,7 +33,6 @@ import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,16 +43,12 @@ public class ENAAssemblyDataSource {
 
     private final ENABrowserFactory factory;
 
-    private final ENAAssemblyReportReaderFactory readerFactory;
-
     @Value("${asm.file.download.dir}")
     private String asmFileDownloadDir;
 
     @Autowired
-    public ENAAssemblyDataSource(ENABrowserFactory factory,
-                                 ENAAssemblyReportReaderFactory readerFactory) {
+    public ENAAssemblyDataSource(ENABrowserFactory factory) {
         this.factory = factory;
-        this.readerFactory = readerFactory;
     }
 
     public Optional<Path> downloadAssemblyReport(String accession) throws IOException {
@@ -97,14 +91,7 @@ public class ENAAssemblyDataSource {
     }
 
     public List<ChromosomeEntity> getChromosomeEntityList(List<String> chrDataList) {
-        List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
-        for (String chrData : chrDataList) {
-            ChromosomeEntity chromosomeEntity = getChromosomeEntity(chrData);
-            if (chromosomeEntity != null) {
-                chromosomeEntityList.add(chromosomeEntity);
-            }
-        }
-        return chromosomeEntityList;
+        return ENAAssemblyReportReader.getChromosomeEntity(chrDataList);
     }
 
     public ChromosomeEntity getChromosomeEntity(String chrLine) {

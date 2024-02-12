@@ -20,119 +20,12 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NCBIAssemblyReportReader extends AssemblyReportReader {
-
-    public NCBIAssemblyReportReader(InputStreamReader inputStreamReader, boolean isScaffoldsEnabled) {
-        super(inputStreamReader, isScaffoldsEnabled);
-    }
-
-    protected void parseReport() throws IOException, NullPointerException {
-        if (reader == null) {
-            throw new NullPointerException("Cannot use AssemblyReportReader without having a valid InputStreamReader.");
-        }
-        String line = reader.readLine();
-        while (line != null) {
-            if (line.startsWith("# ")) {
-                if (assemblyEntity == null) {
-                    assemblyEntity = new AssemblyEntity();
-                }
-                parseAssemblyData(line);
-            } else if (!line.startsWith("#")) {
-                String[] columns = line.split("\t", -1);
-                if (columns.length >= 6 && (columns[5].equals("=") || columns[5].equals("<>")) &&
-                        (columns[4] != null && !columns[4].isEmpty() && !columns[4].equals("na"))) {
-                    if (columns[3].equals("Chromosome") && columns[1].equals("assembled-molecule")) {
-                        parseChromosomeLine(columns);
-                    } else if (isScaffoldsEnabled) {
-                        parseScaffoldLine(columns);
-                    }
-                }
-            }
-            line = reader.readLine();
-        }
-        reportParsed = true;
-        reader.close();
-    }
-
-    protected void parseAssemblyData(String line) {
-        int tagEnd = line.indexOf(':');
-        if (tagEnd == -1) {
-            return;
-        }
-        String tag = line.substring(2, tagEnd);
-        String tagData = line.substring(tagEnd + 1).trim();
-        switch (tag) {
-            case "Assembly name": {
-                assemblyEntity.setName(tagData);
-                break;
-            }
-            case "Organism name": {
-                assemblyEntity.setOrganism(tagData);
-                break;
-            }
-            case "Taxid": {
-                assemblyEntity.setTaxid(Long.parseLong(tagData));
-                break;
-            }
-            case "GenBank assembly accession": {
-                assemblyEntity.setInsdcAccession(tagData);
-                break;
-            }
-            case "RefSeq assembly accession": {
-                assemblyEntity.setRefseq(tagData);
-                break;
-            }
-            case "RefSeq assembly and GenBank assemblies identical": {
-                assemblyEntity.setGenbankRefseqIdentical(tagData.equals("yes"));
-                break;
-            }
-        }
-    }
-
-    protected void parseChromosomeLine(String[] columns) {
-        ChromosomeEntity chromosomeEntity = getChromosome(columns);
-        if (chromosomeEntity == null) {
-            return;
-        }
-
-        if (assemblyEntity == null) {
-            assemblyEntity = new AssemblyEntity();
-        }
-        chromosomeEntity.setAssembly(this.assemblyEntity);
-
-        List<ChromosomeEntity> chromosomes = this.assemblyEntity.getChromosomes();
-        if (chromosomes == null) {
-            chromosomes = new LinkedList<>();
-            assemblyEntity.setChromosomes(chromosomes);
-        }
-        chromosomes.add(chromosomeEntity);
-    }
-
-    protected void parseScaffoldLine(String[] columns) {
-        ChromosomeEntity scaffoldEntity = getScaffold(columns);
-        if (scaffoldEntity == null) {
-            return;
-        }
-
-        if (assemblyEntity == null) {
-            assemblyEntity = new AssemblyEntity();
-        }
-        scaffoldEntity.setAssembly(this.assemblyEntity);
-
-        List<ChromosomeEntity> scaffolds = this.assemblyEntity.getChromosomes();
-        if (scaffolds == null) {
-            scaffolds = new LinkedList<>();
-            assemblyEntity.setChromosomes(scaffolds);
-        }
-        scaffolds.add(scaffoldEntity);
-    }
+public class NCBIAssemblyReportReader {
 
     public static AssemblyEntity getAssemblyEntity(List<String> lines) {
         Map<String, String> tagAndValuesMap = lines.stream()
@@ -173,6 +66,17 @@ public class NCBIAssemblyReportReader extends AssemblyReportReader {
         }
 
         return asmEntity;
+    }
+
+    public static List<ChromosomeEntity> getChromosomeEntity(List<String> lines) {
+        List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
+        for (String line : lines) {
+            ChromosomeEntity chromosomeEntity = getChromosomeEntity(line);
+            if (chromosomeEntity != null) {
+                chromosomeEntityList.add(chromosomeEntity);
+            }
+        }
+        return chromosomeEntityList;
     }
 
     public static ChromosomeEntity getChromosomeEntity(String line) {
