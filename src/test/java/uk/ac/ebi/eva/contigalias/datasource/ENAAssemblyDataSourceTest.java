@@ -20,16 +20,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
@@ -41,24 +41,22 @@ public class ENAAssemblyDataSourceTest {
     @Autowired
     private ENAAssemblyDataSource enaDataSource;
 
-    @Autowired
-    private NCBIAssemblyDataSource ncbiDataSource;
-
     @Test
-    public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = enaDataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNotNull(chromosomes);
-        assertFalse(chromosomes.isEmpty());
+    public void testDownloadAssemblyReport() throws IOException {
+        Optional<Path> downloadedAssemblyReport = enaDataSource.downloadAssemblyReport(GCA_ACCESSION_HAVING_CHROMOSOMES);
+        assertTrue(downloadedAssemblyReport.isPresent());
+        assertTrue(Files.exists(downloadedAssemblyReport.get()));
     }
 
     @Test
-    public void getENASequenceNamesForAssembly() throws IOException {
-        Optional<AssemblyEntity> assembly = ncbiDataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        enaDataSource.addENASequenceNamesToAssembly(assembly.get());
-        assertTrue(assembly.isPresent());
-        assertTrue(enaDataSource.hasAllEnaSequenceNames(assembly.get()));
+    public void getChromosomeEntityFromAssemblyReport() throws IOException {
+        Optional<Path> downloadedAssemblyReport = enaDataSource.downloadAssemblyReport(GCA_ACCESSION_HAVING_CHROMOSOMES);
+        List<String> chrLines = Files.lines(downloadedAssemblyReport.get())
+                .filter(l -> !l.startsWith("accession"))
+                .collect(Collectors.toList());
+        List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
+        assertEquals(3143, chromosomeEntityList.size());
+        chromosomeEntityList.stream().forEach(c -> assertTrue(!c.getEnaSequenceName().isEmpty()));
     }
 
 }

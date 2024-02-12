@@ -20,19 +20,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
@@ -47,22 +46,39 @@ public class NCBIAssemblyDataSourceTest {
     private NCBIAssemblyDataSource dataSource;
 
     @Test
+    public void testDownloadAssemblyReport() throws IOException {
+        Optional<Path> downloadedAssemblyReport = dataSource.downloadAssemblyReport(GCA_ACCESSION_HAVING_CHROMOSOMES);
+        assertTrue(downloadedAssemblyReport.isPresent());
+        assertTrue(Files.exists(downloadedAssemblyReport.get()));
+    }
+
+    @Test
     public void getAssemblyByAccessionGCAHavingChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes();
-        assertNotNull(chromosomes);
-        assertFalse(chromosomes.isEmpty());
+        Optional<Path> downloadedAssemblyReport = dataSource.downloadAssemblyReport(GCA_ACCESSION_HAVING_CHROMOSOMES);
+        AssemblyEntity assembly = dataSource.getAssemblyEntity(downloadedAssemblyReport.get());
+        assertEquals(GCA_ACCESSION_HAVING_CHROMOSOMES, assembly.getInsdcAccession());
+        List<String> chrLines = Files.lines(downloadedAssemblyReport.get())
+                .filter(l -> !l.startsWith("#"))
+                .collect(Collectors.toList());
+        List<ChromosomeEntity> chromosomeEntityList = dataSource.getChromosomeEntityList(assembly, chrLines);
+        assertEquals(3143, chromosomeEntityList.size());
     }
 
     @Test
     public void getAssemblyByAccessionGCFNoChromosomes() throws IOException {
-        Optional<AssemblyEntity> accession = dataSource.getAssemblyByAccession(GCF_ACCESSION_NO_CHROMOSOMES);
-        assertTrue(accession.isPresent());
-        List<ChromosomeEntity> chromosomes = accession.get().getChromosomes().stream()
-                .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.CHROMOSOME))
+        Optional<Path> downloadedAssemblyReport = dataSource.downloadAssemblyReport(GCF_ACCESSION_NO_CHROMOSOMES);
+        AssemblyEntity assembly = dataSource.getAssemblyEntity(downloadedAssemblyReport.get());
+        assertEquals("GCA_006125015.1", assembly.getInsdcAccession());
+        List<String> chrLines = Files.lines(downloadedAssemblyReport.get())
+                .filter(l -> !l.startsWith("#"))
                 .collect(Collectors.toList());
-        assertEquals(0, chromosomes.size());
+        List<ChromosomeEntity> chromosomeEntityList = dataSource.getChromosomeEntityList(assembly, chrLines);
+        long numOfChromosomes = chromosomeEntityList.stream()
+                .filter(c -> c.getContigType() == SequenceEntity.ContigType.CHROMOSOME).count();
+        long numOfScaffolds = chromosomeEntityList.stream()
+                .filter(c -> c.getContigType() == SequenceEntity.ContigType.SCAFFOLD).count();
+        assertEquals(0, numOfChromosomes);
+        assertEquals(2, numOfScaffolds);
     }
 
 }

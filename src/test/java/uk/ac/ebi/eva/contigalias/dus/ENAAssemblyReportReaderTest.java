@@ -16,22 +16,16 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,49 +46,23 @@ class ENAAssemblyReportReaderTest {
 
     private static final String SCAFFOLD_GENBANK_ACCESSION = "GJ057137.1";
 
-    private InputStreamReader streamReader;
+    private static final Path assemblyReportPath = Paths.get("src/test/resources/GCA_000003055.3_sequence_report.txt");
 
-    private InputStream stream;
-
-    @Autowired
-    private ENAAssemblyReportReaderFactory readerFactory;
-
-    private ENAAssemblyReportReader reader;
-
-    @BeforeEach
-    void setup() throws FileNotFoundException {
-        stream = new FileInputStream("src/test/resources/GCA_000003055.3_sequence_report.txt");
-        streamReader = new InputStreamReader(stream);
-        reader = readerFactory.build(streamReader);
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        stream.close();
-        streamReader.close();
-    }
-
-    @Test
-    void getAssemblyReportReader() throws IOException {
-        assertTrue(reader.ready());
-    }
-
-    AssemblyEntity getAssemblyEntity() throws IOException {
-        return reader.getAssemblyEntity();
+    List<ChromosomeEntity> getChromosomes() throws IOException {
+        List<String> lines = Files.lines(assemblyReportPath).collect(Collectors.toList());
+        return ENAAssemblyReportReader.getChromosomeEntity(lines);
     }
 
     @Test
     void verifyAssemblyHasChromosomes() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
+        List<ChromosomeEntity> chromosomes = getChromosomes();
         assertNotNull(chromosomes);
         assertEquals(3316, chromosomes.size());
     }
 
     @Test
     void verifyChromosomeMetadata() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
+        List<ChromosomeEntity> chromosomes = getChromosomes();
         ChromosomeEntity chromosome = chromosomes.get(0);
         assertEquals(CHROMOSOME_ENA_SEQUENCE_NAME, chromosome.getEnaSequenceName());
         assertEquals(CHROMOSOME_GENBANK_ACCESSION, chromosome.getInsdcAccession());
@@ -103,8 +71,7 @@ class ENAAssemblyReportReaderTest {
 
     @Test
     void verifyAssemblyHasScaffolds() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+        List<ChromosomeEntity> scaffolds = getChromosomes().stream()
                 .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
         assertNotNull(scaffolds);
         assertEquals(3286, scaffolds.size());
@@ -112,8 +79,7 @@ class ENAAssemblyReportReaderTest {
 
     @Test
     void assertParsedScaffoldValid() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+        List<ChromosomeEntity> scaffolds = getChromosomes().stream()
                 .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
         assertNotNull(scaffolds);
         assertTrue(scaffolds.size() > 0);

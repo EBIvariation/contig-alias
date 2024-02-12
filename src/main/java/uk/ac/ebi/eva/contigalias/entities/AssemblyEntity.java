@@ -24,6 +24,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -63,8 +64,8 @@ public class AssemblyEntity {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL)
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChromosomeEntity> chromosomes;
 
     public AssemblyEntity() {
@@ -178,11 +179,6 @@ public class AssemblyEntity {
                .append("trunc512checksum :\t")
                .append(this.trunc512checksum)
                .append("\n");
-        if (this.chromosomes != null) {
-            builder.append("Number of chromosomes :\t")
-                   .append(this.chromosomes.size())
-                   .append("\n");
-        }
         return builder.toString();
     }
 }

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -31,12 +30,11 @@ import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
-import uk.ac.ebi.eva.contigalias.scheduler.ChecksumSetter;
+import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
+import uk.ac.ebi.eva.contigalias.scheduler.ChromosomeUpdater;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +47,6 @@ import static uk.ac.ebi.eva.contigalias.controller.BaseController.DEFAULT_PAGE_R
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @SpringBootTest
 public class AssemblyServiceIntegrationTest {
-
     private static final int TEST_ENTITIES_NUMBERS = 11;
 
     private final AssemblyEntity[] entities = new AssemblyEntity[TEST_ENTITIES_NUMBERS];
@@ -58,24 +55,25 @@ public class AssemblyServiceIntegrationTest {
     AssemblyRepository repository;
 
     @Autowired
+    ChromosomeRepository chromosomeRepository;
+
+    @Autowired
+    ChromosomeService chromosomeService;
+
+    @Autowired
     private AssemblyService service;
 
     @BeforeEach
-    void setup() throws IOException {
+    void setup() {
         NCBIAssemblyDataSource mockNcbiDataSource = mock(NCBIAssemblyDataSource.class);
         ENAAssemblyDataSource mockEnaDataSource = mock(ENAAssemblyDataSource.class);
-        ChecksumSetter mockChecksumSetter = mock(ChecksumSetter.class);
+        ChromosomeUpdater chromosomeUpdater = mock(ChromosomeUpdater.class);
         for (int i = 0; i < entities.length; i++) {
             AssemblyEntity generate = AssemblyGenerator.generate(i);
             entities[i] = generate;
-            Mockito.when(mockNcbiDataSource.getAssemblyByAccession(generate.getInsdcAccession()))
-                    .thenReturn(Optional.of(generate));
-            Mockito.when(mockNcbiDataSource.getAssemblyByAccession(generate.getRefseq()))
-                    .thenReturn(Optional.of(generate));
-            Mockito.when(mockChecksumSetter.updateMd5CheckSumForAssemblyAsync(generate.getInsdcAccession()))
-                    .thenReturn(new CompletableFuture<>());
         }
-        service = new AssemblyService(repository, mockNcbiDataSource, mockEnaDataSource, mockChecksumSetter);
+        service = new AssemblyService(chromosomeService, repository, chromosomeRepository, mockNcbiDataSource,
+                mockEnaDataSource, chromosomeUpdater);
     }
 
     @AfterEach

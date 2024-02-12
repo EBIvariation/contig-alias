@@ -20,6 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
@@ -46,8 +49,17 @@ public interface AssemblyRepository extends JpaRepository<AssemblyEntity, Long>,
     Page<AssemblyEntity> findAssemblyEntitiesByTaxid(long taxid, Pageable pageable);
 
     @Transactional
-    void deleteAssemblyEntityByInsdcAccession(String insdcAccession);
+    @Modifying
+    @Query("DELETE FROM AssemblyEntity a WHERE a.insdcAccession=:asmInsdcAccession")
+    void deleteAssemblyEntityByInsdcAccession(@Param("asmInsdcAccession") String asmInsdcAccession);
 
     @Transactional
-    void deleteAssemblyEntityByRefseq(String refseq);
+    @Modifying
+    @Query("DELETE FROM AssemblyEntity a WHERE a.refseq=:asmRefSeq")
+    void deleteAssemblyEntityByRefseq(@Param("asmRefSeq") String asmRefSeq);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM AssemblyEntity a WHERE a.insdcAccession=:asmAccession OR a.refseq=:asmAccession")
+    void deleteAssemblyEntityByInsdcAccessionOrRefseq(@Param("asmAccession") String asmAccession);
 }

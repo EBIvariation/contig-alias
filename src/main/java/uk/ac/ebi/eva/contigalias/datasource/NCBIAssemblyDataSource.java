@@ -25,64 +25,74 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReader;
-import uk.ac.ebi.eva.contigalias.dus.NCBIAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
+import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository("NCBIDataSource")
-public class NCBIAssemblyDataSource implements AssemblyDataSource {
+public class NCBIAssemblyDataSource {
 
     private final Logger logger = LoggerFactory.getLogger(NCBIAssemblyDataSource.class);
 
     private final NCBIBrowserFactory factory;
 
-    private final NCBIAssemblyReportReaderFactory readerFactory;
-
     @Value("${asm.file.download.dir}")
     private String asmFileDownloadDir;
 
     @Autowired
-    public NCBIAssemblyDataSource(NCBIBrowserFactory factory,
-                                  NCBIAssemblyReportReaderFactory readerFactory) {
+    public NCBIAssemblyDataSource(NCBIBrowserFactory factory) {
         this.factory = factory;
-        this.readerFactory = readerFactory;
     }
 
-    @Override
-    public Optional<AssemblyEntity> getAssemblyByAccession(
-            String accession) throws IOException, IllegalArgumentException {
-        NCBIBrowser ncbiBrowser = factory.build();
-        ncbiBrowser.connect();
+    public AssemblyEntity getAssemblyEntity(Path downloadFilePath) throws IOException {
+        List<String> asmDataLines = Files.lines(downloadFilePath)
+                .filter(line -> line.startsWith("#"))
+                .collect(Collectors.toList());
+        return getAssemblyEntity(asmDataLines);
+    }
 
-        Optional<Path> downloadFilePath = downloadAssemblyReport(accession, ncbiBrowser);
-        if (!downloadFilePath.isPresent()) {
-            return Optional.empty();
+    public AssemblyEntity getAssemblyEntity(List<String> asmDataLines) {
+        return NCBIAssemblyReportReader.getAssemblyEntity(asmDataLines);
+    }
+
+    public List<ChromosomeEntity> getChromosomeEntityList(AssemblyEntity assemblyEntity, List<String> chrDataList) {
+        List<ChromosomeEntity> chromosomeEntityList = NCBIAssemblyReportReader.getChromosomeEntity(chrDataList);
+        chromosomeEntityList.stream().forEach(c -> c.setAssembly(assemblyEntity));
+        return chromosomeEntityList;
+    }
+
+    public ChromosomeEntity getChromosomeEntity(AssemblyEntity assemblyEntity, String chrLine) {
+        ChromosomeEntity chromosomeEntity = NCBIAssemblyReportReader.getChromosomeEntity(chrLine);
+        if (chromosomeEntity != null) {
+            chromosomeEntity.setAssembly(assemblyEntity);
         }
+        return chromosomeEntity;
+    }
 
-        AssemblyEntity assemblyEntity;
-        try (InputStream stream = new FileInputStream(downloadFilePath.get().toFile())) {
-            NCBIAssemblyReportReader reader = readerFactory.build(stream);
-            assemblyEntity = reader.getAssemblyEntity();
-            logger.info("NCBI: Number of chromosomes in " + accession + " : " +
-                    (assemblyEntity.getChromosomes() != null ? assemblyEntity.getChromosomes().size() : 0));
+    public Optional<Path> downloadAssemblyReport(String accession) throws IOException {
+        NCBIBrowser ncbiBrowser = factory.build();
+        Optional<Path> downloadPath;
+        try {
+            ncbiBrowser.connect();
+            downloadPath = downloadAssemblyReport(accession, ncbiBrowser);
         } finally {
             try {
                 ncbiBrowser.disconnect();
-                Files.deleteIfExists(downloadFilePath.get());
             } catch (IOException e) {
                 logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
             }
         }
-        return Optional.of(assemblyEntity);
+
+        return downloadPath;
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
@@ -105,5 +115,4 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
             return Optional.empty();
         }
     }
-
 }

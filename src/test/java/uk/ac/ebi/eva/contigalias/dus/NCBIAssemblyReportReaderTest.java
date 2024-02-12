@@ -16,23 +16,18 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,23 +60,11 @@ class NCBIAssemblyReportReaderTest {
 
     private static final Long CHROMOSOME_CHR1_SEQ_LENGTH = 158337067l;
 
+    private static final Path assemblyReportPath = Paths.get("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt");
     private ChromosomeEntity scaffoldEntity;
 
-    private InputStreamReader streamReader;
-
-    private InputStream stream;
-
-    @Autowired
-    private NCBIAssemblyReportReaderFactory readerFactory;
-
-    private NCBIAssemblyReportReader reader;
-
     @BeforeEach
-    void setup() throws FileNotFoundException {
-        stream = new FileInputStream(
-                new File("src/test/resources/GCA_000003055.3_Bos_taurus_UMD_3.1_assembly_report.txt"));
-        streamReader = new InputStreamReader(stream);
-        reader = readerFactory.build(streamReader);
+    void setup() {
         scaffoldEntity = (ChromosomeEntity) new ChromosomeEntity()
                 .setGenbankSequenceName("ChrU_1")
                 .setInsdcAccession("GJ057137.1")
@@ -90,19 +73,18 @@ class NCBIAssemblyReportReaderTest {
                 .setUcscName(null);
     }
 
-    @AfterEach
-    void tearDown() throws IOException {
-        stream.close();
-        streamReader.close();
-    }
-
-    @Test
-    void getAssemblyReportReader() throws IOException {
-        assertTrue(reader.ready());
-    }
-
     AssemblyEntity getAssemblyEntity() throws IOException {
-        return reader.getAssemblyEntity();
+        List<String> asmDataLines = Files.lines(assemblyReportPath)
+                .filter(line -> line.startsWith("#"))
+                .collect(Collectors.toList());
+        return NCBIAssemblyReportReader.getAssemblyEntity(asmDataLines);
+    }
+
+    List<ChromosomeEntity> getChromosomes() throws IOException {
+        List<String> chrDataLines = Files.lines(assemblyReportPath)
+                .filter(line -> !line.startsWith("#"))
+                .collect(Collectors.toList());
+        return NCBIAssemblyReportReader.getChromosomeEntity(chrDataLines);
     }
 
     @Test
@@ -118,16 +100,14 @@ class NCBIAssemblyReportReaderTest {
 
     @Test
     void verifyAssemblyHasChromosomes() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
+        List<ChromosomeEntity> chromosomes = getChromosomes();
         assertNotNull(chromosomes);
         assertEquals(3316, chromosomes.size());
     }
 
     @Test
     void verifyChromosomeMetadata() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> chromosomes = assembly.getChromosomes();
+        List<ChromosomeEntity> chromosomes = getChromosomes();
         ChromosomeEntity chromosome = chromosomes.get(0);
         assertEquals(CHROMOSOME_CHR1_SEQUENCE_NAME, chromosome.getGenbankSequenceName());
         assertEquals(CHROMOSOME_CHR1_GENBANK_ACCESSION, chromosome.getInsdcAccession());
@@ -138,8 +118,7 @@ class NCBIAssemblyReportReaderTest {
 
     @Test
     void verifyAssemblyHasScaffolds() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+        List<ChromosomeEntity> scaffolds = getChromosomes().stream()
                 .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
         assertNotNull(scaffolds);
         assertEquals(3286, scaffolds.size());
@@ -147,8 +126,7 @@ class NCBIAssemblyReportReaderTest {
 
     @Test
     void assertParsedScaffoldValid() throws IOException {
-        AssemblyEntity assembly = getAssemblyEntity();
-        List<ChromosomeEntity> scaffolds = assembly.getChromosomes().stream()
+        List<ChromosomeEntity> scaffolds = getChromosomes().stream()
                 .filter(e -> e.getContigType().equals(SequenceEntity.ContigType.SCAFFOLD)).collect(Collectors.toList());
         assertNotNull(scaffolds);
         assertTrue(scaffolds.size() > 0);

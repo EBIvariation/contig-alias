@@ -28,13 +28,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RequestMapping("/v1/admin")
 @RestController
@@ -63,6 +63,9 @@ public class AdminController {
                     "GCA_000001405.10") String asmAccession) throws IOException {
         try {
             handler.fetchAndInsertAssemblyByAccession(asmAccession);
+            // submit jobs for updating ena sequence name and md5 checksum for assembly
+            handler.retrieveAndInsertENASequenceNameForAssembly(asmAccession);
+            handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -82,43 +85,124 @@ public class AdminController {
                     "parallel manner.")
     @PutMapping(value = "assemblies")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
-            @RequestBody(required = false) @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
+            @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Map<String, List<String>> accessionResult = handler.fetchAndInsertAssemblyByAccession(accessions);
+        // submit jobs for updating ena sequence names and md5 checksum for all successfully inserted assemblies
+        if (accessionResult.get("SUCCESS").size() > 0) {
+            handler.retrieveAndInsertENASequenceNameForAssembly(accessionResult.get("SUCCESS"));
+            handler.retrieveAndInsertMd5ChecksumForAssembly(accessionResult.get("SUCCESS"));
+        }
         return new ResponseEntity<>("Accession Processing Result : " + accessionResult, HttpStatus.MULTI_STATUS);
     }
 
     @ApiOperation(value = "Given an assembly accession, retrieve MD5 checksum for all chromosomes belonging to assembly and update")
-    @PutMapping(value = "assemblies/{accession}/md5checksum")
+    @PutMapping(value = "assemblies/md5checksum/{accession}")
     public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(@PathVariable(name = "accession")
                                                                           @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
                                                                                   "GCA_000001405.10") String asmAccession) {
-        try {
-            handler.getAssemblyByAccession(asmAccession);
-            handler.retrieveAndInsertMd5ChecksumForAssembly(asmAccession);
-            return ResponseEntity.ok("A task has been submitted for updating md5checksum for all chromosomes " +
-                    "in assembly " + asmAccession + ". Depending upon the number of chromosomes present in assembly, " +
-                    "this might take some time to complete");
-        } catch (AssemblyNotFoundException e) {
+        Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
+        if (assemblyOpt.isPresent()) {
+            handler.retrieveAndInsertMd5ChecksumForAssembly(assemblyOpt.get().getInsdcAccession());
+            return ResponseEntity.ok("A task has been submitted for updating md5checksum for assembly " + asmAccession
+                    + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
+        } else {
             return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first (md5checksum will be updated as part of the insertion process");
+                    ". Please insert the assembly first. MD5 checksum will be updated as part of the insertion process");
         }
     }
 
-    @ApiOperation(value = "Retrieve list of assemblies for which MD5 Checksum updates are running/going-to-run ")
-    @GetMapping(value = "assemblies/md5checksum/status")
-    public ResponseEntity<String> getMD5ChecksumUpdateTaskStatus() {
-        Map<String, Set<String>> md5ChecksumUpdateTasks = handler.getMD5ChecksumUpdateTaskStatus();
-        Set<String> runningTasks = md5ChecksumUpdateTasks.get("running");
-        Set<String> scheduledTasks = md5ChecksumUpdateTasks.get("scheduled");
-        String runningTaskRes = runningTasks == null || runningTasks.isEmpty() ? "No running MD5 checksum update tasks" :
-                runningTasks.stream().collect(Collectors.joining(","));
-        String scheduledTaskRes = scheduledTasks == null || scheduledTasks.isEmpty() ? "No scheduled MD5 checksum update tasks" :
-                scheduledTasks.stream().collect(Collectors.joining(","));
-        return ResponseEntity.ok("running: " + runningTaskRes + "\nscheduled: " + scheduledTaskRes);
+    @ApiOperation(value = "Given a list of assembly accessions, retrieve MD5 checksum for all chromosomes belonging to all the assemblies and update")
+    @PutMapping(value = "assemblies/md5checksum")
+    public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(
+            @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
+                    "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
+        if (accessions == null || accessions.size() <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<String> asmInsdcAccessionsList = new ArrayList<>();
+        List<String> asmNotPresent = new ArrayList<>();
+        for (String accession : accessions) {
+            Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(accession);
+            if (assemblyOpt.isPresent()) {
+                asmInsdcAccessionsList.add(assemblyOpt.get().getInsdcAccession());
+            } else {
+                asmNotPresent.add(accession);
+            }
+        }
+
+        handler.retrieveAndInsertMd5ChecksumForAssembly(asmInsdcAccessionsList);
+
+        accessions.removeAll(asmNotPresent);
+        String responseText = "A task has been submitted for updating MD5 checksum for assemblies: " + accessions + "."
+                + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
+        if (!asmNotPresent.isEmpty()) {
+            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
+                    + "\nPlease insert the assembly first, MD5 Checksum will be updated as part of the insertion process";
+        }
+
+        return ResponseEntity.ok(responseText);
+    }
+
+    @ApiOperation(value = "Given an assembly accession, retrieve ENA sequence name for all chromosomes belonging to assembly and update")
+    @PutMapping(value = "assemblies/ena-sequence-name/{accession}")
+    public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(@PathVariable(name = "accession")
+                                                                              @ApiParam(value = "INSDC or RefSeq assembly accession. " +
+                                                                                      "Eg: GCA_000001405.10") String asmAccession) {
+        Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
+        if (assemblyOpt.isPresent()) {
+            handler.retrieveAndInsertENASequenceNameForAssembly(assemblyOpt.get().getInsdcAccession());
+            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for assembly " + asmAccession
+                    + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
+        } else {
+            return ResponseEntity.ok("Could not find assembly " + asmAccession +
+                    ". Please insert the assembly first. ENA sequence name will be updated as part of the insertion process");
+        }
+    }
+
+    @ApiOperation(value = "Given a list of assembly accessions, retrieve ENA sequence name for all chromosomes belonging to all the assemblies and update")
+    @PutMapping(value = "assemblies/ena-sequence-name")
+    public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(
+            @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
+                    "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
+        if (accessions == null || accessions.size() <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<String> asmInsdcAccessionsList = new ArrayList<>();
+        List<String> asmNotPresent = new ArrayList<>();
+        for (String accession : accessions) {
+            Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(accession);
+            if (assemblyOpt.isPresent()) {
+                asmInsdcAccessionsList.add(assemblyOpt.get().getInsdcAccession());
+            } else {
+                asmNotPresent.add(accession);
+            }
+        }
+
+        handler.retrieveAndInsertENASequenceNameForAssembly(asmInsdcAccessionsList);
+
+        accessions.removeAll(asmNotPresent);
+        String responseText = "A task has been submitted for updating ENA Sequence Name for assemblies: " + accessions
+                + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
+        if (!asmNotPresent.isEmpty()) {
+            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
+                    + "\nPlease insert the assembly first, ENA Sequence Name will be updated as part of the insertion process";
+        }
+
+        return ResponseEntity.ok(responseText);
+    }
+
+
+    @ApiOperation(value = "Retrieve list of Jobs that are running or scheduled to run")
+    @GetMapping(value = "assemblies/scheduled-jobs")
+    public ResponseEntity<List<String>> getMD5ChecksumUpdateTaskStatus() {
+        List<String> scheduledJobStatus = handler.getScheduledJobStatus();
+        return ResponseEntity.ok(scheduledJobStatus);
     }
 
 //    This endpoint can be enabled in the future when checksums for assemblies are added to the project.

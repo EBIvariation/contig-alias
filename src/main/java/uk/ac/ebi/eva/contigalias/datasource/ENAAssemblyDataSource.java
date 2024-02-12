@@ -25,75 +25,48 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReader;
-import uk.ac.ebi.eva.contigalias.dus.ENAAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowser;
 import uk.ac.ebi.eva.contigalias.dus.ENABrowserFactory;
-import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
-import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Repository("ENADataSource")
-public class ENAAssemblyDataSource implements AssemblyDataSource {
+public class ENAAssemblyDataSource {
 
     private final Logger logger = LoggerFactory.getLogger(ENAAssemblyDataSource.class);
 
     private final ENABrowserFactory factory;
 
-    private final ENAAssemblyReportReaderFactory readerFactory;
-
     @Value("${asm.file.download.dir}")
     private String asmFileDownloadDir;
 
     @Autowired
-    public ENAAssemblyDataSource(ENABrowserFactory factory,
-                                 ENAAssemblyReportReaderFactory readerFactory) {
+    public ENAAssemblyDataSource(ENABrowserFactory factory) {
         this.factory = factory;
-        this.readerFactory = readerFactory;
     }
 
-    @Override
-    public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
+    public Optional<Path> downloadAssemblyReport(String accession) throws IOException {
         ENABrowser enaBrowser = factory.build();
         enaBrowser.connect();
         try {
-            Optional<Path> downloadFilePath = downloadAssemblyReport(enaBrowser, accession);
-            if (!downloadFilePath.isPresent()) {
-                return Optional.empty();
-            }
-
-            AssemblyEntity assemblyEntity;
-            try (InputStream stream = new FileInputStream(downloadFilePath.get().toFile())) {
-                ENAAssemblyReportReader reader = readerFactory.build(stream);
-                assemblyEntity = reader.getAssemblyEntity();
-                logger.info("ENA: Number of chromosomes in " + accession + " : " + assemblyEntity.getChromosomes().size());
-            } finally {
-                try {
-                    enaBrowser.disconnect();
-                    Files.deleteIfExists(downloadFilePath.get());
-                } catch (IOException e) {
-                    logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
-                }
-            }
-            return Optional.of(assemblyEntity);
+            enaBrowser.connect();
+            return downloadAssemblyReport(enaBrowser, accession);
         } catch (Exception e) {
             logger.warn("Could not fetch Assembly Report from ENA for accession " + accession + "Exception: " + e);
             return Optional.empty();
+        } finally {
+            try {
+                enaBrowser.disconnect();
+            } catch (IOException e) {
+                logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
+            }
         }
-
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
@@ -105,58 +78,23 @@ public class ENAAssemblyDataSource implements AssemblyDataSource {
         try {
             boolean success = enaBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
             if (success) {
-                logger.info("ENA assembly report downloaded successfully for accession "+ accession);
+                logger.info("ENA assembly report downloaded successfully for accession " + accession);
                 return Optional.of(downloadFilePath);
             } else {
-                logger.warn("ENA assembly report could not be downloaded successfully for accession "+accession);
+                logger.warn("ENA assembly report could not be downloaded successfully for accession " + accession);
                 return Optional.empty();
             }
         } catch (IOException | DownloadFailedException e) {
-            logger.warn("Error downloading ENA assembly report for accession "+ accession + e);
+            logger.warn("Error downloading ENA assembly report for accession " + accession + e);
             return Optional.empty();
         }
     }
 
-    /**
-     * Adds ENA sequence names to chromosomes and scaffolds in an assembly. Will modify the AssemblyEntity in-place.
-     *
-     * @param optional {@link AssemblyEntity} to add ENA sequence names to
-     * @throws IOException Passes IOException thrown by {@link #getAssemblyByAccession(String)}
-     */
-    public void addENASequenceNamesToAssembly(AssemblyEntity targetAssembly) throws IOException {
-        if (!hasAllEnaSequenceNames(targetAssembly)) {
-            String insdcAccession = targetAssembly.getInsdcAccession();
-            Optional<AssemblyEntity> enaAssembly = getAssemblyByAccession(insdcAccession);
-
-            if (enaAssembly.isPresent()) {
-                AssemblyEntity sourceAssembly = enaAssembly.get();
-                addENASequenceNames(Objects.nonNull(sourceAssembly.getChromosomes()) ?
-                                sourceAssembly.getChromosomes() : Collections.emptyList(),
-                        Objects.nonNull(targetAssembly.getChromosomes()) ?
-                                targetAssembly.getChromosomes() : Collections.emptyList());
-            }
-        }
+    public List<ChromosomeEntity> getChromosomeEntityList(List<String> chrDataList) {
+        return ENAAssemblyReportReader.getChromosomeEntity(chrDataList);
     }
 
-    public boolean hasAllEnaSequenceNames(AssemblyEntity assembly) {
-        List<ChromosomeEntity> chromosomes = Objects.nonNull(assembly.getChromosomes()) ?
-                assembly.getChromosomes() : Collections.emptyList();
-        return chromosomes.stream().allMatch(sequence -> sequence.getEnaSequenceName() != null);
-    }
-
-    private void addENASequenceNames(
-            List<? extends SequenceEntity> sourceSequences, List<? extends SequenceEntity> targetSequences) {
-        Map<String, SequenceEntity> insdcToSequenceEntity = new HashMap<>();
-        for (SequenceEntity targetSeq : targetSequences) {
-            insdcToSequenceEntity.put(targetSeq.getInsdcAccession(), targetSeq);
-        }
-        for (SequenceEntity sourceSeq : sourceSequences) {
-            String sourceInsdcAccession = sourceSeq.getInsdcAccession();
-            if (insdcToSequenceEntity.containsKey(sourceInsdcAccession)) {
-                insdcToSequenceEntity.get(sourceInsdcAccession).setEnaSequenceName(sourceSeq.getEnaSequenceName());
-            } else {
-                insdcToSequenceEntity.put(sourceInsdcAccession, sourceSeq);
-            }
-        }
+    public ChromosomeEntity getChromosomeEntity(String chrLine) {
+        return ENAAssemblyReportReader.getChromosomeEntity(chrLine);
     }
 }
