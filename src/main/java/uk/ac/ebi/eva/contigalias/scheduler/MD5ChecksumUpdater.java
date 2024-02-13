@@ -4,15 +4,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
+import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MD5ChecksumUpdater {
@@ -20,49 +26,67 @@ public class MD5ChecksumUpdater {
     private final int DEFAULT_BATCH_SIZE = 10000;
     private String INSDC_ACCESSION_PLACE_HOLDER = "INSDC_ACCESSION_PLACE_HOLDER";
     private String INSDC_CHECKSUM_URL = "https://www.ebi.ac.uk/ena/cram/sequence/insdc:" + INSDC_ACCESSION_PLACE_HOLDER + "/metadata";
-    private RestTemplate restTemplate;
-    private final JdbcTemplate jdbcTemplate;
+    private final NCBIAssemblyDataSource ncbiDataSource;
     private final ChromosomeService chromosomeService;
+    private RestTemplate restTemplate;
 
     @Autowired
-    public MD5ChecksumUpdater(RestTemplate restTemplate, JdbcTemplate jdbcTemplate, ChromosomeService chromosomeService) {
-        this.restTemplate = restTemplate;
-        this.jdbcTemplate = jdbcTemplate;
+    public MD5ChecksumUpdater(ChromosomeService chromosomeService, NCBIAssemblyDataSource ncbiDataSource, RestTemplate restTemplate) {
         this.chromosomeService = chromosomeService;
+        this.ncbiDataSource = ncbiDataSource;
+        this.restTemplate = restTemplate;
     }
 
-    public void updateMD5ChecksumForAssembly(String assembly) {
+    public void updateMD5ChecksumForAssembly(String accession) {
+        logger.info("Start Update MD5 Checksum for assembly : " + accession);
+        Path downloadedNCBIFilePath = null;
         try {
-            logger.info("Trying to update MD5 Checksum for assembly: " + assembly);
-            String sql = "select * from chromosome c where c.assembly_insdc_accession = '" + assembly
-                    + "' AND (c.md5checksum IS NULL OR c.md5checksum = '')";
-            jdbcTemplate.query(sql, (ResultSetExtractor<Void>) rs -> {
-                long chromosomeProcessed = 0;
-                List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
-                while (rs.next()) {
-                    ChromosomeEntity chromosome = new ChromosomeEntity();
-                    chromosome.setInsdcAccession(rs.getString(1));
-                    chromosomeEntityList.add(chromosome);
+            Optional<Path> downloadNCBIFilePathOpt = ncbiDataSource.downloadAssemblyReport(accession);
+            downloadedNCBIFilePath = downloadNCBIFilePathOpt.orElseThrow(() -> new AssemblyNotFoundException(accession));
 
-                    if (chromosomeEntityList.size() == DEFAULT_BATCH_SIZE) {
-                        updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
-                        chromosomeProcessed += chromosomeEntityList.size();
-                        logger.info("Chromosomes Processed till now: " + chromosomeProcessed);
-                        chromosomeEntityList = new ArrayList<>();
+            AssemblyEntity assemblyEntity = new AssemblyEntity();
+            assemblyEntity.setInsdcAccession(accession);
+
+            long numberOfChromosomesInFile = Files.lines(downloadedNCBIFilePath).filter(line -> !line.startsWith("#")).count();
+            logger.info("Number of chromosomes in assembly (" + accession + "): " + numberOfChromosomesInFile);
+
+            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(downloadedNCBIFilePath.toFile()))) {
+                long chromosomesUpdatedTillNow = 0l;
+                List<String> chrLines = new ArrayList<>();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    if (line.startsWith("#")) {
+                        continue;
+                    }
+                    chrLines.add(line);
+                    if (chrLines.size() == DEFAULT_BATCH_SIZE) {
+                        List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
+                        updateMd5ChecksumForChromosome(accession, chromosomeEntityList);
+                        chromosomesUpdatedTillNow += chrLines.size();
+                        logger.info("Number of chromosomes updated till now  : " + chromosomesUpdatedTillNow);
+
+                        chrLines = new ArrayList<>();
                     }
                 }
-                if (chromosomeEntityList.size() > 0) {
-                    updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
-                    chromosomeProcessed += chromosomeEntityList.size();
-                    logger.info("Chromosomes Processed till now: " + chromosomeProcessed);
+                if (!chrLines.isEmpty()) {
+                    List<ChromosomeEntity> chromosomeEntityList = ncbiDataSource.getChromosomeEntityList(assemblyEntity, chrLines);
+                    updateMd5ChecksumForChromosome(accession, chromosomeEntityList);
+                    chromosomesUpdatedTillNow += chrLines.size();
+                    logger.info("Number of chromosomes updated till now  : " + chromosomesUpdatedTillNow);
                 }
+            }
 
-                logger.info("Finished updating MD5 Checksum for assembly: " + assembly);
-
-                return null;
-            });
+            logger.info("MD5 Checksum update finished successfully for assembly: " + accession);
         } catch (Exception e) {
-            logger.error("Error while updating MD5 Checksum for assembly : " + assembly + "\n" + e);
+            logger.error("Error while updating MD5 Checksum for assembly : " + accession + "\n" + e);
+        } finally {
+            if (downloadedNCBIFilePath != null) {
+                try {
+                    Files.deleteIfExists(downloadedNCBIFilePath);
+                } catch (Exception e) {
+                    logger.warn("Could not delete file : " + downloadedNCBIFilePath);
+                }
+            }
         }
     }
 
