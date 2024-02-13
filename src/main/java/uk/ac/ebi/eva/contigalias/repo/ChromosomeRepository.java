@@ -88,6 +88,8 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
 
     Page<ChromosomeEntity> findChromosomeEntitiesByUcscName(String ucscName, Pageable request);
 
+    Page<ChromosomeEntity> findChromosomeEntitiesByMd5checksum(String md5Checksum, Pageable request);
+
     long countChromosomeEntitiesByInsdcAccession(String insdcAccession);
 
     long countChromosomeEntitiesByRefseq(String refseq);

@@ -322,6 +322,21 @@ public class ContigAliasController {
 
     }
 
+    @ApiOperation(value = "Get a list of chromosomes using their MD5 checksum. ",
+            notes = "Given a chromosome's MD5 checksum, this endpoint will return a list of chromosomes that are " +
+                    "associated with the MD5 checksum provided. This endpoint returns a list containing one or more chromosomes. " +
+                    "It also accepts two additional parameters (page and size) to control pagination of results. " +
+                    "If the page number and/or page size are invalid then an HTTP status code of 416 is returned by this endpoint.")
+    @GetMapping(value = "chromosomes/md5checksum/{md5Checksum}", produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByMD5Checksum(
+            @PathVariable @ApiParam(value = "MD5 Checksum of chromosome Eg: 7b6e06758e53927330346e9e7cc00cce") String md5Checksum,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.getSequencesByMD5Checksum(md5Checksum, pageRequest);
+        return createAppropriateResponseEntity(pagedModel);
+    }
+
     private void linkPagedModelGetAssemblyByAuthority(
             String accession, String authority, PagedModel pagedModel) {
         ResponseEntity<PagedModel<EntityModel<AssemblyEntity>>> method;

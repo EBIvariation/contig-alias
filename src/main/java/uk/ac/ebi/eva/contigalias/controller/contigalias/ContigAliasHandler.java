@@ -165,6 +165,11 @@ public class ContigAliasHandler {
         return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
     }
 
+    public PagedModel<EntityModel<SequenceEntity>> getSequencesByMD5Checksum(String md5Checksum, Pageable request) {
+        Page<ChromosomeEntity> chrPage = chromosomeService.getChromosomesByMD5Checksum(md5Checksum, request);
+        return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
+    }
+
     private Page<SequenceEntity> createSequencePage(Page<? extends SequenceEntity> page) {
         return new PageImpl<>(page.getContent().stream().map(e -> (SequenceEntity)e)
                 .collect(Collectors.toList()), page.getPageable(), page.getTotalElements());
