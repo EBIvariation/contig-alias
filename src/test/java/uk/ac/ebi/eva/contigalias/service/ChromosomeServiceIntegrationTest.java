@@ -130,7 +130,7 @@ public class ChromosomeServiceIntegrationTest {
         List<ChromosomeEntity> chromosomeList = chrPage.getContent();
 
         assertEquals(1, chromosomeList.size());
-        assertChromosomeIdenticalToEntity(chromosomeWithMD5, chromosomeList.get(0));
+        assertChromosomesIdentical(chromosomeWithMD5, chromosomeList.get(0));
         assertEquals(testMD5Checksum, chromosomeList.get(0).getMd5checksum());
         assertEquals(assemblyEntity.getInsdcAccession(), chromosomeList.get(0).getAssembly().getInsdcAccession());
     }
@@ -161,11 +161,11 @@ public class ChromosomeServiceIntegrationTest {
         assertEquals(2, chromosomeList.size());
 
         assertEquals(testMD5Checksum, chromosomeList.get(0).getMd5checksum());
-        assertChromosomeIdenticalToEntity(chromosomeWithMD51, chromosomeList.get(0));
+        assertChromosomesIdentical(chromosomeWithMD51, chromosomeList.get(0));
         assertEquals("assembly1", chromosomeList.get(0).getAssembly().getInsdcAccession());
 
         assertEquals(testMD5Checksum, chromosomeList.get(1).getMd5checksum());
-        assertChromosomeIdenticalToEntity(chromosomeWithMD52, chromosomeList.get(1));
+        assertChromosomesIdentical(chromosomeWithMD52, chromosomeList.get(1));
         assertEquals("assembly2", chromosomeList.get(1).getAssembly().getInsdcAccession());
     }
 
@@ -183,7 +183,7 @@ public class ChromosomeServiceIntegrationTest {
         assertEquals(entity.getEnaSequenceName(), chromosomeEntity.getEnaSequenceName());
     }
 
-    void assertChromosomeIdenticalToEntity(ChromosomeEntity chromosomeEntity1, ChromosomeEntity chromosomeEntity2) {
+    void assertChromosomesIdentical(ChromosomeEntity chromosomeEntity1, ChromosomeEntity chromosomeEntity2) {
         assertEquals(chromosomeEntity1.getGenbankSequenceName(), chromosomeEntity2.getGenbankSequenceName());
         assertEquals(chromosomeEntity1.getInsdcAccession(), chromosomeEntity2.getInsdcAccession());
         assertEquals(chromosomeEntity1.getRefseq(), chromosomeEntity2.getRefseq());
