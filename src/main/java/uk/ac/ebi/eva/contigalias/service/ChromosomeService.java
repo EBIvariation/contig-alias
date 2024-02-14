@@ -174,7 +174,7 @@ public class ChromosomeService {
     }
 
     public Page<ChromosomeEntity> getChromosomesByMD5Checksum(String md5Checksum, Pageable request) {
-        Page<ChromosomeEntity> chrPage = repository.findChromosomeEntitiesByMd5checksum(md5Checksum, request);
+        Page<ChromosomeEntity> chrPage = repository.findChromosomeEntitiesByMd5checksumOrderByInsdcAccession(md5Checksum, request);
         return stripChromosomesAndScaffoldsFromAssembly(chrPage);
     }
 
