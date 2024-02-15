@@ -25,14 +25,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-
+import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -115,6 +117,58 @@ public class ChromosomeServiceIntegrationTest {
 
     }
 
+    @Test
+    void testGetChromosomesByMD5Checksum() {
+        String testMD5Checksum = "test-MD5-checksum";
+
+        AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
+        ChromosomeEntity chromosomeWithMD5 = ChromosomeGenerator.generate(assemblyEntity);
+        chromosomeWithMD5.setMd5checksum(testMD5Checksum);
+        chromosomeRepository.save(chromosomeWithMD5);
+
+        Page<ChromosomeEntity> chrPage = service.getChromosomesByMD5Checksum(testMD5Checksum, Pageable.unpaged());
+        List<ChromosomeEntity> chromosomeList = chrPage.getContent();
+
+        assertEquals(1, chromosomeList.size());
+        assertChromosomesIdentical(chromosomeWithMD5, chromosomeList.get(0));
+        assertEquals(testMD5Checksum, chromosomeList.get(0).getMd5checksum());
+        assertEquals(assemblyEntity.getInsdcAccession(), chromosomeList.get(0).getAssembly().getInsdcAccession());
+    }
+
+    @Test
+    void testGetMultipleChromosomesByMD5ChecksumInDifferentAssemblies() {
+        String testMD5Checksum = "test-MD5-checksum";
+
+        AssemblyEntity assemblyEntity1 = AssemblyGenerator.generate();
+        assemblyEntity1.setInsdcAccession("assembly1");
+        ChromosomeEntity chromosomeWithMD51 = ChromosomeGenerator.generate(assemblyEntity1);
+        chromosomeWithMD51.setInsdcAccession("chromosome1");
+        chromosomeWithMD51.setMd5checksum(testMD5Checksum);
+        chromosomeRepository.save(chromosomeWithMD51);
+
+        AssemblyEntity assemblyEntity2 = AssemblyGenerator.generate();
+        assemblyEntity2.setInsdcAccession("assembly2");
+        ChromosomeEntity chromosomeWithMD52 = ChromosomeGenerator.generate(assemblyEntity2);
+        chromosomeWithMD52.setInsdcAccession("chromosome2");
+        chromosomeWithMD52.setMd5checksum(testMD5Checksum);
+        chromosomeRepository.save(chromosomeWithMD52);
+
+        Page<ChromosomeEntity> chrPage = service.getChromosomesByMD5Checksum(testMD5Checksum, Pageable.unpaged());
+
+        List<ChromosomeEntity> chromosomeList = chrPage.getContent().stream()
+                .sorted(Comparator.comparing(c -> c.getInsdcAccession()))
+                .collect(Collectors.toList());
+        assertEquals(2, chromosomeList.size());
+
+        assertEquals(testMD5Checksum, chromosomeList.get(0).getMd5checksum());
+        assertChromosomesIdentical(chromosomeWithMD51, chromosomeList.get(0));
+        assertEquals("assembly1", chromosomeList.get(0).getAssembly().getInsdcAccession());
+
+        assertEquals(testMD5Checksum, chromosomeList.get(1).getMd5checksum());
+        assertChromosomesIdentical(chromosomeWithMD52, chromosomeList.get(1));
+        assertEquals("assembly2", chromosomeList.get(1).getAssembly().getInsdcAccession());
+    }
+
     void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
         assertNotNull(page);
         assertTrue(page.getTotalElements() > 0);
@@ -127,6 +181,14 @@ public class ChromosomeServiceIntegrationTest {
         assertEquals(entity.getRefseq(), chromosomeEntity.getRefseq());
         assertEquals(entity.getUcscName(), chromosomeEntity.getUcscName());
         assertEquals(entity.getEnaSequenceName(), chromosomeEntity.getEnaSequenceName());
+    }
+
+    void assertChromosomesIdentical(ChromosomeEntity chromosomeEntity1, ChromosomeEntity chromosomeEntity2) {
+        assertEquals(chromosomeEntity1.getGenbankSequenceName(), chromosomeEntity2.getGenbankSequenceName());
+        assertEquals(chromosomeEntity1.getInsdcAccession(), chromosomeEntity2.getInsdcAccession());
+        assertEquals(chromosomeEntity1.getRefseq(), chromosomeEntity2.getRefseq());
+        assertEquals(chromosomeEntity1.getUcscName(), chromosomeEntity2.getUcscName());
+        assertEquals(chromosomeEntity1.getEnaSequenceName(), chromosomeEntity2.getEnaSequenceName());
     }
 
 }
