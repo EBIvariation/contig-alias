@@ -4,15 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.service.ChromosomeService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class MD5ChecksumUpdater {
@@ -20,49 +21,46 @@ public class MD5ChecksumUpdater {
     private final int DEFAULT_BATCH_SIZE = 10000;
     private String INSDC_ACCESSION_PLACE_HOLDER = "INSDC_ACCESSION_PLACE_HOLDER";
     private String INSDC_CHECKSUM_URL = "https://www.ebi.ac.uk/ena/cram/sequence/insdc:" + INSDC_ACCESSION_PLACE_HOLDER + "/metadata";
-    private RestTemplate restTemplate;
-    private final JdbcTemplate jdbcTemplate;
     private final ChromosomeService chromosomeService;
+    private RestTemplate restTemplate;
 
     @Autowired
-    public MD5ChecksumUpdater(RestTemplate restTemplate, JdbcTemplate jdbcTemplate, ChromosomeService chromosomeService) {
-        this.restTemplate = restTemplate;
-        this.jdbcTemplate = jdbcTemplate;
+    public MD5ChecksumUpdater(ChromosomeService chromosomeService, RestTemplate restTemplate) {
         this.chromosomeService = chromosomeService;
+        this.restTemplate = restTemplate;
     }
 
-    public void updateMD5ChecksumForAssembly(String assembly) {
+    public void updateMD5ChecksumForAssembly(String accession) {
+        logger.info("Start Update MD5 Checksum for assembly : " + accession);
         try {
-            logger.info("Trying to update MD5 Checksum for assembly: " + assembly);
-            String sql = "select * from chromosome c where c.assembly_insdc_accession = '" + assembly
-                    + "' AND (c.md5checksum IS NULL OR c.md5checksum = '')";
-            jdbcTemplate.query(sql, (ResultSetExtractor<Void>) rs -> {
-                long chromosomeProcessed = 0;
-                List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
-                while (rs.next()) {
-                    ChromosomeEntity chromosome = new ChromosomeEntity();
-                    chromosome.setInsdcAccession(rs.getString(1));
-                    chromosomeEntityList.add(chromosome);
+            int pageNumber = 0;
+            Page<ChromosomeEntity> chrPage;
+            long chromosomeProcessed = 0;
+            long chromosomeUpdated = 0;
+            do {
+                Pageable pageable = PageRequest.of(pageNumber, DEFAULT_BATCH_SIZE);
+                chrPage = chromosomeService.getChromosomesByAssemblyAccession(accession, pageable);
 
-                    if (chromosomeEntityList.size() == DEFAULT_BATCH_SIZE) {
-                        updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
-                        chromosomeProcessed += chromosomeEntityList.size();
-                        logger.info("Chromosomes Processed till now: " + chromosomeProcessed);
-                        chromosomeEntityList = new ArrayList<>();
-                    }
-                }
-                if (chromosomeEntityList.size() > 0) {
-                    updateMd5ChecksumForChromosome(assembly, chromosomeEntityList);
-                    chromosomeProcessed += chromosomeEntityList.size();
-                    logger.info("Chromosomes Processed till now: " + chromosomeProcessed);
+                List<ChromosomeEntity> chromosomeEntityList = chrPage.getContent();
+                List<ChromosomeEntity> chromosomeEntitiesWithoutMD5 = chromosomeEntityList.stream()
+                        .filter(c -> c.getMd5checksum() == null || c.getMd5checksum().isEmpty())
+                        .collect(Collectors.toList());
+
+                if(!chromosomeEntitiesWithoutMD5.isEmpty()){
+                    updateMd5ChecksumForChromosome(accession, chromosomeEntityList);
                 }
 
-                logger.info("Finished updating MD5 Checksum for assembly: " + assembly);
+                chromosomeProcessed += chromosomeEntityList.size();
+                chromosomeUpdated += chromosomeEntitiesWithoutMD5.size();
+                logger.info("Chromosomes Processed till now: {}, selected for update till now: {}", chromosomeProcessed, chromosomeUpdated);
 
-                return null;
-            });
+                pageNumber++;
+            } while (chrPage.hasNext());
+
+            logger.info("Finished updating MD5 Checksum for assembly: " + accession);
+
         } catch (Exception e) {
-            logger.error("Error while updating MD5 Checksum for assembly : " + assembly + "\n" + e);
+            logger.error("Error while updating MD5 Checksum for assembly : " + accession + "\n" + e);
         }
     }
 

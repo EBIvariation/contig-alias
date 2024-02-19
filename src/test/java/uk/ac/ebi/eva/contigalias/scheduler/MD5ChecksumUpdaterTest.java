@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
@@ -34,15 +33,13 @@ class MD5ChecksumUpdaterTest {
     private AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
     private List<ChromosomeEntity> chromosomeEntityList = new ArrayList<>();
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
     private ChromosomeService chromosomeService;
     private MD5ChecksumUpdater md5ChecksumUpdater;
 
     @BeforeEach
     void setup() throws JsonProcessingException {
         RestTemplate restTemplate = mock(RestTemplate.class);
-        md5ChecksumUpdater = new MD5ChecksumUpdater(restTemplate, jdbcTemplate, chromosomeService);
+        md5ChecksumUpdater = new MD5ChecksumUpdater(chromosomeService, restTemplate);
         for (int i = 0; i < 5; i++) {
             ChromosomeEntity chromosomeEntity = ChromosomeGenerator.generate(assemblyEntity);
             chromosomeEntityList.add(chromosomeEntity);
@@ -58,13 +55,13 @@ class MD5ChecksumUpdaterTest {
     @Test
     void testUpdateMD5ChecksumForAssembly() {
         chromosomeService.getChromosomesByAssemblyInsdcAccession(assemblyEntity.getInsdcAccession(),
-                        PageRequest.of(0, 100))
+                        PageRequest.of(0, 10))
                 .forEach(c -> assertNull(c.getMd5checksum()));
 
         md5ChecksumUpdater.updateMD5ChecksumForAssembly(assemblyEntity.getInsdcAccession());
 
         chromosomeService.getChromosomesByAssemblyInsdcAccession(assemblyEntity.getInsdcAccession(),
-                        PageRequest.of(0, 100))
+                        PageRequest.of(0, 10))
                 .forEach(c -> assertEquals(c.getInsdcAccession() + "-MD5", c.getMd5checksum()));
     }
 }

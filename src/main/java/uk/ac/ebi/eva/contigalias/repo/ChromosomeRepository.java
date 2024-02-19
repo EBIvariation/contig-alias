@@ -33,15 +33,15 @@ import java.util.List;
 @Repository
 public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccession(String insdcAccession, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccessionOrderByInsdcAccession(String insdcAccession, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByRefseq(String refseq, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByRefseqOrderByInsdcAccession(String refseq, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccessionOrRefseq(String insdcAccession, String refseq, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccessionOrRefseqOrderByInsdcAccession(String insdcAccession, String refseq, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_InsdcAccession(String asmInsdcAccession, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_InsdcAccessionOrderByInsdcAccession(String asmInsdcAccession, Pageable request);
 
-    @Query("SELECT c FROM ChromosomeEntity c WHERE c.assembly.insdcAccession = :asmInsdcAccession AND (c.md5checksum IS NULL OR c.md5checksum = '')")
+    @Query("SELECT c FROM ChromosomeEntity c WHERE c.assembly.insdcAccession = :asmInsdcAccession AND (c.md5checksum IS NULL OR c.md5checksum = '') ORDER BY c.insdcAccession")
     Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_InsdcAccessionAndMd5checksumIsNullOrEmpty(@Param("asmInsdcAccession") String asmInsdcAccession, Pageable pageable);
 
     @Query("SELECT distinct c.assembly.insdcAccession FROM ChromosomeEntity c WHERE c.md5checksum IS NULL OR c.md5checksum = ''")
@@ -60,33 +60,33 @@ public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Lo
     @Query("DELETE FROM ChromosomeEntity c WHERE c.assembly.insdcAccession=:asmInsdcAccession")
     void deleteChromosomeEntitiesByAssembly_InsdcAccession(@Param("asmInsdcAccession") String asmInsdcAccession);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_Refseq(String asmRefseq, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssembly_RefseqOrderByInsdcAccession(String asmRefseq, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankSequenceNameAndAssembly_Taxid(String genbankName, long asmTaxid, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankSequenceNameAndAssembly_TaxidOrderByInsdcAccession(String genbankName, long asmTaxid, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly_Taxid(String ucscName, long asmTaxid,
-                                                                             Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly_TaxidOrderByInsdcAccession(String ucscName, long asmTaxid,
+                                                                                                  Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameAndAssembly_Taxid(String enaName, long asmTaxid,
-                                                                                    Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameAndAssembly_TaxidOrderByInsdcAccession(String enaName, long asmTaxid,
+                                                                                                         Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankSequenceNameAndAssembly(String genbankName, AssemblyEntity assembly,
-                                                                                  Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankSequenceNameAndAssemblyOrderByInsdcAccession(String genbankName, AssemblyEntity assembly,
+                                                                                                       Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
-                                                                       Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameAndAssemblyOrderByInsdcAccession(String ucscName, AssemblyEntity assembly,
+                                                                                            Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameAndAssembly(String enaName, AssemblyEntity assembly,
-                                                                              Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameAndAssemblyOrderByInsdcAccession(String enaName, AssemblyEntity assembly,
+                                                                                                   Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankSequenceName(String genbankName, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByGenbankSequenceNameOrderByInsdcAccession(String genbankName, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceName(String enaSequenceName, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByEnaSequenceNameOrderByInsdcAccession(String enaSequenceName, Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseq(String insdcAccession, String refseq,
-                                                                                   Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseqOrderByInsdcAccession(String insdcAccession, String refseq,
+                                                                                                               Pageable request);
 
-    Page<ChromosomeEntity> findChromosomeEntitiesByUcscName(String ucscName, Pageable request);
+    Page<ChromosomeEntity> findChromosomeEntitiesByUcscNameOrderByInsdcAccession(String ucscName, Pageable request);
 
     Page<ChromosomeEntity> findChromosomeEntitiesByMd5checksumOrderByInsdcAccession(String md5Checksum, Pageable request);
 

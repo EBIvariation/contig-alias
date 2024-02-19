@@ -205,8 +205,14 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
             assertNotNull(page);
             assertEquals(2, page.getTotalElements());
             List<ChromosomeEntity> entityList = page.get().collect(Collectors.toList());
-            assertChromosomeEntityIdentical(chromosomeEntities[0], entityList.get(0));
-            assertChromosomeEntityIdentical(chromosomeEntities[1], entityList.get(1));
+            ChromosomeEntity first = entityList.stream()
+                    .filter(c->c.getInsdcAccession()==chromosomeEntities[0].getInsdcAccession())
+                    .findFirst().get();
+            ChromosomeEntity second = entityList.stream()
+                    .filter(c->c.getInsdcAccession()==chromosomeEntities[1].getInsdcAccession())
+                    .findFirst().get();
+            assertChromosomeEntityIdentical(chromosomeEntities[0], first);
+            assertChromosomeEntityIdentical(chromosomeEntities[1], second);
         }
 
         /**
