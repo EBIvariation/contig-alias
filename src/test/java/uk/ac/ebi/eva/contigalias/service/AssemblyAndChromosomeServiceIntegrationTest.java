@@ -77,7 +77,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
         @AfterEach
         void tearDown() {
             chromosomeEntities.clear();
-            assemblyService.deleteAssembly(assemblyEntity);
+            assemblyService.deleteEntriesForAssembly(assemblyEntity.getInsdcAccession());
         }
 
         @Test
@@ -188,7 +188,7 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
                 service.deleteChromosome(chromosomeEntity);
             }
             for (AssemblyEntity assemblyEntity : assemblyEntities) {
-                assemblyService.deleteAssembly(assemblyEntity);
+                assemblyService.deleteEntriesForAssembly(assemblyEntity.getInsdcAccession());
             }
             assemblyEntities = null;
             chromosomeEntities = null;

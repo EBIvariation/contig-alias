@@ -238,10 +238,22 @@ public class AdminController {
                     "assembly also deletes all sequences that are associated with that assembly. This endpoint does" +
                     " not return any data.")
     @DeleteMapping(value = "assemblies/{accession}")
-    public void deleteAssemblyByAccession(
+    public ResponseEntity<String> deleteAssemblyByAccession(
             @PathVariable(name = "accession") @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
                     "GCA_000001405.10") String asmAccession) {
-        handler.deleteAssemblyByAccession(asmAccession);
+        Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
+        if (assemblyOpt.isPresent()) {
+            try {
+                handler.deleteAssemblyByAccession(assemblyOpt.get().getInsdcAccession());
+                return ResponseEntity.ok("Assembly Deleted Successfully");
+            } catch (Exception e) {
+                return new ResponseEntity<>("There was an error deleting assembly. " +
+                        "The DB might be in inconsistent state, it is advised to retry deleting",
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return ResponseEntity.ok("Could not find the requested assembly. Looks like it has been deleted earlier");
+        }
     }
 
 }

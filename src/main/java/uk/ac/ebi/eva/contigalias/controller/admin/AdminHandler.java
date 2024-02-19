@@ -78,7 +78,7 @@ public class AdminHandler {
     }
 
     public void deleteAssemblyByAccession(String accession) {
-        assemblyService.deleteAssemblyByAccession(accession);
+        assemblyService.deleteEntriesForAssembly(accession);
     }
 
     public void putAssemblyChecksumsByAccession(String accession, String md5, String trunc512) {
