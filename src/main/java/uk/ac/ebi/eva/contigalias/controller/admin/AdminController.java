@@ -252,7 +252,7 @@ public class AdminController {
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
-            return ResponseEntity.ok("Could not find the requested assembly. Looks like it has been deleted earlier");
+            return ResponseEntity.ok("Could not find the requested assembly.");
         }
     }
 
