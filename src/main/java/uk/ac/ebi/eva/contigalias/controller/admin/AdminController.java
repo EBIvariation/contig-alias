@@ -252,7 +252,8 @@ public class AdminController {
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
-            return ResponseEntity.ok("Could not find the requested assembly.");
+            return new ResponseEntity<>("The requested assembly for deletion could not be found",
+                    HttpStatus.NOT_FOUND);
         }
     }
 
