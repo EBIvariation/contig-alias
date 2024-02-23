@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.contigalias.datasource.ENAAssemblyDataSource;
 import uk.ac.ebi.eva.contigalias.datasource.NCBIAssemblyDataSource;
@@ -165,6 +167,7 @@ public class AssemblyService {
         Files.deleteIfExists(downloadedNCBIFilePath);
     }
 
+    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
     public void deleteEntriesForAssembly(String accession) {
         chromosomeRepository.deleteChromosomeEntitiesByAssembly_InsdcAccession(accession);
         assemblyRepository.deleteAssemblyEntityByInsdcAccessionOrRefseq(accession);
@@ -247,23 +250,6 @@ public class AssemblyService {
         logger.info("Failure: " + accessionResult.getOrDefault("FAILURE", Collections.emptyList()));
 
         return accessionResult;
-    }
-
-    public void deleteAssemblyByInsdcAccession(String insdcAccession) {
-        assemblyRepository.deleteAssemblyEntityByInsdcAccession(insdcAccession);
-    }
-
-    public void deleteAssemblyByRefseq(String refseq) {
-        assemblyRepository.deleteAssemblyEntityByRefseq(refseq);
-    }
-
-    public void deleteAssemblyByAccession(String accession) {
-        Optional<AssemblyEntity> assembly = getAssemblyByAccession(accession);
-        assembly.ifPresent(this::deleteAssembly);
-    }
-
-    public void deleteAssembly(AssemblyEntity entity) {
-        assemblyRepository.delete(entity);
     }
 
     private DuplicateAssemblyException duplicateAssemblyInsertionException(String accession, AssemblyEntity present) {

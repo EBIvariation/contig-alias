@@ -79,7 +79,7 @@ public class AssemblyServiceIntegrationTest {
     @AfterEach
     void tearDown() {
         for (AssemblyEntity entity : entities) {
-            service.deleteAssembly(entity);
+            service.deleteEntriesForAssembly(entity.getInsdcAccession());
         }
     }
 
@@ -102,7 +102,7 @@ public class AssemblyServiceIntegrationTest {
 
         @AfterEach
         void tearDown() {
-            service.deleteAssemblyByRefseq(entity.getRefseq());
+            service.deleteEntriesForAssembly(entity.getInsdcAccession());
         }
 
         @Test
@@ -147,7 +147,7 @@ public class AssemblyServiceIntegrationTest {
             }
 
             for (AssemblyEntity assemblyEntity : entities) {
-                service.deleteAssemblyByInsdcAccession(assemblyEntity.getInsdcAccession());
+                service.deleteEntriesForAssembly(assemblyEntity.getInsdcAccession());
             }
         }
 

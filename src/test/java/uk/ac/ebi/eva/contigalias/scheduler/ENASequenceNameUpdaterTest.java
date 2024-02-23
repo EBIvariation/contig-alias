@@ -43,7 +43,7 @@ public class ENASequenceNameUpdaterTest {
     @AfterEach
     void tearDown() {
         chromosomeEntities.stream().forEach(c -> chromosomeService.deleteChromosome(c));
-        assemblyService.deleteAssembly(assemblyService.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES).get());
+        assemblyService.deleteEntriesForAssembly(assemblyService.getAssemblyByAccession(GCA_ACCESSION_HAVING_CHROMOSOMES).get().getInsdcAccession());
     }
 
     @Test
