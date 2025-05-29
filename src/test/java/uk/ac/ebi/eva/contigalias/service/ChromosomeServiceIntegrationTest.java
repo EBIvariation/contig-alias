@@ -164,7 +164,7 @@ public class ChromosomeServiceIntegrationTest {
         Page<ChromosomeEntity> chrPage = service.getChromosomesByMD5Checksum(testMD5Checksum, Pageable.unpaged());
 
         List<ChromosomeEntity> chromosomeList = chrPage.getContent();
-        assertEquals(2, chromosomeList.size());
+        assertEquals(3, chromosomeList.size());
 
         assertEquals(testMD5Checksum, chromosomeList.get(0).getMd5checksum());
         assertChromosomesIdentical(chromosomeWithMD52, chromosomeList.get(0));

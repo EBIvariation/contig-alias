@@ -117,7 +117,8 @@ public class AssemblyAndChromosomeServiceIntegrationTest {
             assertEquals(CHROMOSOME_LIST_SIZE, chromosomes.getTotalElements());
             List<ChromosomeEntity> entityList = chromosomes.get().collect(Collectors.toList());
             for (int i = 0; i < CHROMOSOME_LIST_SIZE; i++) {
-                assertChromosomeEntityIdentical(chromosomeEntities.get(i), entityList.get(i));
+                // Service should return chromosomes in descending order by INSDC accession
+                assertChromosomeEntityIdentical(chromosomeEntities.get(CHROMOSOME_LIST_SIZE-i-1), entityList.get(i));
             }
         }
 
