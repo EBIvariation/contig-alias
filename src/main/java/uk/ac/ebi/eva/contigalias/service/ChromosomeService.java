@@ -46,17 +46,17 @@ public class ChromosomeService {
 
 
     public Page<ChromosomeEntity> getChromosomesByInsdcAccession(String insdcAccession, Pageable request) {
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByInsdcAccessionOrderByInsdcAccession(insdcAccession, request);
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByInsdcAccessionOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(insdcAccession, request);
         return stripChromosomesAndScaffoldsFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByRefseq(String refseq, Pageable request) {
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByRefseqOrderByInsdcAccession(refseq, request);
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByRefseqOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(refseq, request);
         return stripChromosomesAndScaffoldsFromAssembly(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyInsdcAccession(String asmInsdcAccession, Pageable request) {
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_InsdcAccessionOrderByInsdcAccession(asmInsdcAccession, request);
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_InsdcAccessionOrderByInsdcAccessionDesc(asmInsdcAccession, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
@@ -84,17 +84,17 @@ public class ChromosomeService {
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyRefseq(String asmRefseq, Pageable request) {
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_RefseqOrderByInsdcAccession(asmRefseq, request);
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssembly_RefseqOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(asmRefseq, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
     public List<AssemblyEntity> getAssembliesByChromosomeInsdcAccession(String chrInsdcAccession) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByInsdcAccessionOrderByInsdcAccession(chrInsdcAccession, Pageable.unpaged());
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByInsdcAccessionOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(chrInsdcAccession, Pageable.unpaged());
         return extractAssembliesFromChromosomes(page);
     }
 
     public List<AssemblyEntity> getAssembliesByChromosomeRefseq(String chrRefseq) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByRefseqOrderByInsdcAccession(chrRefseq, Pageable.unpaged());
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByRefseqOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(chrRefseq, Pageable.unpaged());
         return extractAssembliesFromChromosomes(page);
     }
 
@@ -111,70 +111,70 @@ public class ChromosomeService {
     }
 
     public Page<ChromosomeEntity> getChromosomesByName(String name, Pageable request) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankSequenceNameOrderByInsdcAccession(name, request);
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankSequenceNameOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(name, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByNameAndAssemblyTaxid(String name, long asmTaxid, Pageable request) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankSequenceNameAndAssembly_TaxidOrderByInsdcAccession(name, asmTaxid, request);
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankSequenceNameAndAssembly_TaxidOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(name, asmTaxid, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByNameAndAssembly(
             String name, AssemblyEntity assembly, Pageable request) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankSequenceNameAndAssemblyOrderByInsdcAccession(name, assembly, request);
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByGenbankSequenceNameAndAssemblyOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(name, assembly, request);
         assembly.setChromosomes(null);
         return injectAssemblyIntoChromosomes(page, assembly);
     }
 
     public Page<ChromosomeEntity> getChromosomesByAssemblyAccession(String accession, Pageable request) {
-        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseqOrderByInsdcAccession(
+        Page<ChromosomeEntity> chromosomes = repository.findChromosomeEntitiesByAssemblyInsdcAccessionOrAssemblyRefseqOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(
                 accession, accession, request);
         return stripAssembliesFromChromosomes(chromosomes);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscName(String ucscName, Pageable request) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByUcscNameOrderByInsdcAccession(ucscName, request);
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByUcscNameOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(ucscName, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssemblyTaxid(
             String ucscName, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page
-                = repository.findChromosomeEntitiesByUcscNameAndAssembly_TaxidOrderByInsdcAccession(ucscName, asmTaxid, request);
+                = repository.findChromosomeEntitiesByUcscNameAndAssembly_TaxidOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(ucscName, asmTaxid, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByUcscNameAndAssembly(String ucscName, AssemblyEntity assembly,
                                                                       Pageable request) {
         Page<ChromosomeEntity> page
-                = repository.findChromosomeEntitiesByUcscNameAndAssemblyOrderByInsdcAccession(ucscName, assembly, request);
+                = repository.findChromosomeEntitiesByUcscNameAndAssemblyOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(ucscName, assembly, request);
         assembly.setChromosomes(null);
         return injectAssemblyIntoChromosomes(page, assembly);
     }
 
     public Page<ChromosomeEntity> getChromosomesByEnaName(String enaName, Pageable request) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByEnaSequenceNameOrderByInsdcAccession(enaName, request);
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByEnaSequenceNameOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(enaName, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByEnaNameAndAssemblyTaxid(
             String enaName, long asmTaxid, Pageable request) {
         Page<ChromosomeEntity> page
-                = repository.findChromosomeEntitiesByEnaSequenceNameAndAssembly_TaxidOrderByInsdcAccession(enaName, asmTaxid, request);
+                = repository.findChromosomeEntitiesByEnaSequenceNameAndAssembly_TaxidOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(enaName, asmTaxid, request);
         return stripChromosomesAndScaffoldsFromAssembly(page);
     }
 
     public Page<ChromosomeEntity> getChromosomesByEnaNameAndAssembly(
             String enaName, AssemblyEntity assembly, Pageable request) {
         Page<ChromosomeEntity> page
-                = repository.findChromosomeEntitiesByEnaSequenceNameAndAssemblyOrderByInsdcAccession(enaName, assembly, request);
+                = repository.findChromosomeEntitiesByEnaSequenceNameAndAssemblyOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(enaName, assembly, request);
         assembly.setChromosomes(null);
         return injectAssemblyIntoChromosomes(page, assembly);
     }
 
     public Page<ChromosomeEntity> getChromosomesByMD5Checksum(String md5Checksum, Pageable request) {
-        Page<ChromosomeEntity> chrPage = repository.findChromosomeEntitiesByMd5checksumOrderByInsdcAccession(md5Checksum, request);
+        Page<ChromosomeEntity> chrPage = repository.findChromosomeEntitiesByMd5checksumOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(md5Checksum, request);
         return stripChromosomesAndScaffoldsFromAssembly(chrPage);
     }
 
@@ -211,7 +211,7 @@ public class ChromosomeService {
     }
 
     public void putChromosomeChecksumsByAccession(String accession, String md5, String trunc512) {
-        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByInsdcAccessionOrRefseqOrderByInsdcAccession(
+        Page<ChromosomeEntity> page = repository.findChromosomeEntitiesByInsdcAccessionOrRefseqOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(
                 accession, accession, Pageable.unpaged());
         if (page.isEmpty()) {
             throw new IllegalArgumentException(

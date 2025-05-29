@@ -153,20 +153,30 @@ public class ChromosomeServiceIntegrationTest {
         chromosomeWithMD52.setMd5checksum(testMD5Checksum);
         chromosomeRepository.save(chromosomeWithMD52);
 
+        // Contig with same INSDC accession, but in a different assembly
+        AssemblyEntity assemblyEntity3 = AssemblyGenerator.generate();
+        assemblyEntity3.setInsdcAccession("assembly3");
+        ChromosomeEntity chromosomeWithMD53 = ChromosomeGenerator.generate(assemblyEntity3);
+        chromosomeWithMD53.setInsdcAccession("chromosome1");
+        chromosomeWithMD53.setMd5checksum(testMD5Checksum);
+        chromosomeRepository.save(chromosomeWithMD53);
+
         Page<ChromosomeEntity> chrPage = service.getChromosomesByMD5Checksum(testMD5Checksum, Pageable.unpaged());
 
-        List<ChromosomeEntity> chromosomeList = chrPage.getContent().stream()
-                .sorted(Comparator.comparing(c -> c.getInsdcAccession()))
-                .collect(Collectors.toList());
+        List<ChromosomeEntity> chromosomeList = chrPage.getContent();
         assertEquals(2, chromosomeList.size());
 
         assertEquals(testMD5Checksum, chromosomeList.get(0).getMd5checksum());
-        assertChromosomesIdentical(chromosomeWithMD51, chromosomeList.get(0));
-        assertEquals("assembly1", chromosomeList.get(0).getAssembly().getInsdcAccession());
+        assertChromosomesIdentical(chromosomeWithMD52, chromosomeList.get(0));
+        assertEquals("assembly2", chromosomeList.get(0).getAssembly().getInsdcAccession());
 
         assertEquals(testMD5Checksum, chromosomeList.get(1).getMd5checksum());
-        assertChromosomesIdentical(chromosomeWithMD52, chromosomeList.get(1));
-        assertEquals("assembly2", chromosomeList.get(1).getAssembly().getInsdcAccession());
+        assertChromosomesIdentical(chromosomeWithMD53, chromosomeList.get(1));
+        assertEquals("assembly3", chromosomeList.get(1).getAssembly().getInsdcAccession());
+
+        assertEquals(testMD5Checksum, chromosomeList.get(2).getMd5checksum());
+        assertChromosomesIdentical(chromosomeWithMD51, chromosomeList.get(2));
+        assertEquals("assembly1", chromosomeList.get(2).getAssembly().getInsdcAccession());
     }
 
     void assertChromosomePageIdenticalToEntity(Page<ChromosomeEntity> page) {
