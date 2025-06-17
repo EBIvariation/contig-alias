@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.contigalias.repo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,7 +32,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
-public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long> {
+public interface ChromosomeRepository extends JpaRepository<ChromosomeEntity, Long>, JpaSpecificationExecutor<ChromosomeEntity> {
 
     Page<ChromosomeEntity> findChromosomeEntitiesByInsdcAccessionOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(String insdcAccession, Pageable request);
 

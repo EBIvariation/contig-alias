@@ -19,6 +19,7 @@ package uk.ac.ebi.eva.contigalias.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_INSDC;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.AUTHORITY_REFSEQ;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_ENA_TYPE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_GENBANK_TYPE;
+import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasController.NAME_UCSC_TYPE;
 
 @Service
 public class ChromosomeService {
@@ -176,6 +183,49 @@ public class ChromosomeService {
     public Page<ChromosomeEntity> getChromosomesByMD5Checksum(String md5Checksum, Pageable request) {
         Page<ChromosomeEntity> chrPage = repository.findChromosomeEntitiesByMd5checksumOrderByInsdcAccessionDescAssembly_InsdcAccessionDesc(md5Checksum, request);
         return stripChromosomesAndScaffoldsFromAssembly(chrPage);
+    }
+
+    public Page<ChromosomeEntity> searchChromosomeByName(String chromosomeName,
+                                                         String namingConvention,
+                                                         String assemblyAccession,
+                                                         Pageable pageable) {
+        Specification<ChromosomeEntity> spec = queryForSearchingByNameAndNamingConvention(chromosomeName, namingConvention);
+
+        if (assemblyAccession != null && !assemblyAccession.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("assembly").get("insdcAccession"), assemblyAccession));
+        }
+        Page<ChromosomeEntity> resultPage = repository.findAll(spec, pageable);
+        return stripChromosomesAndScaffoldsFromAssembly(resultPage);
+    }
+
+    private Specification<ChromosomeEntity> queryForSearchingByNameAndNamingConvention(String chromosomeName, String namingConvention) {
+        return (root, query, cb) -> {
+            if (namingConvention == null) {
+                return cb.or(
+                        cb.equal(root.get("genbankSequenceName"), chromosomeName),
+                        cb.equal(root.get("enaSequenceName"), chromosomeName),
+                        cb.equal(root.get("insdcAccession"), chromosomeName),
+                        cb.equal(root.get("refseq"), chromosomeName),
+                        cb.equal(root.get("ucscName"), chromosomeName)
+                );
+            } else {
+                switch (namingConvention) {
+                    case AUTHORITY_INSDC:
+                        return cb.equal(root.get("insdcAccession"), chromosomeName);
+                    case NAME_GENBANK_TYPE:
+                        return cb.equal(root.get("genbankSequenceName"), chromosomeName);
+                    case NAME_ENA_TYPE:
+                        return cb.equal(root.get("enaSequenceName"), chromosomeName);
+                    case AUTHORITY_REFSEQ:
+                        return cb.equal(root.get("refseq"), chromosomeName);
+                    case NAME_UCSC_TYPE:
+                        return cb.equal(root.get("ucscName"), chromosomeName);
+                    default:
+                        throw new IllegalArgumentException("Unsupported naming convention: " + namingConvention);
+                }
+            }
+        };
     }
 
     private Page<ChromosomeEntity> injectAssemblyIntoChromosomes(Page<ChromosomeEntity> page, AssemblyEntity assembly) {

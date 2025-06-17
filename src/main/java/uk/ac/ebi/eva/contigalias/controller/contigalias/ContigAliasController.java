@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 
@@ -350,6 +349,25 @@ public class ContigAliasController {
             return;
         }
         pagedModel.add(linkTo(method).withRel(REL_ASSEMBLY));
+    }
+
+    @ApiOperation(value = "Search chromosome using its name", notes = "Given a chromosome's name/accession, " +
+            "this endpoint will return a list of all chromosomes that match that name. " +
+            "If provided, filtering will be done based on naming convention and assembly")
+    @GetMapping(value = "search/chromosome/{name}",
+            produces = "application/json")
+    public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> searchChromosomeByName(
+            @PathVariable @ApiParam(value = "Chromosome name. Eg: CM000663.2") String name,
+            @RequestParam(required = false, name = "namingConvention")
+            @ApiParam(value = "Chromosome naming convention. Eg: refseq") String namingConvention,
+            @RequestParam(required = false, name = "assemblyAccession")
+            @ApiParam(value = "Assembly accession. Eg: GCA_000001405.10") String assemblyAccession,
+            @RequestParam(required = false, name = "page") @ApiParam(value = PAGE_NUMBER_DESCRIPTION) Integer pageNumber,
+            @RequestParam(required = false, name = "size") @ApiParam(value = PAGE_SIZE_DESCRIPTION) Integer pageSize) {
+        PageRequest pageRequest = createPageRequest(pageNumber, pageSize);
+        PagedModel<EntityModel<SequenceEntity>> pagedModel = handler.searchChromosomeByName(name, namingConvention,
+                assemblyAccession, pageRequest);
+        return createAppropriateResponseEntity(pagedModel);
     }
 
 }
