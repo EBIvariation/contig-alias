@@ -201,7 +201,7 @@ public class ChromosomeService {
 
     private Specification<ChromosomeEntity> queryForSearchingByNameAndNamingConvention(String chromosomeName, String namingConvention) {
         return (root, query, cb) -> {
-            if (namingConvention == null) {
+            if (namingConvention == null || namingConvention.isEmpty()) {
                 return cb.or(
                         cb.equal(root.get("genbankSequenceName"), chromosomeName),
                         cb.equal(root.get("enaSequenceName"), chromosomeName),
