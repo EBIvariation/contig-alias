@@ -24,7 +24,6 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.stereotype.Service;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
@@ -162,6 +161,14 @@ public class ContigAliasHandler {
         } else {
             chrPage = chromosomeService.getChromosomesByName(name, request);
         }
+        return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
+    }
+
+    public PagedModel<EntityModel<SequenceEntity>> searchChromosomeByName(String chromosomeName,
+                                                                          String namingConvention,
+                                                                          String assemblyAccession, Pageable request) {
+        Page<ChromosomeEntity> chrPage = chromosomeService.searchChromosomeByName(chromosomeName, namingConvention,
+                assemblyAccession, request);
         return generatePagedModelFromPage(createSequencePage(chrPage), sequenceAssembler);
     }
 
