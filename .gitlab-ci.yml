@@ -30,10 +30,9 @@ test:
           exit 1
     environment:
         name: test-env
-# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
-#    only:
-#        - master
-#        - tags
+    only:
+        - master
+        - tags
 
 # Not executed, parent job definition for package
 .package:
@@ -59,9 +58,8 @@ package-internal:
     variables:
         ENVIRONMENT_NAME: internal
         MAVEN_PROFILE: internal
-# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
-#    only:
-#        - master
+    only:
+        - master
 
 package-development:
     extends: .package
@@ -99,9 +97,8 @@ deploy-tomcat-internal:
         TOMCAT_HOST: $TOMCAT_INTERNAL_HOST
     dependencies:
         - package-internal
-# let's try to deploy in internal not-yet-merged branches to have a preview in the PR
-#    only:
-#        - master
+    only:
+        - master
 
 deploy-tomcat-development:
     extends: .deploy-tomcat
