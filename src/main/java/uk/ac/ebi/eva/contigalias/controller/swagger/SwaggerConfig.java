@@ -16,83 +16,48 @@
 
 package uk.ac.ebi.eva.contigalias.controller.swagger;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import org.springdoc.core.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.util.UriComponentsBuilder;
-import springfox.documentation.PathProvider;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.Contact;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.paths.Paths;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
 
 @Configuration
-@EnableSwagger2WebMvc
 public class SwaggerConfig implements WebMvcConfigurer {
 
-    private final String CONTROLLER_BASE_PATH = "uk.ac.ebi.eva.contigalias.controller";
+    private static final String CONTROLLER_BASE_PATH = "uk.ac.ebi.eva.contigalias.controller";
 
     @Autowired
     SwaggerInterceptAdapter interceptAdapter;
 
-    @Value("${server.servlet.context-path:/}")
-    private String contextPath;
-
     @Bean
-    public Docket publicApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("v1/contigalias")
-                .pathProvider(getPathProvider())
-                .apiInfo(getApiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage(CONTROLLER_BASE_PATH + ".contigalias"))
-                .paths(PathSelectors.any())
+    public GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+                .group("v1/contigalias")
+                .packagesToScan(CONTROLLER_BASE_PATH + ".contigalias")
                 .build();
     }
 
     @Bean
-    public Docket adminApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("v1/only-admins")
-                .pathProvider(getPathProvider())
-                .apiInfo(getApiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage(CONTROLLER_BASE_PATH + ".admin"))
-                .paths(PathSelectors.any())
+    public GroupedOpenApi adminApi() {
+        return GroupedOpenApi.builder()
+                .group("v1/only-admins")
+                .packagesToScan(CONTROLLER_BASE_PATH + ".admin")
                 .build();
     }
 
-    private PathProvider getPathProvider() {
-        return new PathProvider() {
-            @Override
-            public String getOperationPath(String operationPath) {
-                if (operationPath.startsWith(contextPath)) {
-                    operationPath = operationPath.substring(contextPath.length());
-                }
-                return Paths.removeAdjacentForwardSlashes(
-                        UriComponentsBuilder.newInstance().replacePath(operationPath).build().toString());
-            }
-
-            @Override
-            public String getResourceListingPath(String groupName, String apiDeclaration) {
-                return null;
-            }
-        };
-    }
-
-    private ApiInfo getApiInfo() {
-        return new ApiInfoBuilder()
-                .title("Contig-Alias API")
-                .description(
-                        "Service to provide synonyms of chromosome/contig identifiers." +
+    @Bean
+    public OpenAPI contigAliasOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Contig-Alias API")
+                        .description(
+                                "Service to provide synonyms of chromosome/contig identifiers." +
                                 "\nThe endpoints in the following controllers are paginated, which means that all " +
                                 "results aren't returned at once, instead a small subset is returned. This small " +
                                 "subset in the form of a page and the result need to be traversed through this set of" +
@@ -107,16 +72,17 @@ public class SwaggerConfig implements WebMvcConfigurer {
                                 "\nSome information about pagination is also similarly included in a root level " +
                                 "object called \"page\". Due to this, the actual result is not available at the root " +
                                 "level but is actually embedded in another root level element.")
-                .version("1.0")
-                .contact(new Contact("GitHub Repository", "https://github.com/EBIvariation/contig-alias", null))
-                .license("Apache-2.0")
-                .licenseUrl("https://raw.githubusercontent.com/EBIvariation/contig-alias/master/LICENSE")
-                .build();
+                        .version("1.0")
+                        .contact(new Contact()
+                                .name("GitHub Repository")
+                                .url("https://github.com/EBIvariation/contig-alias"))
+                        .license(new License()
+                                .name("Apache-2.0")
+                                .url("https://raw.githubusercontent.com/EBIvariation/contig-alias/master/LICENSE")));
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(interceptAdapter);
     }
-
 }
