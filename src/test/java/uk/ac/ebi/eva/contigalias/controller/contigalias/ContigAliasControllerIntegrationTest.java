@@ -76,14 +76,14 @@ public class ContigAliasControllerIntegrationTest {
     @BeforeEach
     void setup() {
         PagedResourcesAssembler<AssemblyEntity> assemblyAssembler = mock(PagedResourcesAssembler.class);
-        PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel<>(
-                Collections.singletonList(new EntityModel<>(assemblyEntity)), null);
+        PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = PagedModel.of(
+                Collections.singletonList(EntityModel.of(assemblyEntity)), (PagedModel.PageMetadata) null);
         Mockito.when(assemblyAssembler.toModel(any()))
                .thenReturn(assemblyPagedModel);
 
         PagedResourcesAssembler<SequenceEntity> chromosomeAssembler = mock(PagedResourcesAssembler.class);
-        PagedModel<EntityModel<SequenceEntity>> chromosomePagedModel = new PagedModel<>(
-                Collections.singletonList(new EntityModel<>(chromosomeEntity)), null);
+        PagedModel<EntityModel<SequenceEntity>> chromosomePagedModel = PagedModel.of(
+                Collections.singletonList(EntityModel.of(chromosomeEntity)), (PagedModel.PageMetadata) null);
         Mockito.when(chromosomeAssembler.toModel(any()))
                .thenReturn(chromosomePagedModel);
 

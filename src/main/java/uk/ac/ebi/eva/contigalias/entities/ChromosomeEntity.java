@@ -16,12 +16,15 @@
 
 package uk.ac.ebi.eva.contigalias.entities;
 
+import org.springframework.hateoas.server.core.Relation;
+
 import javax.persistence.Entity;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 import java.io.Serializable;
 
 
+@Relation(collectionRelation = "chromosomeEntities", itemRelation = "chromosomeEntity")
 @Entity
 @Table(name = "chromosome")
 @IdClass(ChromosomeId.class)

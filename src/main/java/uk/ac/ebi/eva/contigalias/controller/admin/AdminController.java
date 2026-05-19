@@ -226,8 +226,8 @@ public class AdminController {
     @PutMapping(value = "chromosomes/{accession}/checksum")
     public void putChromosomeChecksumsByAccession(
             @PathVariable @Parameter(description ="INSDC or Refseq chromosome accession. Eg: NC_000001.11") String accession,
-            @RequestParam(required = false) @Parameter("The MD5 checksum associated with the chromosomes.") String md5,
-            @RequestParam(required = false) @Parameter("The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
+            @RequestParam(required = false) @Parameter(description = "The MD5 checksum associated with the chromosomes.") String md5,
+            @RequestParam(required = false) @Parameter(description = "The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
         handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
     }
 

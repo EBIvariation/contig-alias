@@ -219,7 +219,7 @@ public class ContigAliasController {
     @GetMapping(value = "assemblies/{accession}/chromosomes", produces = "application/json")
     public ResponseEntity<PagedModel<EntityModel<SequenceEntity>>> getSequencesByAssemblyAccession(
             @PathVariable(name = "accession") String asmAccession,
-            @RequestParam(required = false, name = "authority") @Parameter("Specify if the provided accession is a " +
+            @RequestParam(required = false, name = "authority") @Parameter(description = "Specify if the provided accession is a " +
                     "INSDC or a RefSeq accession. The acceptable param values are " + AUTHORITY_INSDC + " " +
                     "and " + AUTHORITY_REFSEQ + " respectively. If this parameter is omitted then the results having " +
                     "the given accession as either their INSDC or RefSeq accession are returned. This includes " +
