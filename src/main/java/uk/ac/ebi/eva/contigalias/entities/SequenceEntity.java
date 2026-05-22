@@ -17,7 +17,7 @@
 package uk.ac.ebi.eva.contigalias.entities;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -30,30 +30,30 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public class SequenceEntity {
 
-    @ApiModelProperty(value = "GenBank's name of the sequence.")
+    @Schema(description ="GenBank's name of the sequence.")
     private String genbankSequenceName;
 
-    @ApiModelProperty(value = "ENA's name of the sequence")
+    @Schema(description ="ENA's name of the sequence")
     private String enaSequenceName;
 
     @Id
     @Column(nullable = false)
-    @ApiModelProperty(value = "Sequence's INSDC accession.")
+    @Schema(description ="Sequence's INSDC accession.")
     private String insdcAccession;
 
-    @ApiModelProperty(value = "Sequence's RefSeq accession.")
+    @Schema(description ="Sequence's RefSeq accession.")
     private String refseq;
 
-    @ApiModelProperty(value = "Sequence's length")
+    @Schema(description ="Sequence's length")
     private Long seqLength;
 
-    @ApiModelProperty(value = "Sequence's UCSC style name")
+    @Schema(description ="Sequence's UCSC style name")
     private String ucscName;
 
-    @ApiModelProperty(value = "Sequence's MD5 checksum value.")
+    @Schema(description ="Sequence's MD5 checksum value.")
     private String md5checksum;
 
-    @ApiModelProperty(value = "Sequence's TRUNC512 checksum value.")
+    @Schema(description ="Sequence's TRUNC512 checksum value.")
     private String trunc512checksum;
 
     public enum ContigType {
@@ -61,13 +61,13 @@ public class SequenceEntity {
         CHROMOSOME
     }
 
-    @ApiModelProperty(value = "Type of contig: chromosome (or) scaffold")
+    @Schema(description ="Type of contig: chromosome (or) scaffold")
     @Enumerated(EnumType.STRING)
     private ContigType contigType;
 
     @Id
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ApiModelProperty(value = "Assembly that this sequence belongs to.")
+    @Schema(description ="Assembly that this sequence belongs to.")
     @ManyToOne(cascade = CascadeType.ALL)
     private AssemblyEntity assembly;
 

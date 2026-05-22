@@ -78,8 +78,8 @@ public class ContigAliasHandlerTest {
                    .thenReturn(optionalOfEntity);
 
             PagedResourcesAssembler<AssemblyEntity> assembler = mock(PagedResourcesAssembler.class);
-            PagedModel<EntityModel<AssemblyEntity>> pagedModel = new PagedModel<>(
-                    Collections.singletonList(new EntityModel<>(entity)), null);
+            PagedModel<EntityModel<AssemblyEntity>> pagedModel = PagedModel.of(
+                    Collections.singletonList(EntityModel.of(entity)), (PagedModel.PageMetadata) null);
             Mockito.when(assembler.toModel(any()))
                    .thenReturn(pagedModel);
             handler = new ContigAliasHandler(mockAssemblyService, null, assembler, null);
@@ -191,8 +191,8 @@ public class ContigAliasHandlerTest {
                    .thenReturn(pageOfEntity);
 
             PagedResourcesAssembler<SequenceEntity> mockSequencesAssembler = mock(PagedResourcesAssembler.class);
-            PagedModel<EntityModel<SequenceEntity>> sequencePagedModel = new PagedModel<>(
-                    Collections.singletonList(new EntityModel<>(entity)), null);
+            PagedModel<EntityModel<SequenceEntity>> sequencePagedModel = PagedModel.of(
+                    Collections.singletonList(EntityModel.of(entity)), (PagedModel.PageMetadata) null);
             Mockito.when(mockSequencesAssembler.toModel(any()))
                    .thenReturn(sequencePagedModel);
 
@@ -305,8 +305,8 @@ public class ContigAliasHandlerTest {
 
             PagedResourcesAssembler<AssemblyEntity> mockAssemblyAssembler = mock(PagedResourcesAssembler.class);
 
-            PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = new PagedModel(
-                    Collections.singleton(new EntityModel<>(assemblyEntity)), null);
+            PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = PagedModel.of(
+                    Collections.singleton(EntityModel.of(assemblyEntity)), (PagedModel.PageMetadata) null);
             Mockito.when(mockAssemblyAssembler.toModel(any()))
                    .thenReturn(assemblyPagedModel);
 

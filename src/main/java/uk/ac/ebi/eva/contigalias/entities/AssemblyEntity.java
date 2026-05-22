@@ -17,9 +17,10 @@
 package uk.ac.ebi.eva.contigalias.entities;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.springframework.hateoas.server.core.Relation;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -30,40 +31,41 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.List;
 
+@Relation(collectionRelation = "assemblyEntities", itemRelation = "assemblyEntity")
 @Entity
 @Table(name = "assembly")
 public class AssemblyEntity {
 
     @Id
     @Column(nullable = false)
-    @ApiModelProperty(value = "Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
+    @Schema(description ="Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
     private String insdcAccession;
 
     @Column(nullable = false)
-    @ApiModelProperty(value = "The name of the assembly.")
+    @Schema(description ="The name of the assembly.")
     private String name;
 
-    @ApiModelProperty(value = "The organism of the assembly.")
+    @Schema(description ="The organism of the assembly.")
     private String organism;
 
     @Column(nullable = false)
-    @ApiModelProperty(value = "Assembly's taxonomic ID.")
+    @Schema(description ="Assembly's taxonomic ID.")
     private Long taxid;
 
-    @ApiModelProperty(value = "Assembly's Refseq accession.")
+    @Schema(description ="Assembly's Refseq accession.")
     private String refseq;
 
-    @ApiModelProperty(value = "Are assembly's INSDC and Refseq accessions identical")
+    @Schema(description ="Are assembly's INSDC and Refseq accessions identical")
     private boolean isGenbankRefseqIdentical;
 
-    @ApiModelProperty(value = "Assembly's MD5 checksum value.")
+    @Schema(description ="Assembly's MD5 checksum value.")
     private String md5checksum;
 
-    @ApiModelProperty(value = "Assembly's TRUNC512 checksum value.")
+    @Schema(description ="Assembly's TRUNC512 checksum value.")
     private String trunc512checksum;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
+    @Schema(description ="List of all chromosomes of the assembly present in the database.")
     @LazyCollection(LazyCollectionOption.TRUE)
     @OneToMany(mappedBy = "assembly", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChromosomeEntity> chromosomes;

@@ -36,7 +36,7 @@ public class SwaggerInterceptAdapter extends HandlerInterceptorAdapter {
 
         if (req.equals(contextPath) || req.equals(contextPath + "/") ||
                 req.equals(contextPath + "/v1") || req.equals(contextPath + "/v1/")) {
-            response.sendRedirect(contextPath + "/swagger-ui.html");
+            response.sendRedirect(contextPath + "/swagger-ui/index.html");
             return false;
         }
 

@@ -31,6 +31,8 @@ public class BaseController {
 
     public static final int DEFAULT_PAGE_SIZE = 10;
 
+    public static final int MAX_PAGE_SIZE = 1000;
+
     public static final String PAGE_NUMBER_DESCRIPTION = "You can provide a page index to return only a subset of" +
             " the data. Page numbers start from 0 and if not specified then default page number is 0.";
 
@@ -52,7 +54,7 @@ public class BaseController {
             pagex = page;
         }
         if (size != null) {
-            sizex = size;
+            sizex = Math.min(size, MAX_PAGE_SIZE);
         }
 
         // Even though this is redundant it is required for some integration tests to pass.

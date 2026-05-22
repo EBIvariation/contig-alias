@@ -24,6 +24,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -48,16 +49,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser(USERNAME_ADMIN).password("{noop}" + PASSWORD_ADMIN).roles(ROLE_ADMIN);
+        String encodedPassword = "{bcrypt}" + new BCryptPasswordEncoder().encode(PASSWORD_ADMIN);
+        auth.inMemoryAuthentication()
+            .withUser(USERNAME_ADMIN)
+            .password(encodedPassword)
+            .roles(ROLE_ADMIN);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeRequests()
-            .antMatchers("/v1/assemblies/**").permitAll()
-            .antMatchers("/v1/chromosomes/**").permitAll()
+            .antMatchers("/v1/assemblies/**", "/v1/chromosomes/**", "/v1/search/**").permitAll()
+            .antMatchers("/info", "/health").permitAll()
+            .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
             .antMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
+            .anyRequest().denyAll()
             .and().httpBasic().realmName(REALM)
             .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
             .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

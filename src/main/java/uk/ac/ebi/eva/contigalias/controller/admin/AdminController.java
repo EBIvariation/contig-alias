@@ -16,8 +16,8 @@
 
 package uk.ac.ebi.eva.contigalias.controller.admin;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,9 +46,9 @@ public class AdminController {
         this.handler = handler;
     }
 
-    @ApiOperation(value = "Fetch an assembly from remote server using its INSDC or RefSeq accession and insert " +
+    @Operation(summary ="Fetch an assembly from remote server using its INSDC or RefSeq accession and insert " +
             "into local database.",
-            notes = "Given an assembly's accession, this endpoint will fetch and add the assembly that matches that " +
+            description ="Given an assembly's accession, this endpoint will fetch and add the assembly that matches that " +
                     "accession into the local database. The accession can be either a INSDC or a RefSeq accession " +
                     "and the endpoint will automatically fetch the correct assembly from remote server. It will first" +
                     " search for the target assembly in the local database as trying to insert an assembly which " +
@@ -59,7 +59,7 @@ public class AdminController {
                     "already exists in the local database.")
     @PutMapping(value = "assemblies/{accession}")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
-            @PathVariable(name = "accession") @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
+            @PathVariable(name = "accession") @Parameter(description ="INSDC or RefSeq assembly accession. Eg: " +
                     "GCA_000001405.10") String asmAccession) throws IOException {
         try {
             handler.fetchAndInsertAssemblyByAccession(asmAccession);
@@ -72,9 +72,9 @@ public class AdminController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Fetch assemblies from remote server using their INSDC or RefSeq accessions and insert " +
+    @Operation(summary ="Fetch assemblies from remote server using their INSDC or RefSeq accessions and insert " +
             "into local database.",
-            notes = "Given a list of assembly accessions, for every accession in the list this endpoint will fetch " +
+            description ="Given a list of assembly accessions, for every accession in the list this endpoint will fetch " +
                     "and add the assembly that matches that accession into the local database. The accession can be " +
                     "either a INSDC or RefSeq accession and the endpoint will automatically fetch the correct " +
                     "assembly from remote server. It will first search for the target assembly in the local database " +
@@ -85,7 +85,7 @@ public class AdminController {
                     "parallel manner.")
     @PutMapping(value = "assemblies")
     public ResponseEntity<?> fetchAndInsertAssemblyByAccession(
-            @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
+            @RequestBody @Parameter(description ="A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -99,26 +99,27 @@ public class AdminController {
         return new ResponseEntity<>("Accession Processing Result : " + accessionResult, HttpStatus.MULTI_STATUS);
     }
 
-    @ApiOperation(value = "Given an assembly accession, retrieve MD5 checksum for all chromosomes belonging to assembly and update")
+    @Operation(summary ="Given an assembly accession, retrieve MD5 checksum for all chromosomes belonging to assembly and update")
     @PutMapping(value = "assemblies/md5checksum/{accession}")
     public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(@PathVariable(name = "accession")
-                                                                          @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
+                                                                          @Parameter(description ="INSDC or RefSeq assembly accession. Eg: " +
                                                                                   "GCA_000001405.10") String asmAccession) {
         Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
         if (assemblyOpt.isPresent()) {
-            handler.retrieveAndInsertMd5ChecksumForAssembly(assemblyOpt.get().getInsdcAccession());
-            return ResponseEntity.ok("A task has been submitted for updating md5checksum for assembly " + asmAccession
+            String insdcAccession = assemblyOpt.get().getInsdcAccession();
+            handler.retrieveAndInsertMd5ChecksumForAssembly(insdcAccession);
+            return ResponseEntity.ok("A task has been submitted for updating md5checksum for assembly " + insdcAccession
                     + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
         } else {
-            return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first. MD5 checksum will be updated as part of the insertion process");
+            return ResponseEntity.ok("Could not find the requested assembly. " +
+                    "Please insert the assembly first. MD5 checksum will be updated as part of the insertion process");
         }
     }
 
-    @ApiOperation(value = "Given a list of assembly accessions, retrieve MD5 checksum for all chromosomes belonging to all the assemblies and update")
+    @Operation(summary ="Given a list of assembly accessions, retrieve MD5 checksum for all chromosomes belonging to all the assemblies and update")
     @PutMapping(value = "assemblies/md5checksum")
     public ResponseEntity<String> retrieveAndInsertMd5ChecksumForAssembly(
-            @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
+            @RequestBody @Parameter(description ="A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -137,37 +138,37 @@ public class AdminController {
 
         handler.retrieveAndInsertMd5ChecksumForAssembly(asmInsdcAccessionsList);
 
-        accessions.removeAll(asmNotPresent);
-        String responseText = "A task has been submitted for updating MD5 checksum for assemblies: " + accessions + "."
+        String responseText = "A task has been submitted for updating MD5 checksum for assemblies: " + asmInsdcAccessionsList + "."
                 + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
         if (!asmNotPresent.isEmpty()) {
-            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
-                    + "\nPlease insert the assembly first, MD5 Checksum will be updated as part of the insertion process";
+            responseText = responseText + "\n" + asmNotPresent.size() + " assemblies were not found in the database."
+                    + "\nPlease insert the assemblies first, MD5 Checksum will be updated as part of the insertion process";
         }
 
         return ResponseEntity.ok(responseText);
     }
 
-    @ApiOperation(value = "Given an assembly accession, retrieve ENA sequence name for all chromosomes belonging to assembly and update")
+    @Operation(summary ="Given an assembly accession, retrieve ENA sequence name for all chromosomes belonging to assembly and update")
     @PutMapping(value = "assemblies/ena-sequence-name/{accession}")
     public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(@PathVariable(name = "accession")
-                                                                              @ApiParam(value = "INSDC or RefSeq assembly accession. " +
+                                                                              @Parameter(description ="INSDC or RefSeq assembly accession. " +
                                                                                       "Eg: GCA_000001405.10") String asmAccession) {
         Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
         if (assemblyOpt.isPresent()) {
-            handler.retrieveAndInsertENASequenceNameForAssembly(assemblyOpt.get().getInsdcAccession());
-            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for assembly " + asmAccession
+            String insdcAccession = assemblyOpt.get().getInsdcAccession();
+            handler.retrieveAndInsertENASequenceNameForAssembly(insdcAccession);
+            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for assembly " + insdcAccession
                     + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
         } else {
-            return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first. ENA sequence name will be updated as part of the insertion process");
+            return ResponseEntity.ok("Could not find the requested assembly. " +
+                    "Please insert the assembly first. ENA sequence name will be updated as part of the insertion process");
         }
     }
 
-    @ApiOperation(value = "Given a list of assembly accessions, retrieve ENA sequence name for all chromosomes belonging to all the assemblies and update")
+    @Operation(summary ="Given a list of assembly accessions, retrieve ENA sequence name for all chromosomes belonging to all the assemblies and update")
     @PutMapping(value = "assemblies/ena-sequence-name")
     public ResponseEntity<String> retrieveAndInsertENASequenceNameForAssembly(
-            @RequestBody @ApiParam(value = "A JSON array of INSDC or RefSeq assembly accessions. " +
+            @RequestBody @Parameter(description ="A JSON array of INSDC or RefSeq assembly accessions. " +
                     "Eg: [\"GCA_000001405.10\",\"GCA_000001405.11\",\"GCA_000001405.12\"]") List<String> accessions) {
         if (accessions == null || accessions.size() <= 0) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -186,19 +187,18 @@ public class AdminController {
 
         handler.retrieveAndInsertENASequenceNameForAssembly(asmInsdcAccessionsList);
 
-        accessions.removeAll(asmNotPresent);
-        String responseText = "A task has been submitted for updating ENA Sequence Name for assemblies: " + accessions
+        String responseText = "A task has been submitted for updating ENA Sequence Name for assemblies: " + asmInsdcAccessionsList
                 + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
         if (!asmNotPresent.isEmpty()) {
-            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
-                    + "\nPlease insert the assembly first, ENA Sequence Name will be updated as part of the insertion process";
+            responseText = responseText + "\n" + asmNotPresent.size() + " assemblies were not found in the database."
+                    + "\nPlease insert the assemblies first, ENA Sequence Name will be updated as part of the insertion process";
         }
 
         return ResponseEntity.ok(responseText);
     }
 
 
-    @ApiOperation(value = "Retrieve list of Jobs that are running or scheduled to run")
+    @Operation(summary ="Retrieve list of Jobs that are running or scheduled to run")
     @GetMapping(value = "assemblies/scheduled-jobs")
     public ResponseEntity<List<String>> getMD5ChecksumUpdateTaskStatus() {
         List<String> scheduledJobStatus = handler.getScheduledJobStatus();
@@ -206,40 +206,40 @@ public class AdminController {
     }
 
 //    This endpoint can be enabled in the future when checksums for assemblies are added to the project.
-//    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to an assembly by accession.",
-//            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will
+//    @Operation(summary ="Add MD5 and TRUNC512 checksums to an assembly by accession.",
+//            description ="Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will
 //            " +
 //                    "add the given checksums to the assembly that matches the given INSDC or RefSeq accession.")
 //    @PutMapping(value = "assemblies/{accession}/checksum")
 //    public void putAssemblyChecksumsByAccession(
-//            @PathVariable @ApiParam(value = "INSDC or Refseq assembly accession. Eg: GCA_000001405.10") String
+//            @PathVariable @Parameter(description ="INSDC or Refseq assembly accession. Eg: GCA_000001405.10") String
 //            accession,
-//            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the assembly.") String md5,
-//            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the assembly.") String
+//            @RequestParam(required = false) @Parameter("The MD5 checksum associated with the assembly.") String md5,
+//            @RequestParam(required = false) @Parameter("The TRUNC512 checksum associated with the assembly.") String
 //                    trunc512) {
 //        handler.putAssemblyChecksumsByAccession(accession, md5, trunc512);
 //    }
 
-    @ApiOperation(value = "Add MD5 and TRUNC512 checksums to all chromosomes by accession.",
-            notes = "Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
+    @Operation(summary ="Add MD5 and TRUNC512 checksums to all chromosomes by accession.",
+            description ="Given an INSDC or RefSeq accession along with a MD5 or a TRUNC512 checksum, this endpoint will " +
                     "add the given checksums to all chromosomes that match the given INSDC or RefSeq accession.")
     @PutMapping(value = "chromosomes/{accession}/checksum")
     public void putChromosomeChecksumsByAccession(
-            @PathVariable @ApiParam(value = "INSDC or Refseq chromosome accession. Eg: NC_000001.11") String accession,
-            @RequestParam(required = false) @ApiParam("The MD5 checksum associated with the chromosomes.") String md5,
-            @RequestParam(required = false) @ApiParam("The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
+            @PathVariable @Parameter(description ="INSDC or Refseq chromosome accession. Eg: NC_000001.11") String accession,
+            @RequestParam(required = false) @Parameter(description = "The MD5 checksum associated with the chromosomes.") String md5,
+            @RequestParam(required = false) @Parameter(description = "The TRUNC512 checksum associated with the chromosomes.") String trunc512) {
         handler.putChromosomeChecksumsByAccession(accession, md5, trunc512);
     }
 
-    @ApiOperation(value = "Delete an assembly from local database using its INSDC or RefSeq accession.",
-            notes = "Given an assembly's accession this endpoint will delete the assembly that matches that " +
+    @Operation(summary ="Delete an assembly from local database using its INSDC or RefSeq accession.",
+            description ="Given an assembly's accession this endpoint will delete the assembly that matches that " +
                     "accession from the local database. The accession can be either a INSDC or RefSeq accession and" +
                     " the endpoint will automatically deletes the correct assembly from the database. Deleting an " +
                     "assembly also deletes all sequences that are associated with that assembly. This endpoint does" +
                     " not return any data.")
     @DeleteMapping(value = "assemblies/{accession}")
     public ResponseEntity<String> deleteAssemblyByAccession(
-            @PathVariable(name = "accession") @ApiParam(value = "INSDC or RefSeq assembly accession. Eg: " +
+            @PathVariable(name = "accession") @Parameter(description ="INSDC or RefSeq assembly accession. Eg: " +
                     "GCA_000001405.10") String asmAccession) {
         Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
         if (assemblyOpt.isPresent()) {
