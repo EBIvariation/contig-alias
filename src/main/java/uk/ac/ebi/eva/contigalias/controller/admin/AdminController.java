@@ -106,12 +106,13 @@ public class AdminController {
                                                                                   "GCA_000001405.10") String asmAccession) {
         Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
         if (assemblyOpt.isPresent()) {
-            handler.retrieveAndInsertMd5ChecksumForAssembly(assemblyOpt.get().getInsdcAccession());
-            return ResponseEntity.ok("A task has been submitted for updating md5checksum for assembly " + asmAccession
+            String insdcAccession = assemblyOpt.get().getInsdcAccession();
+            handler.retrieveAndInsertMd5ChecksumForAssembly(insdcAccession);
+            return ResponseEntity.ok("A task has been submitted for updating md5checksum for assembly " + insdcAccession
                     + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
         } else {
-            return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first. MD5 checksum will be updated as part of the insertion process");
+            return ResponseEntity.ok("Could not find the requested assembly. " +
+                    "Please insert the assembly first. MD5 checksum will be updated as part of the insertion process");
         }
     }
 
@@ -137,12 +138,11 @@ public class AdminController {
 
         handler.retrieveAndInsertMd5ChecksumForAssembly(asmInsdcAccessionsList);
 
-        accessions.removeAll(asmNotPresent);
-        String responseText = "A task has been submitted for updating MD5 checksum for assemblies: " + accessions + "."
+        String responseText = "A task has been submitted for updating MD5 checksum for assemblies: " + asmInsdcAccessionsList + "."
                 + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
         if (!asmNotPresent.isEmpty()) {
-            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
-                    + "\nPlease insert the assembly first, MD5 Checksum will be updated as part of the insertion process";
+            responseText = responseText + "\n" + asmNotPresent.size() + " assemblies were not found in the database."
+                    + "\nPlease insert the assemblies first, MD5 Checksum will be updated as part of the insertion process";
         }
 
         return ResponseEntity.ok(responseText);
@@ -155,12 +155,13 @@ public class AdminController {
                                                                                       "Eg: GCA_000001405.10") String asmAccession) {
         Optional<AssemblyEntity> assemblyOpt = handler.getAssemblyByAccession(asmAccession);
         if (assemblyOpt.isPresent()) {
-            handler.retrieveAndInsertENASequenceNameForAssembly(assemblyOpt.get().getInsdcAccession());
-            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for assembly " + asmAccession
+            String insdcAccession = assemblyOpt.get().getInsdcAccession();
+            handler.retrieveAndInsertENASequenceNameForAssembly(insdcAccession);
+            return ResponseEntity.ok("A task has been submitted for updating ENA Sequence Name for assembly " + insdcAccession
                     + "\nDepending upon the size of assembly and other scheduled jobs, this might take some time to complete");
         } else {
-            return ResponseEntity.ok("Could not find assembly " + asmAccession +
-                    ". Please insert the assembly first. ENA sequence name will be updated as part of the insertion process");
+            return ResponseEntity.ok("Could not find the requested assembly. " +
+                    "Please insert the assembly first. ENA sequence name will be updated as part of the insertion process");
         }
     }
 
@@ -186,12 +187,11 @@ public class AdminController {
 
         handler.retrieveAndInsertENASequenceNameForAssembly(asmInsdcAccessionsList);
 
-        accessions.removeAll(asmNotPresent);
-        String responseText = "A task has been submitted for updating ENA Sequence Name for assemblies: " + accessions
+        String responseText = "A task has been submitted for updating ENA Sequence Name for assemblies: " + asmInsdcAccessionsList
                 + "\nDepending upon other scheduled jobs and the size of assembly, this might take some time to complete";
         if (!asmNotPresent.isEmpty()) {
-            responseText = responseText + "\nThe following assemblies are not present: " + asmNotPresent + "."
-                    + "\nPlease insert the assembly first, ENA Sequence Name will be updated as part of the insertion process";
+            responseText = responseText + "\n" + asmNotPresent.size() + " assemblies were not found in the database."
+                    + "\nPlease insert the assemblies first, ENA Sequence Name will be updated as part of the insertion process";
         }
 
         return ResponseEntity.ok(responseText);
