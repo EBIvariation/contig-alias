@@ -86,7 +86,7 @@ package-production:
     script:
         - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
         - apk add --update curl
-        - curl -u $TOMCAT_USER:$TOMCAT_PASSWORD -T "$WS_ARTIFACT_PATH" "https://$TOMCAT_HOST/manager/text/deploy?update=true&path=/eva/webservices/contig-alias&version=$DATETIME" | grep "OK - Deployed application"
+        - curl -u $TOMCAT_USER:$TOMCAT_PASSWORD -T "$WS_ARTIFACT_PATH" "http://$TOMCAT_HOST/manager/text/deploy?update=true&path=/eva/webservices/contig-alias&version=$DATETIME" | grep "OK - Deployed application"
 
 deploy-tomcat-internal:
     extends: .deploy-tomcat
