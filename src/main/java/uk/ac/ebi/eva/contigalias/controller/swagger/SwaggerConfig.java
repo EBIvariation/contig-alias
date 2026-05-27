@@ -20,7 +20,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import org.springdoc.core.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,26 +29,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class SwaggerConfig implements WebMvcConfigurer {
 
-    private static final String CONTROLLER_BASE_PATH = "uk.ac.ebi.eva.contigalias.controller";
-
     @Autowired
     SwaggerInterceptAdapter interceptAdapter;
-
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("v1/contigalias")
-                .packagesToScan(CONTROLLER_BASE_PATH + ".contigalias")
-                .build();
-    }
-
-    @Bean
-    public GroupedOpenApi adminApi() {
-        return GroupedOpenApi.builder()
-                .group("v1/only-admins")
-                .packagesToScan(CONTROLLER_BASE_PATH + ".admin")
-                .build();
-    }
 
     @Bean
     public OpenAPI contigAliasOpenAPI() {
