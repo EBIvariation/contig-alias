@@ -16,11 +16,11 @@
 
 package uk.ac.ebi.eva.contigalias.entities;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 import org.springframework.hateoas.server.core.Relation;
 
-import javax.persistence.Entity;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
 import java.io.Serializable;
 
 

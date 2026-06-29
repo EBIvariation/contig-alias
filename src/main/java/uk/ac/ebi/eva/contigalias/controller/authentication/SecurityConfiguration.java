@@ -18,17 +18,22 @@ package uk.ac.ebi.eva.contigalias.controller.authentication;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration {
 
     public static final String REALM = "EBI-REALM";
 
@@ -47,26 +52,36 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         this.customBasicAuthenticationEntryPoint = customBasicAuthenticationEntryPoint;
     }
 
-    @Autowired
-    public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
-        String encodedPassword = "{bcrypt}" + new BCryptPasswordEncoder().encode(PASSWORD_ADMIN);
-        auth.inMemoryAuthentication()
-            .withUser(USERNAME_ADMIN)
-            .password(encodedPassword)
-            .roles(ROLE_ADMIN);
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeRequests()
-            .antMatchers("/v1/assemblies/**", "/v1/chromosomes/**", "/v1/search/**").permitAll()
-            .antMatchers("/info", "/health").permitAll()
-            .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-            .antMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
-            .anyRequest().denyAll()
-            .and().httpBasic().realmName(REALM)
-            .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
-            .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new InMemoryUserDetailsManager(
+                User.withUsername(USERNAME_ADMIN)
+                        .password(passwordEncoder().encode(PASSWORD_ADMIN))
+                        .roles(ROLE_ADMIN)
+                        .build()
+        );
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v1/assemblies/**", "/v1/chromosomes/**", "/v1/search/**").permitAll()
+                        .requestMatchers("/info", "/health").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
+                        .anyRequest().denyAll()
+                ).httpBasic(basic -> basic.realmName(REALM)
+                        .authenticationEntryPoint(customBasicAuthenticationEntryPoint)
+                ).sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
+
+        return http.build();
     }
 }

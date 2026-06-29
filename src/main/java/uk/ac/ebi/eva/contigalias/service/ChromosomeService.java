@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.contigalias.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,6 @@ import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
-import javax.transaction.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedList;
