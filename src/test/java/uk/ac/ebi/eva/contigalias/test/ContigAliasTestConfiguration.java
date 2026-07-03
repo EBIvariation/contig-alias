@@ -28,6 +28,7 @@ import uk.ac.ebi.eva.contigalias.controller.authentication.CustomBasicAuthentica
 public class ContigAliasTestConfiguration {
     @Bean
     public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+        // CSRF disabled intentionally — stateless REST API uses Basic Auth with no session cookies, so CSRF is not applicable
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
