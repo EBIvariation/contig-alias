@@ -30,3 +30,4 @@ jobs:
 
       - name: Run Maven tests
         run: mvn -B clean test
+

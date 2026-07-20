@@ -8,7 +8,7 @@
     <version>${revision}</version>
     <name>contig-alias</name>
     <description>Service to provide synonyms of chromosome/contig identifiers</description>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -128,14 +128,6 @@
                 </configuration>
             </plugin>
         </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources/</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-
     </build>
 
 </project>

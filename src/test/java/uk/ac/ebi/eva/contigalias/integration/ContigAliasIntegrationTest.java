@@ -60,6 +60,8 @@ public class ContigAliasIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
         registry.add("ftp.proxy.host", () -> "test_ftp_host");
         registry.add("ftp.proxy.port", () -> 20);
+        registry.add("controller.auth.admin.username", () -> "admin");
+        registry.add("controller.auth.admin.password", () -> "admin");
     }
 
 
