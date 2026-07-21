@@ -99,6 +99,7 @@ build:docker:dev:
     IMAGE_LATEST: dev-latest
   only:
     - master
+    - java21
 
 deploy-to-cluster:dev:
   extends: .update_and_deploy
@@ -115,6 +116,7 @@ deploy-to-cluster:dev:
     name: development
   only:
     - master
+    - java21
 
 # ============================================================================
 # STAGING: Deploy on master branch
@@ -141,3 +143,4 @@ deploy-to-cluster:staging:
     name: staging
   only:
     - master
+    - java21
