@@ -13,8 +13,7 @@ variables:
   MEDIA_TYPE: application/vnd.github.raw
 
 # REQUIRED GitLab CI/CD Variables (Global or per-project):
-# DOCKER_REGISTRY_USER: Username for Docker registry authentication
-# DOCKER_REGISTRY_PASSWORD: Password for Docker registry authentication
+# DOCKER_AUTH_CONFIG: Contains username and password for the docker registry above
 # GITHUB_USER: GitHub username for accessing private maven settings repository
 # GITHUB_TOKEN: GitHub personal access token for accessing private maven settings repository
 #
@@ -36,7 +35,6 @@ variables:
   before_script:
     - echo "Waiting for Docker daemon to be ready..."
     - docker info
-    - echo -n $DOCKER_REGISTRY_PASSWORD | docker login -u $DOCKER_REGISTRY_USER --password-stdin $DOCKER_REGISTRY
   script:
     - docker build -t $DOCKER_IMAGE:$IMAGE_TAG -t $DOCKER_IMAGE:$IMAGE_LATEST .
     - docker push $DOCKER_IMAGE:$IMAGE_TAG
@@ -63,6 +61,8 @@ variables:
     - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $KUBECONFIG_FILE > ~/.kube/config
     - chmod 600 ~/.kube/config
   script:
+    # Create/update the image pull secret in the target namespace from DOCKER_AUTH_CONFIG. It only updates if DOCKER_AUTH_CONFIG changes
+    - kubectl create secret generic regcred --type=kubernetes.io/dockerconfigjson --from-literal=.dockerconfigjson="$DOCKER_AUTH_CONFIG" -n $K8S_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
     - source $HOME/.venv/bin/activate
     # Download Maven settings from private repository
     - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > maven-settings.xml
