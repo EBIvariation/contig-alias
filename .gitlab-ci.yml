@@ -129,13 +129,7 @@ deploy-to-cluster:staging:
   variables:
     IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
     ENV: staging
-    # Deliberately reuses the "development" Maven profile rather than a
-    # production-like one (e.g. eva-seqcol's "production_processing"):
-    # contig-alias never had a genuine staging tier before, and its old
-    # "production" profile/DB has no eva-k8s equivalent yet. Reusing the
-    # known-safe dev profile avoids auto-deploying to a prod-like DB with
-    # no manual gate. Revisit if/when a real "prod" overlay is added.
-    MAVEN_PROFILE: development
+    MAVEN_PROFILE: production_processing
     K8S_MANIFEST_PATH: k8s-manifests/contig-alias/overlays/staging
     K8S_NAMESPACE: contig-alias-stage
     KUBECONFIG_FILE: $KUBECONFIG_FILE_STAGING
