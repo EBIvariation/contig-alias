@@ -340,7 +340,7 @@ public class ChromosomeService {
     }
 
     public void insertAllChromosomes(List<ChromosomeEntity> chromosomeEntityList) {
-        String sql = "INSERT INTO chromosome (assembly_insdc_accession,contig_type,ena_sequence_name," +
+        String sql = "INSERT INTO eva.chromosome (assembly_insdc_accession,contig_type,ena_sequence_name," +
                 "genbank_sequence_name,insdc_accession,md5checksum,refseq,seq_length,trunc512checksum,ucsc_name) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {

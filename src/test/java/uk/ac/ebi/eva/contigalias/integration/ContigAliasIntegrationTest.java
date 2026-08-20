@@ -24,6 +24,10 @@ import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.repo.AssemblyRepository;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -54,6 +58,8 @@ public class ContigAliasIntegrationTest {
 
     @DynamicPropertySource
     static void dataSourceProperties(DynamicPropertyRegistry registry) {
+        createEvaSchema();
+
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
@@ -62,6 +68,17 @@ public class ContigAliasIntegrationTest {
         registry.add("ftp.proxy.port", () -> 20);
         registry.add("controller.auth.admin.username", () -> "admin");
         registry.add("controller.auth.admin.password", () -> "admin");
+    }
+
+    private static void createEvaSchema() {
+        postgreSQLContainer.start();
+        try (Connection connection = DriverManager.getConnection(
+                postgreSQLContainer.getJdbcUrl(), postgreSQLContainer.getUsername(), postgreSQLContainer.getPassword());
+             Statement statement = connection.createStatement()) {
+            statement.execute("CREATE SCHEMA IF NOT EXISTS eva");
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to create eva schema for integration test", e);
+        }
     }
 
 
@@ -558,4 +575,3 @@ public class ContigAliasIntegrationTest {
     }
 
 }
-
