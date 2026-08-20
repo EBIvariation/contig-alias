@@ -26,7 +26,7 @@ import java.io.Serializable;
 
 @Relation(collectionRelation = "chromosomeEntities", itemRelation = "chromosomeEntity")
 @Entity
-@Table(name = "chromosome")
+@Table(name = "chromosome", schema = "eva")
 @IdClass(ChromosomeId.class)
 public class ChromosomeEntity extends SequenceEntity implements Serializable {
     public ChromosomeEntity() {
