@@ -33,7 +33,7 @@ import java.util.List;
 
 @Relation(collectionRelation = "assemblyEntities", itemRelation = "assemblyEntity")
 @Entity
-@Table(name = "assembly")
+@Table(name = "assembly", schema = "eva")
 public class AssemblyEntity {
 
     @Id
