@@ -21,8 +21,6 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
 import java.io.FileOutputStream;

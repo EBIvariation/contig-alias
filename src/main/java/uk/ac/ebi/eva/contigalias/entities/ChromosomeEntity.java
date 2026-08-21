@@ -16,17 +16,17 @@
 
 package uk.ac.ebi.eva.contigalias.entities;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 import org.springframework.hateoas.server.core.Relation;
 
-import javax.persistence.Entity;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
 import java.io.Serializable;
 
 
 @Relation(collectionRelation = "chromosomeEntities", itemRelation = "chromosomeEntity")
 @Entity
-@Table(name = "chromosome")
+@Table(name = "chromosome", schema = "eva")
 @IdClass(ChromosomeId.class)
 public class ChromosomeEntity extends SequenceEntity implements Serializable {
     public ChromosomeEntity() {

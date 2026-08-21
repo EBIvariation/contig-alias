@@ -15,13 +15,22 @@
  */
 package uk.ac.ebi.eva.contigalias.test;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 import uk.ac.ebi.eva.contigalias.controller.authentication.CustomBasicAuthenticationEntryPoint;
 
-@Configuration
+@TestConfiguration
 @Import({CustomBasicAuthenticationEntryPoint.class})
-public class TestConfiguration {
-
+public class ContigAliasTestConfiguration {
+    @Bean
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+        // CSRF disabled intentionally — stateless REST API uses Basic Auth with no session cookies, so CSRF is not applicable
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        return http.build();
+    }
 }

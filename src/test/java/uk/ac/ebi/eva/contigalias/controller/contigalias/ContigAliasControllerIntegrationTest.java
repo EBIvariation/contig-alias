@@ -28,13 +28,12 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
 import uk.ac.ebi.eva.contigalias.entities.AssemblyEntity;
 import uk.ac.ebi.eva.contigalias.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.contigalias.entities.SequenceEntity;
 import uk.ac.ebi.eva.contigalias.entitygenerator.AssemblyGenerator;
 import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
-import uk.ac.ebi.eva.contigalias.test.TestConfiguration;
+import uk.ac.ebi.eva.contigalias.test.ContigAliasTestConfiguration;
 
 import java.util.Collections;
 
@@ -60,7 +59,7 @@ import static uk.ac.ebi.eva.contigalias.controller.contigalias.ContigAliasContro
  * See https://github.com/json-path/JsonPath for the jsonPath syntax.
  */
 @WebMvcTest(ContigAliasController.class)
-@Import(TestConfiguration.class)
+@Import(ContigAliasTestConfiguration.class)
 public class ContigAliasControllerIntegrationTest {
 
     private final AssemblyEntity assemblyEntity = AssemblyGenerator.generate();
@@ -79,13 +78,13 @@ public class ContigAliasControllerIntegrationTest {
         PagedModel<EntityModel<AssemblyEntity>> assemblyPagedModel = PagedModel.of(
                 Collections.singletonList(EntityModel.of(assemblyEntity)), (PagedModel.PageMetadata) null);
         Mockito.when(assemblyAssembler.toModel(any()))
-               .thenReturn(assemblyPagedModel);
+                .thenReturn(assemblyPagedModel);
 
         PagedResourcesAssembler<SequenceEntity> chromosomeAssembler = mock(PagedResourcesAssembler.class);
         PagedModel<EntityModel<SequenceEntity>> chromosomePagedModel = PagedModel.of(
                 Collections.singletonList(EntityModel.of(chromosomeEntity)), (PagedModel.PageMetadata) null);
         Mockito.when(chromosomeAssembler.toModel(any()))
-               .thenReturn(chromosomePagedModel);
+                .thenReturn(chromosomePagedModel);
 
         when(mockHandler.getAssemblyByAccession(assemblyEntity.getInsdcAccession()))
                 .thenReturn(assemblyPagedModel);
@@ -151,15 +150,15 @@ public class ContigAliasControllerIntegrationTest {
 
     void assertPagedModelResponseValid(ResultActions actions, String path) throws Exception {
         actions.andExpect(status().isOk())
-               .andExpect(jsonPath(path).exists())
-               .andExpect(jsonPath(path + ".id").doesNotExist());
+                .andExpect(jsonPath(path).exists())
+                .andExpect(jsonPath(path + ".id").doesNotExist());
     }
 
     @Test
     void getAssemblyByAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/assemblies/{accession}", assemblyEntity.getInsdcAccession(), DEFAULT_PAGE_NUMBER,
-                    DEFAULT_PAGE_SIZE));
+                        DEFAULT_PAGE_SIZE));
         assertAssemblyPagedModelResponseValid(resultActions);
     }
 
@@ -195,7 +194,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByChromosomeNameAndAssemblyTaxid() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/chromosomes/name/{name}",
-                    chromosomeEntity.getGenbankSequenceName()).param("taxid", assemblyEntity.getTaxid().toString()));
+                        chromosomeEntity.getGenbankSequenceName()).param("taxid", assemblyEntity.getTaxid().toString()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
@@ -203,7 +202,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByChromosomeNameAndAssemblyAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/chromosomes/name/{name}",
-                    chromosomeEntity.getGenbankSequenceName()).param("accession", assemblyEntity.getInsdcAccession()));
+                        chromosomeEntity.getGenbankSequenceName()).param("accession", assemblyEntity.getInsdcAccession()));
         assertChromosomePagedModelResponseValid(resultActions);
     }
 
@@ -211,7 +210,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByChromosomeUcscNameAndAssemblyTaxid() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/chromosomes/name/{name}",
-                    chromosomeEntity.getUcscName())
+                        chromosomeEntity.getUcscName())
                         .param("taxid", assemblyEntity.getTaxid().toString())
                         .param("name", NAME_UCSC_TYPE));
         assertChromosomePagedModelResponseValid(resultActions);
@@ -221,7 +220,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByChromosomeUcscNameAndAssemblyAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/chromosomes/name/{name}",
-                    chromosomeEntity.getUcscName())
+                        chromosomeEntity.getUcscName())
                         .param("accession", assemblyEntity.getInsdcAccession())
                         .param("name", NAME_UCSC_TYPE));
         assertChromosomePagedModelResponseValid(resultActions);
@@ -231,7 +230,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByChromosomeEnaNameAndAssemblyTaxid() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/chromosomes/name/{name}",
-                    chromosomeEntity.getEnaSequenceName())
+                        chromosomeEntity.getEnaSequenceName())
                         .param("taxid", assemblyEntity.getTaxid().toString())
                         .param("name", NAME_ENA_TYPE));
         assertChromosomePagedModelResponseValid(resultActions);
@@ -241,7 +240,7 @@ public class ContigAliasControllerIntegrationTest {
     void getSequencesByChromosomeEnaNameAndAssemblyAccession() throws Exception {
         ResultActions resultActions = mockMvc.perform(
                 get("/v1/chromosomes/name/{name}",
-                    chromosomeEntity.getEnaSequenceName())
+                        chromosomeEntity.getEnaSequenceName())
                         .param("accession", assemblyEntity.getInsdcAccession())
                         .param("name", NAME_ENA_TYPE));
         assertChromosomePagedModelResponseValid(resultActions);

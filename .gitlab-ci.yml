@@ -1,139 +1,142 @@
 stages:
-    - test
-    - package
-    - deploy
+  - build
+  - deploy
 
 variables:
-    WS_ARTIFACT_PATH: target/contig-alias-$ENVIRONMENT_NAME.war
-    MAVEN_SETTINGS: maven-settings.xml
-    URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
-    MEDIA_TYPE: application/vnd.github.raw
+  DOCKER_REGISTRY: dockerhub.ebi.ac.uk
+  DOCKER_IMAGE: dockerhub.ebi.ac.uk/ebivariation/contig-alias
+  K8S_REPO_URL: https://github.com/EBIvariation/eva-k8s.git
+  MAVEN_SETTINGS: maven-settings.xml
+  URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
+  KUBECONFIG_FILE_DEV: https://api.github.com/repos/EBIvariation/configuration/contents/kubernetes-clusters/development-k8s-team-admin-conf.conf
+  KUBECONFIG_FILE_STAGING: https://api.github.com/repos/EBIvariation/configuration/contents/kubernetes-clusters/staging-k8s-team-admin-conf.conf
+  MEDIA_TYPE: application/vnd.github.raw
 
-test:
-    stage: test
-    image: ubuntu:latest
-    before_script:
-        - apt-get update
-        - apt-get upgrade -y
-        - apt-get install -y curl jq
-    script:
+# REQUIRED GitLab CI/CD Variables (Global or per-project):
+# DOCKER_AUTH_CONFIG: Contains username and password for the docker registry above
+# GITHUB_USER: GitHub username for accessing private maven settings repository
+# GITHUB_TOKEN: GitHub personal access token for accessing private maven settings repository
+#
+# ============================================================================
+# Base Job Templates
+# ============================================================================
+
+.build_docker:
+  stage: build
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+      command: ["--storage-driver=overlay2", "--insecure-registry=localhost"]
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - echo "Waiting for Docker daemon to be ready..."
+    - docker info
+  script:
+    - docker build -t $DOCKER_IMAGE:$IMAGE_TAG -t $DOCKER_IMAGE:$IMAGE_LATEST .
+    - docker push $DOCKER_IMAGE:$IMAGE_TAG
+    - docker push $DOCKER_IMAGE:$IMAGE_LATEST
+
+.update_and_deploy:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git curl python3 kubectl
+    - python3 -m venv $HOME/.venv
+    - source $HOME/.venv/bin/activate
+    - git config --global user.email "gitlab-ci@ebi.ac.uk"
+    - git config --global user.name "GitLab CI"
+    - git config --global credential.helper store
+    # Clone eva-k8s for scripts and manifests
+    - git clone --depth 1 https://github.com/EBIvariation/eva-k8s.git k8s-repo
+    - cd k8s-repo
+    - pip install --no-cache-dir lxml retry cached-property pyyaml requests
+    - pip install --no-dependencies -r scripts/requirements.txt
+    - echo "https://${GITHUB_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
+    - mkdir -p ~/.kube
+    # Download kubernetes cluster configuration from private repository
+    - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $KUBECONFIG_FILE > ~/.kube/config
+    - chmod 600 ~/.kube/config
+  script:
+    # Create the target namespace if it doesn't already exist
+    - kubectl apply -f $K8S_MANIFEST_PATH/namespace.yaml
+    # Create/update the image pull secret in the target namespace from DOCKER_AUTH_CONFIG. It only updates if DOCKER_AUTH_CONFIG changes
+    - kubectl create secret generic regcred --type=kubernetes.io/dockerconfigjson --from-literal=.dockerconfigjson="$DOCKER_AUTH_CONFIG" -n $K8S_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+    - source $HOME/.venv/bin/activate
+    # Download Maven settings from private repository
+    - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > maven-settings.xml
+    # Convert Maven settings to application.properties
+    - python scripts/maven-settings-to-properties.py --maven_file maven-settings.xml --property_set contig-alias --profile $MAVEN_PROFILE --output application.properties
+    # Update image tag in kustomization
+    - python scripts/update-image-tag.py "$K8S_MANIFEST_PATH/kustomization.yaml" "${IMAGE_TAG}"
+    - git add "$K8S_MANIFEST_PATH/kustomization.yaml"
+    # Only commit if the image tag has changed
     - |
-      for i in {1..5}; do
-           echo "Finding Github CI status for ${CI_COMMIT_SHA}..." && export GITHUB_CI_STATUS=$(curl -s https://api.github.com/repos/EBIVariation/contig-alias/actions/runs | jq --arg COMMIT_TO_FIND $CI_COMMIT_SHA -r '.workflow_runs | map(select(.head_sha == $COMMIT_TO_FIND and .conclusion == "success"))[0].conclusion') && [[ $GITHUB_CI_STATUS == "success" ]] && echo "Github CI run was successful!"
-           if [ $? -ne 0 ]; then
-            echo "Retrying..."
-            sleep 300
-           else
-            exit 0
-           fi
-          done
-          exit 1
-    environment:
-        name: test-env
-    only:
-        - master
-        - tags
+      if ! git diff --cached --quiet; then
+        git commit -m "Update contig-alias ${ENV} image tag to ${IMAGE_TAG}"
+        git push https://${GITHUB_TOKEN}:x-oauth-basic@github.com/EBIvariation/eva-k8s.git main
+      fi
 
-# Not executed, parent job definition for package
-.package:
-    stage: package
-    image: maven:3.6.1-jdk-8-alpine
-    environment:
-        name: $ENVIRONMENT_NAME
-    before_script:
-        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
-        - apk add --update curl
-        - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > $MAVEN_SETTINGS
-    script:
-        - mvn package --settings $MAVEN_SETTINGS -P $MAVEN_PROFILE -DskipTests
-        - cp target/contig-alias*.war.original $WS_ARTIFACT_PATH
-    after_script:
-        - rm $MAVEN_SETTINGS
-    artifacts:
-        paths:
-            - $WS_ARTIFACT_PATH
+    # Copy the application.properties where it is expected -- DO NOT COMMIT
+    - cp -vf application.properties $K8S_MANIFEST_PATH/
 
-package-internal:
-    extends: .package
-    variables:
-        ENVIRONMENT_NAME: internal
-        MAVEN_PROFILE: internal
-    only:
-        - master
+    # Deploy to cluster
+    - kubectl apply -k $K8S_MANIFEST_PATH
+    - kubectl rollout status deployment/contig-alias -n $K8S_NAMESPACE --timeout=5m
+  environment:
+    kubernetes:
+      namespace: $K8S_NAMESPACE
 
-package-development:
-    extends: .package
-    variables:
-        ENVIRONMENT_NAME: development
-        MAVEN_PROFILE: development
-    only:
-        - master
+# ============================================================================
+# DEVELOPMENT: Deploy on master branch
+# ============================================================================
 
-package-production:
-    extends: .package
-    variables:
-        ENVIRONMENT_NAME: production
-        MAVEN_PROFILE: production
-    only:
-        - tags
+build:docker:dev:
+  extends: .build_docker
+  variables:
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+    IMAGE_LATEST: dev-latest
+  only:
+    - master
+    - java21
 
-# Not executed, parent job definition for deployments
-.deploy-tomcat:
-    stage: deploy
-    image: alpine:3.9.5
-    environment:
-        name: $ENVIRONMENT_NAME
-    script:
-        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
-        - apk add --update curl
-        - curl -u $TOMCAT_USER:$TOMCAT_PASSWORD -T "$WS_ARTIFACT_PATH" "http://$TOMCAT_HOST/manager/text/deploy?update=true&path=/eva/webservices/contig-alias&version=$DATETIME" | grep "OK - Deployed application"
+deploy-to-cluster:dev:
+  extends: .update_and_deploy
+  needs:
+    - build:docker:dev
+  variables:
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+    ENV: development
+    MAVEN_PROFILE: development
+    K8S_MANIFEST_PATH: k8s-manifests/contig-alias/overlays/dev
+    K8S_NAMESPACE: contig-alias-dev
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_DEV
+  environment:
+    name: development
+  only:
+    - master
+    - java21
 
-deploy-tomcat-internal:
-    extends: .deploy-tomcat
-    variables:
-        ENVIRONMENT_NAME: internal
-        TOMCAT_USER: $TOMCAT_INTERNAL_USER
-        TOMCAT_PASSWORD: $TOMCAT_INTERNAL_PASSWORD
-        TOMCAT_HOST: $TOMCAT_INTERNAL_HOST
-    dependencies:
-        - package-internal
-    only:
-        - master
+# ============================================================================
+# STAGING: Deploy on master branch
+# ============================================================================
 
-deploy-tomcat-development:
-    extends: .deploy-tomcat
-    variables:
-        ENVIRONMENT_NAME: development
-        TOMCAT_USER: $TOMCAT_DEVELOPMENT_USER
-        TOMCAT_PASSWORD: $TOMCAT_DEVELOPMENT_PASSWORD
-        TOMCAT_HOST: $TOMCAT_DEVELOPMENT_HOST
-    dependencies:
-        - package-development
-    only:
-        - master
-
-deploy-tomcat-production:
-    extends: .deploy-tomcat
-    when: manual
-    variables:
-        ENVIRONMENT_NAME: production
-        TOMCAT_USER: $TOMCAT_PRODUCTION_USER
-        TOMCAT_PASSWORD: $TOMCAT_PRODUCTION_PASSWORD
-        TOMCAT_HOST: $TOMCAT_PRODUCTION_HOST
-    dependencies:
-        - package-production
-    only:
-        - tags
-
-deploy-tomcat-production-fallback:
-    extends: .deploy-tomcat
-    when: manual
-    variables:
-        ENVIRONMENT_NAME: production
-        TOMCAT_USER: $TOMCAT_PRODUCTION_FALLBACK_USER
-        TOMCAT_PASSWORD: $TOMCAT_PRODUCTION_FALLBACK_PASSWORD
-        TOMCAT_HOST: $TOMCAT_PRODUCTION_FALLBACK_HOST
-    dependencies:
-        - package-production
-    only:
-        - tags
+deploy-to-cluster:staging:
+  extends: .update_and_deploy
+  needs:
+    - build:docker:dev
+  variables:
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+    ENV: staging
+    MAVEN_PROFILE: production_processing
+    K8S_MANIFEST_PATH: k8s-manifests/contig-alias/overlays/staging
+    K8S_NAMESPACE: contig-alias-stage
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_STAGING
+  environment:
+    name: staging
+  only:
+    - master
+    - java21
