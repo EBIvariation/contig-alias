@@ -16,40 +16,25 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.apache.commons.net.ftp.FTPFile;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.nio.file.Path;
+import java.util.List;
 
-public class ENABrowser extends PassiveAnonymousFTPClient {
+/**
+ * Browses and downloads ENA assembly reports over HTTPS. EBI mirrors the same file tree served
+ * over FTP (ftp.ebi.ac.uk) at the same paths over plain HTTPS.
+ */
+public class ENABrowser {
 
-    public static final String EBI_FTP_SERVER = "ftp.ebi.ac.uk";
+    public static final String EBI_SERVER = "https://ftp.ebi.ac.uk";
 
     public static final String PATH_ENA_ASSEMBLY = "/pub/databases/ena/assembly/";
 
-    private String ftpProxyHost;
+    private final HttpFileBrowser browser;
 
-    private Integer ftpProxyPort;
-
-    public ENABrowser(String ftpProxyHost, Integer ftpProxyPort) {
-        this.ftpProxyHost = ftpProxyHost;
-        this.ftpProxyPort = ftpProxyPort;
-    }
-
-    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
-    public void connect() throws IOException {
-        if (ftpProxyHost != null && !ftpProxyHost.equals("null") &&
-                ftpProxyPort != null && ftpProxyPort != 0) {
-            super.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ftpProxyHost, ftpProxyPort)));
-        }
-        super.connect(EBI_FTP_SERVER);
+    public ENABrowser() {
+        this.browser = new HttpFileBrowser();
     }
 
     /**
@@ -59,20 +44,11 @@ public class ENABrowser extends PassiveAnonymousFTPClient {
      *
      * @param accession Any GCA accession
      * @return Input stream of the corresponding sequence_report.txt file.
-     * @throws IOException Passes exception thrown by FTPBrowser.retrieveFileStream()
+     * @throws IOException Passes exception thrown while fetching the remote file
      */
     public InputStream getAssemblyReportInputStream(String accession) throws IOException, IllegalArgumentException {
-
-        if (accession.length() < 15) {
-            throw new IllegalArgumentException("Accession should be at least 15 characters long!");
-        }
-
-        String directory = accession.substring(0, 7) + "/" + accession.substring(0, 10) + "/";
-        String filename = accession + "_sequence_report.txt";
-        String fullPath = PATH_ENA_ASSEMBLY + directory + filename;
-
-        return super.retrieveFileStream(fullPath);
-
+        String fullPath = getAssemblyDirPath(accession) + accession + "_sequence_report.txt";
+        return browser.openStream(EBI_SERVER + fullPath);
     }
 
     public String getAssemblyDirPath(String accession) {
@@ -83,13 +59,20 @@ public class ENABrowser extends PassiveAnonymousFTPClient {
         return PATH_ENA_ASSEMBLY + directory;
     }
 
-    public FTPFile getAssemblyReportFile(String dirPath, String accession) throws IOException {
-        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(dirPath));
-        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream
-                .filter(f -> f.getName().equals(accession + "_sequence_report.txt"));
-        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
+    public RemoteFile getAssemblyReportFile(String dirPath, String accession) throws IOException {
+        String expectedName = accession + "_sequence_report.txt";
+        List<String> entries = browser.listDirectory(EBI_SERVER + dirPath);
+        String name = entries.stream()
+                              .filter(entry -> entry.equals(expectedName))
+                              .findFirst()
+                              .orElseThrow(() -> new IllegalArgumentException(
+                                      "Assembly Report File not present in given directory: " + dirPath));
+        long size = browser.headContentLength(EBI_SERVER + dirPath + name);
+        return new RemoteFile(name, size);
+    }
 
-        return assemblyReport.orElseThrow(() -> new IllegalArgumentException("Assembly Report File not present in given directory: " + dirPath));
+    public boolean downloadFile(String filePath, Path downloadFilePath, long expectedSize) throws IOException {
+        return browser.downloadFile(EBI_SERVER + filePath, downloadFilePath, expectedSize);
     }
 
 }

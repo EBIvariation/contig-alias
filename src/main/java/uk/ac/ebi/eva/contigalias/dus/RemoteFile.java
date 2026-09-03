@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 EMBL - European Bioinformatics Institute
+ * Copyright 2026 EMBL - European Bioinformatics Institute
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,28 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.springframework.stereotype.Component;
+/**
+ * Name and size of a file found in a remote HTTPS directory listing. Replaces
+ * {@code org.apache.commons.net.ftp.FTPFile} now that {@link NCBIBrowser} and {@link ENABrowser}
+ * no longer talk FTP.
+ */
+public class RemoteFile {
 
-@Component
-public class NCBIBrowserFactory {
+    private final String name;
 
-    public NCBIBrowser build(){
-        return new NCBIBrowser();
+    private final long size;
+
+    public RemoteFile(String name, long size) {
+        this.name = name;
+        this.size = size;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getSize() {
+        return size;
     }
 
 }
