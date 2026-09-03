@@ -16,54 +16,40 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPFileFilters;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import uk.ac.ebi.eva.contigalias.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.contigalias.exception.IncorrectAccessionException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-public class NCBIBrowser extends PassiveAnonymousFTPClient {
+/**
+ * Browses and downloads NCBI assembly reports over HTTPS. NCBI mirrors the same file tree served
+ * over FTP (ftp.ncbi.nlm.nih.gov) at the same paths over plain HTTPS - see
+ * {@link HttpFileBrowser} for why this class talks HTTPS rather than FTP.
+ */
+public class NCBIBrowser {
 
-    public static final String NCBI_FTP_SERVER = "ftp.ncbi.nlm.nih.gov";
+    public static final String NCBI_SERVER = "https://ftp.ncbi.nlm.nih.gov";
 
     public static final String PATH_GENOMES_ALL = "/genomes/all/";
 
-    private String ftpProxyHost;
+    private final HttpFileBrowser browser;
 
-    private Integer ftpProxyPort;
-
-    public NCBIBrowser(String ftpProxyHost, Integer ftpProxyPort) {
-        this.ftpProxyHost = ftpProxyHost;
-        this.ftpProxyPort = ftpProxyPort;
-    }
-
-    @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier=2))
-    public void connect() throws IOException {
-        if (ftpProxyHost != null && !ftpProxyHost.equals("null") &&
-                ftpProxyPort != null && ftpProxyPort != 0) {
-            super.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ftpProxyHost, ftpProxyPort)));
-        }
-        super.connect(NCBI_FTP_SERVER);
+    public NCBIBrowser() {
+        this.browser = new HttpFileBrowser();
     }
 
     /**
-     * Takes a Genbank or Refseq accession and converts it to the equivalent path used by NCBI's FTP server.
+     * Takes a Genbank or Refseq accession and converts it to the equivalent path used by NCBI's server.
      * For example, on input "GCF_007608995.1" the output path is "/genomes/all/GCF/007/608/995/GCF_007608995
      * .1_ASM760899v1/".
      *
      * @param accession Any GCA or GCF String
      * @return Path relative to ftp.ncbi.nlm.nih.gov
-     * @throws IOException Passes exception thrown by FTPBrowser.listDirectories()
+     * @throws IOException Passes exception thrown while listing the remote directory
      */
     public Optional<String> getGenomeReportDirectory(String accession) throws IOException, IllegalArgumentException {
 
@@ -94,58 +80,48 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient {
         path += accession.substring(0, 3) + "/";
 
         String currPath = PATH_GENOMES_ALL + path;
-        FTPFile[] ftpFiles = super.listFiles(currPath, FTPFileFilters.ALL);
+        List<String> entries = browser.listDirectory(NCBI_SERVER + currPath);
 
-        if (ftpFiles.length > 0) {
-            // We're assuming that the directory will always have a suffix stating with an underscore GCA_004051055.1_
-            Optional<FTPFile> dir = Arrays.stream(ftpFiles).filter(it -> it.getName().startsWith(rawQuery+"_")).findFirst();
-            if (dir.isPresent()) {
-                if (dir.get().isSymbolicLink()) {
-                    // symbolic link relative to current path Optional
-                    // symlink = "../../../../../archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
-                    // path = "/genomes/archive/old_genbank/Eukaryotes/vertebrates_mammals/Homo_sapiens/GRCh37"
-                    return Optional.of(Paths.get(currPath + dir.get().getLink()).normalize().toString() + "/");
-                } else if (dir.get().isDirectory()) {
-                    // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
-                    return Optional.of(currPath + dir.get().getName() + "/");
-                }
-            }
+        // We're assuming that the directory will always have a suffix starting with an underscore GCA_004051055.1_
+        Optional<String> dir = entries.stream()
+                                       .filter(name -> name.startsWith(rawQuery + "_") && name.endsWith("/"))
+                                       .findFirst();
+        if (dir.isPresent()) {
+            // path = "GCA/004/051/055/GCA_004051055.1_ASM405105v1/"
+            return Optional.of(currPath + dir.get());
         }
 
         return Optional.empty();
-
     }
 
     /**
-     * @param directoryPath The path of the directory in which target report is located relative to root of FTP server.
-     *                      Eg:- "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/"
+     * @param directoryPath The path of the directory in which target report is located relative to root of the
+     *                      server. Eg:- "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/"
      * @return An InputStream of the first *assembly_report.txt file it finds.
-     * @throws IOException Passes exception thrown by FTPBrowser.retrieveFileStream()
+     * @throws IOException Passes exception thrown while listing or fetching the remote directory
      */
     public InputStream getAssemblyReportInputStream(String directoryPath) throws IOException {
-
-        InputStream fileStream;
-
-        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
-        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(
-                f -> f.getName().contains("assembly_report.txt"));
-        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
-
-        if (assemblyReport.isPresent()) {
-            directoryPath += assemblyReport.get().getName();
-            fileStream = super.retrieveFileStream(directoryPath);
-        } else {
-            throw new IllegalArgumentException("Assembly Report File not present in given directory: " + directoryPath);
-        }
-        return fileStream;
+        String reportName = findAssemblyReportName(directoryPath);
+        return browser.openStream(NCBI_SERVER + directoryPath + reportName);
     }
 
-    public FTPFile getNCBIAssemblyReportFile(String directoryPath) throws IOException {
-        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
-        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("assembly_report.txt"));
-        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
+    public RemoteFile getNCBIAssemblyReportFile(String directoryPath) throws IOException {
+        String reportName = findAssemblyReportName(directoryPath);
+        long size = browser.headContentLength(NCBI_SERVER + directoryPath + reportName);
+        return new RemoteFile(reportName, size);
+    }
 
-        return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Report File not present in given directory: " + directoryPath));
+    public boolean downloadFile(String filePath, Path downloadFilePath, long expectedSize) throws IOException {
+        return browser.downloadFile(NCBI_SERVER + filePath, downloadFilePath, expectedSize);
+    }
+
+    private String findAssemblyReportName(String directoryPath) throws IOException {
+        List<String> entries = browser.listDirectory(NCBI_SERVER + directoryPath);
+        return entries.stream()
+                       .filter(name -> name.contains("assembly_report.txt"))
+                       .findFirst()
+                       .orElseThrow(() -> new AssemblyNotFoundException(
+                               "Assembly Report File not present in given directory: " + directoryPath));
     }
 
 }

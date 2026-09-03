@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.contigalias.datasource;
 
-import org.apache.commons.net.ftp.FTPFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -10,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import uk.ac.ebi.eva.contigalias.dus.NCBIBrowser;
+import uk.ac.ebi.eva.contigalias.dus.RemoteFile;
 import uk.ac.ebi.eva.contigalias.exception.DownloadFailedException;
 
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class RetryTest {
     NCBIBrowser ncbiBrowser;
 
     @Mock
-    FTPFile ftpFile;
+    RemoteFile remoteFile;
 
     @Autowired
     private NCBIAssemblyDataSource dataSource;
@@ -45,10 +45,10 @@ public class RetryTest {
         String mockFileName = "mock_file.txt";
         Long mockFileSize = 1000l;
         when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenReturn(Optional.of(mockDirectory));
-        when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(ftpFile);
-        when(ftpFile.getName()).thenReturn(mockFileName);
-        when(ftpFile.getSize()).thenReturn(mockFileSize);
-        when(ncbiBrowser.downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
+        when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(remoteFile);
+        when(remoteFile.getName()).thenReturn(mockFileName);
+        when(remoteFile.getSize()).thenReturn(mockFileSize);
+        when(ncbiBrowser.downloadFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
                 .thenReturn(true);
         Optional<Path> result = dataSource.downloadAssemblyReport(mockAccession, ncbiBrowser);
         assertTrue(result.isPresent());
@@ -61,10 +61,10 @@ public class RetryTest {
         String mockFileName = "mock_file.txt";
         Long mockFileSize = 1000l;
         when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenReturn(Optional.of(mockDirectory));
-        when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(ftpFile);
-        when(ftpFile.getName()).thenReturn(mockFileName);
-        when(ftpFile.getSize()).thenReturn(mockFileSize);
-        when(ncbiBrowser.downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
+        when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(remoteFile);
+        when(remoteFile.getName()).thenReturn(mockFileName);
+        when(remoteFile.getSize()).thenReturn(mockFileSize);
+        when(ncbiBrowser.downloadFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
                 .thenReturn(false);
         Optional<Path> result = dataSource.downloadAssemblyReport(mockAccession, ncbiBrowser);
         assertFalse(result.isPresent());
@@ -77,10 +77,10 @@ public class RetryTest {
         String mockFileName = "mock_file.txt";
         Long mockFileSize = 1000l;
         when(ncbiBrowser.getGenomeReportDirectory(mockAccession)).thenReturn(Optional.of(mockDirectory));
-        when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(ftpFile);
-        when(ftpFile.getName()).thenReturn(mockFileName);
-        when(ftpFile.getSize()).thenReturn(mockFileSize);
-        when(ncbiBrowser.downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
+        when(ncbiBrowser.getNCBIAssemblyReportFile(mockDirectory)).thenReturn(remoteFile);
+        when(remoteFile.getName()).thenReturn(mockFileName);
+        when(remoteFile.getSize()).thenReturn(mockFileSize);
+        when(ncbiBrowser.downloadFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize))
                 .thenThrow(new DownloadFailedException("Download Failed"));
 
         NCBIAssemblyDataSource anotherObjSpy = Mockito.spy(dataSource);
@@ -90,7 +90,7 @@ public class RetryTest {
         assertEquals("Download Failed", thrown.getMessage());
 
         verify(ncbiBrowser, times(5))
-                .downloadFTPFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize);
+                .downloadFile(mockDirectory + mockFileName, Paths.get("/tmp/mock_file.txt"), mockFileSize);
     }
 
     @Test

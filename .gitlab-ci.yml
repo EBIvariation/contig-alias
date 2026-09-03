@@ -102,6 +102,7 @@ build:docker:dev:
   only:
     - master
     - java21
+    - replace_ftp
 
 deploy-to-cluster:dev:
   extends: .update_and_deploy
@@ -119,6 +120,7 @@ deploy-to-cluster:dev:
   only:
     - master
     - java21
+    - replace_ftp
 
 # ============================================================================
 # STAGING: Deploy on master branch
@@ -140,3 +142,4 @@ deploy-to-cluster:staging:
   only:
     - master
     - java21
+    - replace_ftp

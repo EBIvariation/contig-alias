@@ -16,7 +16,6 @@
 
 package uk.ac.ebi.eva.contigalias.dus;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,36 +31,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class ENABrowserTest {
 
+    private static final String ACCESSION = "GCA_003005035.1";
+
     @Autowired
     private ENABrowserFactory factory;
 
     private ENABrowser enaBrowser;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         enaBrowser = factory.build();
-        enaBrowser.connect();
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        enaBrowser.disconnect();
     }
 
     @Test
-    void connect() throws IOException {
-        enaBrowser.connect();
-    }
-
-    @Test
-    void navigateToENAAssemblyDirectory() throws IOException {
-        assertTrue(enaBrowser.changeWorkingDirectory(ENABrowser.PATH_ENA_ASSEMBLY));
-        assertTrue(enaBrowser.listFiles().length > 0);
+    void getAssemblyReportFile() throws IOException {
+        String dirPath = enaBrowser.getAssemblyDirPath(ACCESSION);
+        RemoteFile reportFile = enaBrowser.getAssemblyReportFile(dirPath, ACCESSION);
+        assertTrue(reportFile.getName().equals(ACCESSION + "_sequence_report.txt"));
+        assertTrue(reportFile.getSize() > 0);
     }
 
     @Test
     void getAssemblyReportInputStream() throws IOException {
-        try (InputStream stream = enaBrowser.getAssemblyReportInputStream("GCA_003005035.1")) {
+        try (InputStream stream = enaBrowser.getAssemblyReportInputStream(ACCESSION)) {
             assertTrue(stream.read() != -1);
         }
     }
