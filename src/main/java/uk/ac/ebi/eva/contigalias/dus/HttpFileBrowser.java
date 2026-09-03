@@ -104,17 +104,9 @@ public class HttpFileBrowser {
     }
 
     /**
-     * Downloads a file over HTTPS to {@code downloadFilePath}, verifying its size against
-     * {@code expectedSize} once downloaded.
-     * <p>
-     * Resumes from wherever a previous attempt left off using HTTP {@code Range} requests - the
-     * direct analog of what {@code wget -c}/{@code curl -C -} do - instead of restarting a large
-     * file from scratch on every dropped connection; both NCBI and EBI's static file servers
-     * support this ({@code Accept-Ranges: bytes}). An {@code If-Range} validator (the ETag or
-     * Last-Modified header the server offered on the previous attempt) guards against silently
-     * appending onto a file that changed underneath us between attempts: if the server doesn't
-     * honour the range, or the file changed, it responds with a fresh {@code 200} instead of
-     * {@code 206}, and this falls back to a clean restart rather than producing a corrupt file.
+     * Downloads a file over HTTPS to download FilePath, verifying its size against
+     *  expectedSize once downloaded. Resumes from wherever a previous attempt left off
+     * using HTTP Range requests.
      */
     public boolean downloadFile(String url, Path downloadFilePath, long expectedSize) throws IOException {
         long downloaded = Files.exists(downloadFilePath) ? Files.size(downloadFilePath) : 0;
@@ -181,8 +173,8 @@ public class HttpFileBrowser {
     }
 
     /**
-     * Returns the {@code Content-Length} reported for a remote file, used as the "expected size"
-     * for {@link #downloadFile} in place of FTP's {@code FTPFile.getSize()}.
+     * Returns the Content-Length reported for a remote file, used as the "expected size"
+     * for {@link #downloadFile} in place of FTP's FTPFile.getSize().
      */
     public long headContentLength(String url) throws IOException {
         HttpRequest request = requestBuilder(url).method("HEAD", HttpRequest.BodyPublishers.noBody()).build();

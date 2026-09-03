@@ -17,9 +17,7 @@
 package uk.ac.ebi.eva.contigalias.dus;
 
 /**
- * Name and size of a file found in a remote HTTPS directory listing. Replaces
- * {@code org.apache.commons.net.ftp.FTPFile} now that {@link NCBIBrowser} and {@link ENABrowser}
- * no longer talk FTP.
+ * Name and size of a file found in a remote HTTPS directory listing.
  */
 public class RemoteFile {
 

@@ -33,9 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies that {@link HttpFileBrowser#downloadFile} recovers from a connection dropped
- * mid-transfer by resuming (HTTP {@code Range}) rather than restarting a large download from
- * scratch, and falls back cleanly to a full restart when the server doesn't honour the range.
+ * Verifies that downloadFile recovers from a connection dropped
+ * mid-transfer.
  */
 public class HttpFileBrowserTest {
 
