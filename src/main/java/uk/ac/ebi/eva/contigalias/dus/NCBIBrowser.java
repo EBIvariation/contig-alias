@@ -83,9 +83,6 @@ public class NCBIBrowser {
         List<String> entries = browser.listDirectory(NCBI_SERVER + currPath);
 
         // We're assuming that the directory will always have a suffix starting with an underscore GCA_004051055.1_
-        // Apache/nginx serve a symlinked directory (used by NCBI for suppressed/superseded assemblies)
-        // transparently as a normal entry, so no special-casing is needed here the way FTP's LIST
-        // response required (it reported the symlink target explicitly).
         Optional<String> dir = entries.stream()
                                        .filter(name -> name.startsWith(rawQuery + "_") && name.endsWith("/"))
                                        .findFirst();
