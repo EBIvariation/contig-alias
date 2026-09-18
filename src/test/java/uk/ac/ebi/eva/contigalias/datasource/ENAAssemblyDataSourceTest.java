@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class ENAAssemblyDataSourceTest {
 
-    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.5";
+    private static final String GCA_ACCESSION_HAVING_CHROMOSOMES = "GCA_000003055.2";
 
     @Autowired
     private ENAAssemblyDataSource enaDataSource;
@@ -55,7 +55,7 @@ public class ENAAssemblyDataSourceTest {
                 .filter(l -> !l.startsWith("accession"))
                 .collect(Collectors.toList());
         List<ChromosomeEntity> chromosomeEntityList = enaDataSource.getChromosomeEntityList(chrLines);
-        assertEquals(3143, chromosomeEntityList.size());
+        assertEquals(3316, chromosomeEntityList.size());
         chromosomeEntityList.stream().forEach(c -> assertTrue(!c.getEnaSequenceName().isEmpty()));
     }
 

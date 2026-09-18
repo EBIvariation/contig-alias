@@ -32,9 +32,7 @@ import uk.ac.ebi.eva.contigalias.entitygenerator.ChromosomeGenerator;
 import uk.ac.ebi.eva.contigalias.repo.ChromosomeRepository;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
