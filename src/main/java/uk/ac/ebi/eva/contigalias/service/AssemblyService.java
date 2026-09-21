@@ -16,6 +16,7 @@
 
 package uk.ac.ebi.eva.contigalias.service;
 
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,6 @@ import uk.ac.ebi.eva.contigalias.scheduler.ChromosomeUpdater;
 import uk.ac.ebi.eva.contigalias.scheduler.job.Job;
 import uk.ac.ebi.eva.contigalias.scheduler.job.JobType;
 
-import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

@@ -1,139 +1,94 @@
 stages:
-    - test
-    - package
-    - deploy
+  - build
+  - deploy
 
-variables:
-    WS_ARTIFACT_PATH: target/contig-alias-$ENVIRONMENT_NAME.war
-    MAVEN_SETTINGS: maven-settings.xml
-    URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
-    MEDIA_TYPE: application/vnd.github.raw
+# Shared .build_docker / .update_and_deploy templates live in eva-k8s
+# See https://github.com/EBIvariation/eva-k8s/blob/main/gitlab-ci/webservice.yml.
+include:
+  - remote: 'https://raw.githubusercontent.com/EBIvariation/eva-k8s/refs/tags/v1.0/gitlab-ci/webservice.yml'
 
-test:
-    stage: test
-    image: ubuntu:latest
-    before_script:
-        - apt-get update
-        - apt-get upgrade -y
-        - apt-get install -y curl jq
-    script:
-    - |
-      for i in {1..5}; do
-           echo "Finding Github CI status for ${CI_COMMIT_SHA}..." && export GITHUB_CI_STATUS=$(curl -s https://api.github.com/repos/EBIVariation/contig-alias/actions/runs | jq --arg COMMIT_TO_FIND $CI_COMMIT_SHA -r '.workflow_runs | map(select(.head_sha == $COMMIT_TO_FIND and .conclusion == "success"))[0].conclusion') && [[ $GITHUB_CI_STATUS == "success" ]] && echo "Github CI run was successful!"
-           if [ $? -ne 0 ]; then
-            echo "Retrying..."
-            sleep 300
-           else
-            exit 0
-           fi
-          done
-          exit 1
-    environment:
-        name: test-env
-    only:
-        - master
-        - tags
+# REQUIRED GitLab CI/CD Variables (Global):
+# DOCKER_AUTH_CONFIG: Contains username and password for the docker registry above
+# GITHUB_USER: GitHub username for accessing private maven settings repository
+# GITHUB_TOKEN: GitHub personal access token for accessing private maven settings repository
 
-# Not executed, parent job definition for package
-.package:
-    stage: package
-    image: maven:3.6.1-jdk-8-alpine
-    environment:
-        name: $ENVIRONMENT_NAME
-    before_script:
-        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
-        - apk add --update curl
-        - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > $MAVEN_SETTINGS
-    script:
-        - mvn package --settings $MAVEN_SETTINGS -P $MAVEN_PROFILE -DskipTests
-        - cp target/contig-alias*.war.original $WS_ARTIFACT_PATH
-    after_script:
-        - rm $MAVEN_SETTINGS
-    artifacts:
-        paths:
-            - $WS_ARTIFACT_PATH
+# ============================================================================
+# DEVELOPMENT: Deploy on master branch
+# ============================================================================
 
-package-internal:
-    extends: .package
-    variables:
-        ENVIRONMENT_NAME: internal
-        MAVEN_PROFILE: internal
-    only:
-        - master
+build:docker:dev:
+  extends: .build_docker
+  variables:
+    SERVICE_NAME: contig-alias
+    IMAGE_REPOSITORY: dockerhub.ebi.ac.uk/ebivariation/contig-alias
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+  only:
+    - master
 
-package-development:
-    extends: .package
-    variables:
-        ENVIRONMENT_NAME: development
-        MAVEN_PROFILE: development
-    only:
-        - master
+deploy-to-cluster:dev:
+  extends: .update_and_deploy
+  needs:
+    - build:docker:dev
+  variables:
+    SERVICE_NAME: contig-alias
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+    ENV: development
+    MAVEN_PROFILE: development
+    K8S_MANIFEST_PATH: k8s-manifests/contig-alias/overlays/dev
+    K8S_NAMESPACE: contig-alias-dev
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_DEV
+  environment:
+    name: development
+  only:
+    - master
 
-package-production:
-    extends: .package
-    variables:
-        ENVIRONMENT_NAME: production
-        MAVEN_PROFILE: production
-    only:
-        - tags
+# ============================================================================
+# STAGING: Deploy on master branch
+# ============================================================================
 
-# Not executed, parent job definition for deployments
-.deploy-tomcat:
-    stage: deploy
-    image: alpine:3.9.5
-    environment:
-        name: $ENVIRONMENT_NAME
-    script:
-        - DATETIME=$(date +%Y-%m-%dT%H-%M-%S)
-        - apk add --update curl
-        - curl -u $TOMCAT_USER:$TOMCAT_PASSWORD -T "$WS_ARTIFACT_PATH" "http://$TOMCAT_HOST/manager/text/deploy?update=true&path=/eva/webservices/contig-alias&version=$DATETIME" | grep "OK - Deployed application"
+deploy-to-cluster:staging:
+  extends: .update_and_deploy
+  needs:
+    - build:docker:dev
+  variables:
+    SERVICE_NAME: contig-alias
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+    ENV: staging
+    MAVEN_PROFILE: production_processing
+    K8S_MANIFEST_PATH: k8s-manifests/contig-alias/overlays/staging
+    K8S_NAMESPACE: contig-alias-stage
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_STAGING
+  environment:
+    name: staging
+  only:
+    - master
 
-deploy-tomcat-internal:
-    extends: .deploy-tomcat
-    variables:
-        ENVIRONMENT_NAME: internal
-        TOMCAT_USER: $TOMCAT_INTERNAL_USER
-        TOMCAT_PASSWORD: $TOMCAT_INTERNAL_PASSWORD
-        TOMCAT_HOST: $TOMCAT_INTERNAL_HOST
-    dependencies:
-        - package-internal
-    only:
-        - master
+# ============================================================================
+# PRODUCTION: Deploy on git tags
+# ============================================================================
 
-deploy-tomcat-development:
-    extends: .deploy-tomcat
-    variables:
-        ENVIRONMENT_NAME: development
-        TOMCAT_USER: $TOMCAT_DEVELOPMENT_USER
-        TOMCAT_PASSWORD: $TOMCAT_DEVELOPMENT_PASSWORD
-        TOMCAT_HOST: $TOMCAT_DEVELOPMENT_HOST
-    dependencies:
-        - package-development
-    only:
-        - master
+build:docker:prod:
+  extends: .build_docker
+  variables:
+    SERVICE_NAME: contig-alias
+    IMAGE_REPOSITORY: dockerhub.ebi.ac.uk/ebivariation/contig-alias
+    IMAGE_TAG: $CI_COMMIT_TAG
+  only:
+    - tags
 
-deploy-tomcat-production:
-    extends: .deploy-tomcat
-    when: manual
-    variables:
-        ENVIRONMENT_NAME: production
-        TOMCAT_USER: $TOMCAT_PRODUCTION_USER
-        TOMCAT_PASSWORD: $TOMCAT_PRODUCTION_PASSWORD
-        TOMCAT_HOST: $TOMCAT_PRODUCTION_HOST
-    dependencies:
-        - package-production
-    only:
-        - tags
-
-deploy-tomcat-production-fallback:
-    extends: .deploy-tomcat
-    when: manual
-    variables:
-        ENVIRONMENT_NAME: production
-        TOMCAT_USER: $TOMCAT_PRODUCTION_FALLBACK_USER
-        TOMCAT_PASSWORD: $TOMCAT_PRODUCTION_FALLBACK_PASSWORD
-        TOMCAT_HOST: $TOMCAT_PRODUCTION_FALLBACK_HOST
-    dependencies:
-        - package-production
-    only:
-        - tags
+deploy-to-cluster:prod:
+  extends: .update_and_deploy
+  needs:
+    - build:docker:prod
+  variables:
+    SERVICE_NAME: contig-alias
+    IMAGE_TAG: $CI_COMMIT_TAG
+    ENV: prod
+    MAVEN_PROFILE: production
+    K8S_MANIFEST_PATH: k8s-manifests/contig-alias/overlays/prod
+    K8S_NAMESPACE: contig-alias-prod
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_PROD
+  environment:
+    name: prod
+  only:
+    - tags
