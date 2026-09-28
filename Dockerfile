@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 RUN groupadd -r contigalias && useradd -r -g contigalias contigalias
 
 # Create config directory for runtime application.properties mount
-RUN mkdir -p /app/config && chown -R contigalias:contigalias /app
+RUN mkdir -p /app/config /tmp/tomcat/logs && chown -R contigalias:contigalias /app /tmp/tomcat
 
 # Copy the JAR file from build stage
 COPY --from=build /app/target/*.jar app.jar
