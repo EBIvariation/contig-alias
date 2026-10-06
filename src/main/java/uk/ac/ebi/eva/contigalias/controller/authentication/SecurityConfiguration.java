@@ -18,8 +18,11 @@ package uk.ac.ebi.eva.contigalias.controller.authentication;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -39,6 +42,8 @@ public class SecurityConfiguration {
 
     private static final String ROLE_ADMIN = "ADMIN";
 
+    private static final String ROLE_ACTUATOR_ADMIN = "ACTUATOR_ADMIN";
+
     private final CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
 
     @Value("${controller.auth.admin.username}")
@@ -46,6 +51,12 @@ public class SecurityConfiguration {
 
     @Value("${controller.auth.admin.password}")
     private String PASSWORD_ADMIN;
+
+    @Value("${actuator.auth.username}")
+    private String USERNAME_ACTUATOR;
+
+    @Value("${actuator.auth.password}")
+    private String PASSWORD_ACTUATOR;
 
     @Autowired
     public SecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint) {
@@ -63,17 +74,36 @@ public class SecurityConfiguration {
                 User.withUsername(USERNAME_ADMIN)
                         .password(passwordEncoder().encode(PASSWORD_ADMIN))
                         .roles(ROLE_ADMIN)
+                        .build(),
+                User.withUsername(USERNAME_ACTUATOR)
+                        .password(passwordEncoder().encode(PASSWORD_ACTUATOR))
+                        .roles(ROLE_ACTUATOR_ADMIN)
                         .build()
         );
     }
 
+    /**
+     * Every actuator endpoint (served on the management port) requires the actuator user.
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().hasRole(ROLE_ACTUATOR_ADMIN))
+                .httpBasic(Customizer.withDefaults())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // CSRF disabled intentionally — stateless REST API uses Basic Auth with no session cookies, so CSRF is not applicable
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v1/assemblies/**", "/v1/chromosomes/**", "/v1/search/**").permitAll()
-                        .requestMatchers("/info", "/health", "/error").permitAll()
+                        .requestMatchers("/livez", "/readyz", "/error").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/v1/admin/**").hasRole(ROLE_ADMIN)
                         .anyRequest().denyAll()
