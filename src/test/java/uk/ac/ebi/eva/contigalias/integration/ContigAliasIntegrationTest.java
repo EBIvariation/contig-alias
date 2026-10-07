@@ -68,6 +68,8 @@ public class ContigAliasIntegrationTest {
         registry.add("ftp.proxy.port", () -> 20);
         registry.add("controller.auth.admin.username", () -> "admin");
         registry.add("controller.auth.admin.password", () -> "admin");
+        registry.add("actuator.auth.username", () -> "actuator");
+        registry.add("actuator.auth.password", () -> "actuator");
     }
 
     private static void createEvaSchema() {
